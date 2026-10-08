@@ -5,15 +5,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f3f6fc">
+
   <title>Caça-Palavras | Desafio</title>
 
   <style>
-    /* =====================================
-       CONFIGURAÇÃO DOS TEMAS
-    ===================================== */
+    /* =========================================
+       1. VARIÁVEIS DO TEMA CLARO
+    ========================================= */
 
     :root {
-      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      font-family: system-ui, -apple-system,
+        "Segoe UI", sans-serif;
+
       color-scheme: light;
 
       --bg: #f3f6fc;
@@ -22,7 +25,7 @@
       --text: #17233c;
       --muted: #64748b;
       --border: #e6ebf5;
-      --shadow: rgba(44,65,110,.07);
+      --shadow: rgba(44, 65, 110, .07);
 
       --primary: #4f46e5;
       --primary-hover: #4338ca;
@@ -33,20 +36,33 @@
       --cell-text: #243553;
       --cell-selected: #c7d2fe;
       --cell-selected-text: #312e81;
-      --cell-found: #bbf7d0;
-      --cell-found-text: #166534;
+
+      --found: #bbf7d0;
+      --found-text: #166534;
+
+      --missed: #fecaca;
+      --missed-text: #991b1b;
 
       --word-bg: #f7f9fd;
-      --word-found-bg: #f0fdf4;
+      --word-found: #f0fdf4;
       --word-found-text: #15803d;
+
+      --word-missed: #fef2f2;
+      --word-missed-text: #b91c1c;
 
       --input-bg: #fbfcff;
       --input-border: #d8e0ed;
       --progress-bg: #edf1f8;
       --check-border: #cbd5e1;
+
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --danger-soft: #fee2e2;
     }
 
-    /* TEMA ESCURO */
+    /* =========================================
+       2. VARIÁVEIS DO TEMA ESCURO
+    ========================================= */
 
     html[data-theme="dark"] {
       color-scheme: dark;
@@ -57,7 +73,7 @@
       --text: #e8eefb;
       --muted: #94a3b8;
       --border: #29364c;
-      --shadow: rgba(0,0,0,.28);
+      --shadow: rgba(0, 0, 0, .28);
 
       --primary: #6366f1;
       --primary-hover: #818cf8;
@@ -68,18 +84,33 @@
       --cell-text: #e2e8f0;
       --cell-selected: #6366f1;
       --cell-selected-text: #ffffff;
-      --cell-found: #166534;
-      --cell-found-text: #dcfce7;
+
+      --found: #166534;
+      --found-text: #dcfce7;
+
+      --missed: #991b1b;
+      --missed-text: #fee2e2;
 
       --word-bg: #202d43;
-      --word-found-bg: #143b30;
+      --word-found: #143b30;
       --word-found-text: #86efac;
+
+      --word-missed: #482326;
+      --word-missed-text: #fca5a5;
 
       --input-bg: #101a2b;
       --input-border: #35435c;
       --progress-bg: #263349;
       --check-border: #64748b;
+
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --danger-soft: #482326;
     }
+
+    /* =========================================
+       3. ESTILOS GERAIS
+    ========================================= */
 
     * {
       box-sizing: border-box;
@@ -88,6 +119,7 @@
     body {
       margin: 0;
       min-height: 100vh;
+
       background:
         radial-gradient(
           circle at 5% 0%,
@@ -97,12 +129,14 @@
         var(--bg);
 
       color: var(--text);
+
       transition:
         background .25s ease,
         color .25s ease;
     }
 
-    button, textarea {
+    button,
+    textarea {
       font: inherit;
     }
 
@@ -110,141 +144,20 @@
       cursor: pointer;
     }
 
-    /* =====================================
-       CABEÇALHO
-    ===================================== */
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 14px;
-      padding: 20px max(
-        20px,
-        calc((100vw - 1160px)/2)
-      );
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .5;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 850;
-      font-size: 1.22rem;
-      letter-spacing: -.04em;
-    }
-
-    .brand-icon {
-      display: grid;
-      place-items: center;
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      background: var(--primary);
-      color: #ffffff;
-      font-size: 1.4rem;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* =====================================
-       BOTÕES
-    ===================================== */
-
-    .button {
-      border: 0;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-weight: 750;
-      transition:
-        transform .14s,
-        background .14s,
-        color .14s;
-    }
-
-    .button:active {
-      transform: scale(.97);
-    }
-
-    .button:focus-visible,
+    button:focus-visible,
     textarea:focus-visible {
       outline: 3px solid #a5b4fc;
       outline-offset: 3px;
     }
 
-    .button-primary {
-      background: var(--primary);
-      color: #ffffff;
-    }
-
-    .button-primary:hover {
-      background: var(--primary-hover);
-    }
-
-    .button-outline {
-      background: var(--button-bg);
-      color: var(--button-text);
-    }
-
-    .button-outline:hover {
-      filter: brightness(.95);
-    }
-
-    html[data-theme="dark"] .button-outline:hover {
-      filter: brightness(1.2);
-    }
-
-    /* BOTÃO DE TEMA */
-
-    .theme-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-width: 130px;
-    }
-
-    .theme-icon {
-      font-size: 1.1rem;
-      line-height: 1;
-    }
-
-    /* =====================================
-       LAYOUT PRINCIPAL
-    ===================================== */
-
-    .app {
-      width: min(1160px, calc(100% - 36px));
-      margin: 38px auto;
-
-      display: grid;
-      grid-template-columns:
-        minmax(0, 1fr) 300px;
-
-      align-items: start;
-      gap: 24px;
-    }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      box-shadow:
-        0 12px 36px var(--shadow);
-      padding: 26px;
-      transition:
-        background .25s,
-        border-color .25s;
-    }
-
-    h1, h2, p {
+    h1,
+    h2,
+    p {
       margin-top: 0;
     }
 
@@ -265,9 +178,168 @@
       font-size: .92rem;
     }
 
-    /* =====================================
-       PROGRESSO
-    ===================================== */
+    /* =========================================
+       4. CABEÇALHO
+    ========================================= */
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+
+      padding: 20px max(
+        20px,
+        calc((100vw - 1160px) / 2)
+      );
+
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      font-weight: 850;
+      font-size: 1.22rem;
+      letter-spacing: -.04em;
+    }
+
+    .brand-icon {
+      display: grid;
+      place-items: center;
+
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 1.4rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    /* =========================================
+       5. BOTÕES
+    ========================================= */
+
+    .button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+
+      font-weight: 750;
+
+      transition:
+        transform .14s,
+        background .14s,
+        color .14s;
+    }
+
+    .button:active:not(:disabled) {
+      transform: scale(.97);
+    }
+
+    .button-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .button-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .button-outline {
+      background: var(--button-bg);
+      color: var(--button-text);
+    }
+
+    .button-outline:hover:not(:disabled) {
+      filter: brightness(.95);
+    }
+
+    html[data-theme="dark"]
+    .button-outline:hover:not(:disabled) {
+      filter: brightness(1.2);
+    }
+
+    /* BOTÃO DE TEMA */
+
+    .theme-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .theme-icon {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    /* BOTÃO DE DESISTÊNCIA */
+
+    .button-danger-outline {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .button-danger-outline:hover:not(:disabled) {
+      filter: brightness(.95);
+    }
+
+    .button-danger {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    .button-danger:hover:not(:disabled) {
+      background: var(--danger-hover);
+    }
+
+    /* =========================================
+       6. LAYOUT PRINCIPAL
+    ========================================= */
+
+    .app {
+      width: min(1160px, calc(100% - 36px));
+      margin: 38px auto;
+
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1fr) 300px;
+
+      align-items: start;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+
+      box-shadow:
+        0 12px 36px var(--shadow);
+
+      padding: 26px;
+
+      transition:
+        background .25s,
+        border-color .25s;
+    }
+
+    /* =========================================
+       7. BARRA DE PROGRESSO
+    ========================================= */
 
     .score {
       display: flex;
@@ -276,8 +348,9 @@
       gap: 8px;
 
       font-weight: 750;
-      margin: 24px 0 9px;
       font-size: .89rem;
+
+      margin: 24px 0 9px;
     }
 
     .progress {
@@ -290,6 +363,7 @@
     .progress-fill {
       width: 0;
       height: 100%;
+
       background:
         linear-gradient(
           90deg,
@@ -301,24 +375,30 @@
       transition: width .3s ease;
     }
 
-    /* =====================================
-       TABULEIRO
-    ===================================== */
+    /* =========================================
+       8. TABULEIRO
+    ========================================= */
 
     .board-wrap {
       display: flex;
       justify-content: center;
+
       margin-top: 25px;
-      overflow-x: auto;
       padding: 3px 0 6px;
+
+      overflow-x: auto;
     }
 
     .board {
       --size: 14;
 
       display: grid;
+
       grid-template-columns:
-        repeat(var(--size), minmax(0, 1fr));
+        repeat(
+          var(--size),
+          minmax(0, 1fr)
+        );
 
       gap: 3px;
 
@@ -328,6 +408,8 @@
       touch-action: none;
       user-select: none;
       -webkit-user-select: none;
+
+      cursor: crosshair;
     }
 
     .cell {
@@ -335,14 +417,19 @@
       aspect-ratio: 1;
 
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
 
       border-radius: 6px;
       background: var(--cell-bg);
       color: var(--cell-text);
 
-      font-size: clamp(9px, 1.55vw, 18px);
+      font-size: clamp(
+        9px,
+        1.55vw,
+        18px
+      );
+
       font-weight: 800;
 
       transition:
@@ -350,24 +437,61 @@
         color .1s;
     }
 
+    /* CÉLULA SELECIONADA */
+
     .cell.selected {
       background: var(--cell-selected);
       color: var(--cell-selected-text);
     }
 
+    /* PALAVRA ENCONTRADA */
+
     .cell.found {
-      background: var(--cell-found);
-      color: var(--cell-found-text);
+      background: var(--found);
+      color: var(--found-text);
     }
 
-    .cell.selected.found {
+    /* PALAVRA NÃO ENCONTRADA */
+
+    .cell.missed {
+      background: var(--missed);
+      color: var(--missed-text);
+    }
+
+    /* CRUZAMENTO ENTRE VERDE E VERMELHO */
+
+    .cell.found.missed {
+      background:
+        linear-gradient(
+          135deg,
+          var(--found) 50%,
+          var(--missed) 50%
+        );
+
+      color: var(--text);
+    }
+
+    /* SELEÇÃO TEMPORÁRIA */
+
+    .cell.selected:not(.missed) {
       background: var(--cell-selected);
       color: var(--cell-selected-text);
     }
 
+    /* PARTIDA ENCERRADA */
+
+    .board.locked {
+      cursor: default;
+    }
+
+    /* =========================================
+       9. MENSAGENS
+    ========================================= */
+
     .feedback {
       min-height: 28px;
       text-align: center;
+
       margin: 17px 0 0;
 
       font-size: .92rem;
@@ -376,37 +500,88 @@
     }
 
     .feedback.success {
-      color: #16a34a;
+      color: #15803d;
     }
 
     html[data-theme="dark"] .feedback.success {
       color: #86efac;
     }
 
-    /* =====================================
-       LISTA DE PALAVRAS
-    ===================================== */
+    .feedback.gave-up {
+      color: var(--danger);
+    }
+
+    /* =========================================
+       10. LEGENDA DAS CORES
+    ========================================= */
+
+    .legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 17px;
+
+      margin-top: 18px;
+      padding-top: 16px;
+
+      border-top: 1px solid var(--border);
+
+      color: var(--muted);
+      font-size: .8rem;
+    }
+
+    .legend[hidden] {
+      display: none;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 14px;
+
+      border-radius: 4px;
+    }
+
+    .legend-color.green {
+      background: var(--found);
+    }
+
+    .legend-color.red {
+      background: var(--missed);
+    }
+
+    /* =========================================
+       11. LISTA DE PALAVRAS
+    ========================================= */
 
     .section-title {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: 8px;
     }
 
     .count {
       font-size: .76rem;
       font-weight: 750;
+
       color: var(--button-text);
       background: var(--button-bg);
 
-      border-radius: 99px;
       padding: 5px 9px;
+      border-radius: 99px;
     }
 
     .word-list {
       padding: 0;
       margin: 18px 0 25px;
+
       list-style: none;
 
       display: grid;
@@ -419,11 +594,13 @@
       gap: 10px;
 
       background: var(--word-bg);
+
       border-radius: 10px;
       padding: 10px 12px;
 
       font-size: .9rem;
       font-weight: 700;
+
       overflow-wrap: anywhere;
     }
 
@@ -437,13 +614,15 @@
 
       border-radius: 50%;
       border: 2px solid var(--check-border);
-      color: transparent;
 
+      color: transparent;
       font-size: 12px;
     }
 
+    /* ENCONTRADA */
+
     .word.found {
-      background: var(--word-found-bg);
+      background: var(--word-found);
       color: var(--word-found-text);
     }
 
@@ -459,9 +638,22 @@
       opacity: .75;
     }
 
-    /* =====================================
-       EDITOR DE PALAVRAS
-    ===================================== */
+    /* NÃO ENCONTRADA APÓS DESISTÊNCIA */
+
+    .word.missed {
+      background: var(--word-missed);
+      color: var(--word-missed-text);
+    }
+
+    .word.missed .word-mark {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: #ffffff;
+    }
+
+    /* =========================================
+       12. EDITOR DE PALAVRAS
+    ========================================= */
 
     .editor {
       border-top: 1px solid var(--border);
@@ -470,9 +662,9 @@
 
     .editor label {
       display: block;
+      font-size: .95rem;
       font-weight: 800;
       margin-bottom: 9px;
-      font-size: .95rem;
     }
 
     textarea {
@@ -482,6 +674,7 @@
 
       background: var(--input-bg);
       color: var(--text);
+
       border: 1px solid var(--input-border);
       border-radius: 11px;
 
@@ -502,22 +695,92 @@
     }
 
     .error {
-      color: #ef4444;
+      color: var(--danger);
       font-size: .82rem;
       margin-top: 9px;
       min-height: 20px;
     }
 
+    /* =========================================
+       13. JANELA DE CONFIRMAÇÃO
+    ========================================= */
+
+    .confirm-dialog {
+      width: min(
+        430px,
+        calc(100% - 30px)
+      );
+
+      max-width: none;
+
+      background: var(--panel);
+      color: var(--text);
+
+      border: 1px solid var(--border);
+      border-radius: 20px;
+
+      padding: 28px;
+
+      box-shadow:
+        0 25px 80px rgba(0, 0, 0, .25);
+    }
+
+    .confirm-dialog::backdrop {
+      background: rgba(0, 0, 0, .65);
+      backdrop-filter: blur(4px);
+    }
+
+    .dialog-icon {
+      display: grid;
+      place-items: center;
+
+      width: 52px;
+      height: 52px;
+
+      margin-bottom: 18px;
+
+      border-radius: 15px;
+      background: var(--danger-soft);
+
+      font-size: 1.6rem;
+      color: var(--danger);
+    }
+
+    .confirm-dialog h2 {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+
+    .confirm-dialog p {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: .92rem;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      margin-top: 24px;
+    }
+
+    /* =========================================
+       14. RODAPÉ
+    ========================================= */
+
     footer {
       text-align: center;
       margin: 20px;
+
       color: var(--muted);
       font-size: .8rem;
     }
 
-    /* =====================================
-       RESPONSIVIDADE
-    ===================================== */
+    /* =========================================
+       15. RESPONSIVIDADE
+    ========================================= */
 
     @media (max-width: 850px) {
 
@@ -536,7 +799,7 @@
     @media (max-width: 500px) {
 
       .topbar {
-        padding: 14px 16px;
+        padding: 14px 12px;
       }
 
       .brand {
@@ -555,10 +818,6 @@
       .button {
         padding: 10px 11px;
         font-size: .8rem;
-      }
-
-      .theme-button {
-        min-width: 0;
       }
 
       .theme-button .theme-label {
@@ -582,7 +841,12 @@
 
       .cell {
         border-radius: 3px;
-        font-size: clamp(8px, 2.6vw, 13px);
+
+        font-size: clamp(
+          8px,
+          2.6vw,
+          13px
+        );
       }
 
       .word-list {
@@ -594,6 +858,18 @@
         padding: 9px;
       }
 
+      .confirm-dialog {
+        padding: 20px;
+      }
+
+      .dialog-actions {
+        flex-direction: column;
+      }
+
+      .dialog-actions .button {
+        width: 100%;
+      }
+
     }
 
   </style>
@@ -601,9 +877,9 @@
 
 <body>
 
-  <!-- ====================================
-       CABEÇALHO
-  ==================================== -->
+  <!-- ======================================
+       16. CABEÇALHO
+  ====================================== -->
 
   <header class="topbar">
 
@@ -614,7 +890,8 @@
 
     <div class="header-actions">
 
-      <!-- BOTÃO DE TEMA -->
+      <!-- ALTERNAR TEMA -->
+
       <button
         id="theme-toggle"
         class="button button-outline theme-button"
@@ -622,15 +899,23 @@
         aria-label="Ativar modo escuro"
         aria-pressed="false"
       >
-        <span id="theme-icon" class="theme-icon">
+        <span
+          id="theme-icon"
+          class="theme-icon"
+        >
           ☾
         </span>
-        <span id="theme-label" class="theme-label">
+
+        <span
+          id="theme-label"
+          class="theme-label"
+        >
           Modo escuro
         </span>
       </button>
 
       <!-- EMBARALHAR -->
+
       <button
         id="shuffle"
         class="button button-outline"
@@ -639,18 +924,33 @@
         ↻ Embaralhar
       </button>
 
+      <!-- DESISTIR -->
+
+      <button
+        id="giveup"
+        class="button button-danger-outline"
+        type="button"
+      >
+        ⚑ Desistir
+      </button>
+
     </div>
 
   </header>
 
 
-  <!-- ====================================
-       JOGO
-  ==================================== -->
+  <!-- ======================================
+       17. CONTEÚDO PRINCIPAL
+  ====================================== -->
 
   <main class="app">
 
-    <section class="card" aria-labelledby="game-title">
+    <!-- JOGO -->
+
+    <section
+      class="card"
+      aria-labelledby="game-title"
+    >
 
       <h1 id="game-title">
         Encontre as palavras
@@ -660,6 +960,8 @@
         Arraste sobre as letras na horizontal,
         vertical ou diagonal, em qualquer sentido.
       </p>
+
+      <!-- PROGRESSO -->
 
       <div class="score">
 
@@ -672,11 +974,15 @@
       </div>
 
       <div class="progress">
+
         <div
           id="progress-fill"
           class="progress-fill"
         ></div>
+
       </div>
+
+      <!-- TABULEIRO -->
 
       <div class="board-wrap">
 
@@ -689,6 +995,8 @@
 
       </div>
 
+      <!-- MENSAGEM DO JOGO -->
+
       <p
         id="feedback"
         class="feedback"
@@ -698,20 +1006,55 @@
         Encontre a primeira palavra!
       </p>
 
+      <!-- LEGENDA APÓS DESISTÊNCIA -->
+
+      <div
+        id="legend"
+        class="legend"
+        hidden
+      >
+
+        <span class="legend-item">
+
+          <span
+            class="legend-color green"
+          ></span>
+
+          Encontrada
+
+        </span>
+
+        <span class="legend-item">
+
+          <span
+            class="legend-color red"
+          ></span>
+
+          Não encontrada
+
+        </span>
+
+      </div>
+
     </section>
 
 
-    <!-- ====================================
-         PAINEL LATERAL
-    ==================================== -->
+    <!-- ======================================
+         PAINEL DE PALAVRAS
+    ====================================== -->
 
     <aside class="card sidebar">
 
       <div class="section-title">
 
-        <h2>Palavras para encontrar</h2>
+        <h2>
+          Palavras para encontrar
+        </h2>
 
-        <span id="badge" class="count">
+        <span
+          id="badge"
+          class="count"
+        >
           0 restantes
         </span>
 
@@ -721,7 +1064,6 @@
         id="word-list"
         class="word-list"
       ></ul>
-
 
       <!-- PERSONALIZAÇÃO -->
 
@@ -746,8 +1088,9 @@
 
         <p class="hint">
           Separe as palavras por vírgula ou linha.
-          Acentos e espaços são ignorados no tabuleiro.
-          Máximo: 25 palavras, com até 20 letras cada.
+          Acentos e espaços são ignorados no
+          tabuleiro. Máximo de 25 palavras,
+          com até 20 letras cada.
         </p>
 
         <div
@@ -762,16 +1105,78 @@
 
   </main>
 
+
+  <!-- ======================================
+       18. MODAL DE CONFIRMAÇÃO
+  ====================================== -->
+
+  <dialog
+    id="giveup-dialog"
+    class="confirm-dialog"
+    aria-labelledby="dialog-title"
+    aria-describedby="dialog-text"
+  >
+
+    <div class="dialog-icon">
+      ⚠
+    </div>
+
+    <h2 id="dialog-title">
+      Deseja mesmo desistir?
+    </h2>
+
+    <p id="dialog-text">
+      Ao confirmar, a partida será encerrada
+      e todas as palavras que você ainda não
+      encontrou serão reveladas em vermelho.
+    </p>
+
+    <p>
+      Você poderá iniciar uma nova partida
+      utilizando o botão Embaralhar.
+    </p>
+
+    <div class="dialog-actions">
+
+      <button
+        id="keep-playing"
+        class="button button-outline"
+        type="button"
+      >
+        Continuar jogando
+      </button>
+
+      <button
+        id="confirm-giveup"
+        class="button button-danger"
+        type="button"
+      >
+        Sim, desistir
+      </button>
+
+    </div>
+
+  </dialog>
+
+
   <footer>
-    Um novo tabuleiro é gerado a cada atualização da página.
+    Um novo tabuleiro é gerado a cada atualização
+    da página.
   </footer>
 
 
   <script>
 
     // ==========================================
-    // 1. CONFIGURAÇÕES
+    // 19. CONFIGURAÇÕES DO JOGO
     // ==========================================
+
+    /*
+      EDITE AQUI AS PALAVRAS PADRÃO.
+
+      Elas serão utilizadas quando o usuário
+      abrir o jogo pela primeira vez.
+    */
 
     const DEFAULT_WORDS = [
       "CAÇA-PALAVRAS",
@@ -784,40 +1189,64 @@
       "MEMÓRIA"
     ];
 
-    const STORAGE_KEY = "caca-palavras-lista-v1";
+    // Armazenamento no navegador
+    const STORAGE_KEY =
+      "caca-palavras-lista-v1";
 
-    // Armazenamento separado para o tema
-    const THEME_KEY = "caca-palavras-tema-v1";
+    const THEME_KEY =
+      "caca-palavras-tema-v1";
 
+    // Limites do jogo
+    const MIN_SIZE = 12;
+    const MAX_SIZE = 24;
+
+    const MAX_WORDS = 25;
+    const MAX_WORD_LENGTH = 20;
+
+    // Direções possíveis
     const DIRECTIONS = [
-      [-1, -1],
-      [-1,  0],
-      [-1,  1],
-      [ 0, -1],
-      [ 0,  1],
-      [ 1, -1],
-      [ 1,  0],
-      [ 1,  1]
+
+      [-1, -1], // Diagonal superior esquerda
+      [-1,  0], // Vertical para cima
+      [-1,  1], // Diagonal superior direita
+
+      [ 0, -1], // Horizontal esquerda
+      [ 0,  1], // Horizontal direita
+
+      [ 1, -1], // Diagonal inferior esquerda
+      [ 1,  0], // Vertical para baixo
+      [ 1,  1]  // Diagonal inferior direita
+
     ];
 
-    const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-    const board = document.getElementById("board");
-    const input = document.getElementById("words-input");
-    const feedback = document.getElementById("feedback");
-    const error = document.getElementById("error");
-
-    let words = [];
-    let letters = [];
-    let boardSize = 0;
-
-    let found = new Set();
-    let drag = null;
+    const ALPHABET =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 
     // ==========================================
-    // 2. CONTROLE DE TEMA CLARO / ESCURO
+    // 20. ELEMENTOS DA INTERFACE
     // ==========================================
+
+    const board =
+      document.getElementById("board");
+
+    const input =
+      document.getElementById("words-input");
+
+    const feedback =
+      document.getElementById("feedback");
+
+    const error =
+      document.getElementById("error");
+
+    const giveupButton =
+      document.getElementById("giveup");
+
+    const giveupDialog =
+      document.getElementById("giveup-dialog");
+
+    const legend =
+      document.getElementById("legend");
 
     const themeButton =
       document.getElementById("theme-toggle");
@@ -828,30 +1257,55 @@
     const themeLabel =
       document.getElementById("theme-label");
 
+
+    // ==========================================
+    // 21. ESTADO DO JOGO
+    // ==========================================
+
+    let words = [];
+
+    let letters = [];
+
+    let boardSize = 0;
+
+    // Palavras encontradas
+    let found = new Set();
+
+    // Posições reais de todas as palavras
+    let placements = new Map();
+
+    // Seleção atual
+    let drag = null;
+
+    // Controle do encerramento
+    let gameOver = false;
+
+    // Tema atual
     let currentTheme = "light";
 
-    // Aplica visualmente o tema escolhido
+
+    // ==========================================
+    // 22. CONTROLE DE TEMA
+    // ==========================================
+
     function applyTheme(theme) {
 
       currentTheme = theme;
 
-      const isDark = theme === "dark";
+      const isDark =
+        theme === "dark";
 
-      // Altera o atributo no HTML
       document.documentElement.setAttribute(
         "data-theme",
         theme
       );
 
-      // Modifica o ícone
       themeIcon.textContent =
         isDark ? "☀" : "☾";
 
-      // Modifica o texto do botão
       themeLabel.textContent =
         isDark ? "Modo claro" : "Modo escuro";
 
-      // Acessibilidade
       themeButton.setAttribute(
         "aria-label",
         isDark
@@ -864,7 +1318,6 @@
         String(isDark)
       );
 
-      // Altera a cor da barra do navegador
       const metaTheme = document.querySelector(
         'meta[name="theme-color"]'
       );
@@ -873,14 +1326,15 @@
 
         metaTheme.setAttribute(
           "content",
-          isDark ? "#0b1221" : "#f3f6fc"
+          isDark
+            ? "#0b1221"
+            : "#f3f6fc"
         );
 
       }
 
     }
 
-    // Recupera o tema salvo anteriormente
     function loadTheme() {
 
       let savedTheme = null;
@@ -892,8 +1346,6 @@
 
       } catch (_) {}
 
-      // Se não houver preferência salva,
-      // utiliza o tema do sistema operacional
       if (
         savedTheme !== "dark" &&
         savedTheme !== "light"
@@ -908,33 +1360,35 @@
       }
 
       applyTheme(savedTheme);
+
     }
 
-    // Alterna entre claro e escuro
-    themeButton.addEventListener("click", () => {
+    themeButton.addEventListener(
+      "click",
+      () => {
 
-      const nextTheme =
-        currentTheme === "dark"
-          ? "light"
-          : "dark";
+        const nextTheme =
+          currentTheme === "dark"
+            ? "light"
+            : "dark";
 
-      applyTheme(nextTheme);
+        applyTheme(nextTheme);
 
-      // Salva a preferência no navegador
-      try {
+        try {
 
-        localStorage.setItem(
-          THEME_KEY,
-          nextTheme
-        );
+          localStorage.setItem(
+            THEME_KEY,
+            nextTheme
+          );
 
-      } catch (_) {}
+        } catch (_) {}
 
-    });
+      }
+    );
 
 
     // ==========================================
-    // 3. TRATAMENTO DAS PALAVRAS
+    // 23. NORMALIZAÇÃO DAS PALAVRAS
     // ==========================================
 
     function normalize(word) {
@@ -947,6 +1401,11 @@
 
     }
 
+
+    // ==========================================
+    // 24. VALIDAÇÃO DAS PALAVRAS
+    // ==========================================
+
     function parseWords(text) {
 
       const entries = text
@@ -955,35 +1414,41 @@
         .filter(Boolean);
 
       if (!entries.length) {
+
         throw new Error(
           "Digite pelo menos uma palavra."
         );
+
       }
 
-      if (entries.length > 25) {
+      if (entries.length > MAX_WORDS) {
+
         throw new Error(
-          "Utilize no máximo 25 palavras."
+          `Utilize no máximo ${MAX_WORDS} palavras.`
         );
+
       }
 
       const unique = new Map();
 
       for (const label of entries) {
 
-        const clean = normalize(label);
+        const clean =
+          normalize(label);
 
         if (
           clean.length < 2 ||
-          clean.length > 20
+          clean.length > MAX_WORD_LENGTH
         ) {
 
           throw new Error(
             `A palavra "${label}" deve ter ` +
-            "entre 2 e 20 letras."
+            `entre 2 e ${MAX_WORD_LENGTH} letras.`
           );
 
         }
 
+        // Evita duplicações após a normalização
         if (!unique.has(clean)) {
 
           unique.set(clean, {
@@ -996,16 +1461,26 @@
       }
 
       return [...unique.values()];
+
     }
 
 
     // ==========================================
-    // 4. GERAÇÃO DO TABULEIRO
+    // 25. FUNÇÕES ALEATÓRIAS
     // ==========================================
 
     function random(n) {
-      return Math.floor(Math.random() * n);
+
+      return Math.floor(
+        Math.random() * n
+      );
+
     }
+
+
+    // ==========================================
+    // 26. VERIFICAR POSIÇÃO DISPONÍVEL
+    // ==========================================
 
     function canPlace(
       grid,
@@ -1016,10 +1491,17 @@
       dc
     ) {
 
-      for (let i = 0; i < word.length; i++) {
+      for (
+        let i = 0;
+        i < word.length;
+        i++
+      ) {
 
-        const r = row + i * dr;
-        const c = col + i * dc;
+        const r =
+          row + i * dr;
+
+        const c =
+          col + i * dc;
 
         if (
           r < 0 ||
@@ -1027,54 +1509,92 @@
           r >= grid.length ||
           c >= grid.length
         ) {
+
           return false;
+
         }
 
         if (
           grid[r][c] &&
           grid[r][c] !== word[i]
         ) {
+
           return false;
+
         }
 
       }
 
       return true;
+
     }
+
+
+    // ==========================================
+    // 27. INSERIR PALAVRA NO TABULEIRO
+    // ==========================================
+
+    /*
+      Além de inserir as letras, esta função
+      devolve o caminho exato da palavra.
+
+      Esse caminho será usado posteriormente
+      para revelar as respostas na desistência.
+    */
 
     function place(grid, word) {
 
       const size = grid.length;
 
-      for (let tries = 0; tries < 600; tries++) {
+      for (
+        let tries = 0;
+        tries < 750;
+        tries++
+      ) {
 
         const [dr, dc] =
-          DIRECTIONS[random(DIRECTIONS.length)];
+          DIRECTIONS[
+            random(DIRECTIONS.length)
+          ];
 
         const minR =
-          dr < 0 ? word.length - 1 : 0;
+          dr < 0
+            ? word.length - 1
+            : 0;
 
         const maxR =
-          dr > 0 ? size - word.length : size - 1;
+          dr > 0
+            ? size - word.length
+            : size - 1;
 
         const minC =
-          dc < 0 ? word.length - 1 : 0;
+          dc < 0
+            ? word.length - 1
+            : 0;
 
         const maxC =
-          dc > 0 ? size - word.length : size - 1;
+          dc > 0
+            ? size - word.length
+            : size - 1;
 
         if (
           minR > maxR ||
           minC > maxC
         ) {
+
           continue;
+
         }
 
         const row =
-          minR + random(maxR - minR + 1);
+          minR + random(
+            maxR - minR + 1
+          );
 
         const col =
-          minC + random(maxC - minC + 1);
+          minC + random(
+            maxC - minC + 1
+          );
 
         if (
           !canPlace(
@@ -1086,82 +1606,150 @@
             dc
           )
         ) {
+
           continue;
-        }
-
-        for (let i = 0; i < word.length; i++) {
-
-          grid[row + i * dr][col + i * dc] =
-            word[i];
 
         }
 
-        return true;
+        const path = [];
+
+        // Insere cada letra
+        for (
+          let i = 0;
+          i < word.length;
+          i++
+        ) {
+
+          const r =
+            row + i * dr;
+
+          const c =
+            col + i * dc;
+
+          grid[r][c] = word[i];
+
+          path.push([r, c]);
+
+        }
+
+        // Devolve as posições utilizadas
+        return path;
+
       }
 
-      return false;
+      return null;
+
     }
+
+
+    // ==========================================
+    // 28. GERAR TABULEIRO COMPLETO
+    // ==========================================
 
     function makeBoard() {
 
       const longest = Math.max(
-        ...words.map(w => w.clean.length)
+        ...words.map(
+          w => w.clean.length
+        )
       );
 
       const total = words.reduce(
-        (n, w) => n + w.clean.length,
+        (n, w) =>
+          n + w.clean.length,
         0
       );
 
       const firstSize = Math.max(
-        12,
+        MIN_SIZE,
         longest,
         Math.min(
-          24,
-          Math.ceil(Math.sqrt(total * 2.4))
+          MAX_SIZE,
+          Math.ceil(
+            Math.sqrt(total * 2.4)
+          )
         )
       );
 
+      // Tenta tamanhos crescentes
       for (
         let size = firstSize;
-        size <= 24;
+        size <= MAX_SIZE;
         size++
       ) {
 
+        // Várias tentativas por tamanho
         for (
           let attempt = 0;
-          attempt < 60;
+          attempt < 80;
           attempt++
         ) {
 
           const grid = Array.from(
             { length: size },
-            () => Array(size).fill("")
+            () =>
+              Array(size).fill("")
           );
 
+          const newPlacements =
+            new Map();
+
+          // Palavras maiores primeiro
           const sorted = [...words].sort(
             (a, b) =>
-              b.clean.length - a.clean.length
+              b.clean.length -
+              a.clean.length
           );
 
-          if (
-            !sorted.every(
-              w => place(grid, w.clean)
-            )
-          ) {
+          let success = true;
+
+          for (const word of sorted) {
+
+            const path =
+              place(
+                grid,
+                word.clean
+              );
+
+            if (!path) {
+
+              success = false;
+              break;
+
+            }
+
+            // Armazena a localização real
+            newPlacements.set(
+              word.clean,
+              path
+            );
+
+          }
+
+          if (!success) {
             continue;
           }
 
           // Preenche os espaços restantes
-          for (let r = 0; r < size; r++) {
+          for (
+            let r = 0;
+            r < size;
+            r++
+          ) {
 
-            for (let c = 0; c < size; c++) {
+            for (
+              let c = 0;
+              c < size;
+              c++
+            ) {
 
               if (!grid[r][c]) {
 
                 grid[r][c] =
                   ALPHABET[
-                    random(ALPHABET.length)
+                    random(
+                      ALPHABET.length
+                    )
                   ];
 
               }
@@ -1170,22 +1758,29 @@
 
           }
 
-          boardSize = size;
+          // Retorna o tabuleiro completo
+          return {
+            grid,
+            size,
+            placements: newPlacements
+          };
 
-          return grid;
         }
 
       }
 
       throw new Error(
         "Não foi possível encaixar todas " +
-        "as palavras. Tente uma lista menor."
+        "as palavras no tabuleiro. " +
+        "Tente utilizar palavras menores " +
+        "ou reduzir a quantidade."
       );
+
     }
 
 
     // ==========================================
-    // 5. EXIBIÇÃO DO TABULEIRO
+    // 29. DESENHAR TABULEIRO
     // ==========================================
 
     function renderBoard() {
@@ -1198,132 +1793,249 @@
       const fragment =
         document.createDocumentFragment();
 
-      letters.forEach((line, r) => {
+      letters.forEach(
+        (line, r) => {
 
-        line.forEach((letter, c) => {
+          line.forEach(
+            (letter, c) => {
 
-          const cell =
-            document.createElement("div");
+              const cell =
+                document.createElement(
+                  "div"
+                );
 
-          cell.className = "cell";
+              cell.className = "cell";
 
-          cell.setAttribute(
-            "role",
-            "gridcell"
+              cell.setAttribute(
+                "role",
+                "gridcell"
+              );
+
+              cell.dataset.row = r;
+              cell.dataset.col = c;
+
+              cell.textContent =
+                letter;
+
+              fragment.appendChild(
+                cell
+              );
+
+            }
           );
 
-          cell.dataset.row = r;
-          cell.dataset.col = c;
+        }
+      );
 
-          cell.textContent = letter;
+      board.replaceChildren(
+        fragment
+      );
 
-          fragment.appendChild(cell);
-
-        });
-
-      });
-
-      board.replaceChildren(fragment);
     }
 
 
     // ==========================================
-    // 6. LISTA E PROGRESSO
+    // 30. RENDERIZAR LISTA DE PALAVRAS
     // ==========================================
 
     function renderWords() {
 
       const list =
-        document.getElementById("word-list");
+        document.getElementById(
+          "word-list"
+        );
 
       const fragment =
         document.createDocumentFragment();
 
       for (const word of words) {
 
-        const item =
-          document.createElement("li");
+        const isFound =
+          found.has(word.clean);
 
-        item.className =
-          "word" +
-          (found.has(word.clean) ? " found" : "");
+        const isMissed =
+          gameOver && !isFound;
+
+        const item =
+          document.createElement(
+            "li"
+          );
+
+        item.className = "word";
+
+        if (isFound) {
+
+          item.classList.add(
+            "found"
+          );
+
+        } else if (isMissed) {
+
+          item.classList.add(
+            "missed"
+          );
+
+        }
 
         const mark =
-          document.createElement("span");
+          document.createElement(
+            "span"
+          );
 
-        mark.className = "word-mark";
+        mark.className =
+          "word-mark";
 
-        mark.textContent =
-          found.has(word.clean) ? "✓" : "";
+        if (isFound) {
+
+          mark.textContent = "✓";
+
+        } else if (isMissed) {
+
+          mark.textContent = "✕";
+
+        }
 
         const label =
-          document.createElement("span");
+          document.createElement(
+            "span"
+          );
 
-        label.className = "word-text";
+        label.className =
+          "word-text";
 
-        label.textContent = word.label;
+        label.textContent =
+          word.label;
 
-        item.append(mark, label);
+        item.append(
+          mark,
+          label
+        );
 
-        fragment.appendChild(item);
+        fragment.appendChild(
+          item
+        );
+
       }
 
-      list.replaceChildren(fragment);
+      list.replaceChildren(
+        fragment
+      );
 
+      // Indicador de progresso
       document.getElementById(
         "score"
       ).textContent =
         `${found.size} / ${words.length} encontradas`;
 
+      // Contador lateral
       document.getElementById(
         "badge"
       ).textContent =
-        `${words.length - found.size} restantes`;
+        gameOver
+          ? "Encerrado"
+          : `${words.length - found.size} restantes`;
+
+      // Porcentagem
+      const percentage =
+        words.length
+          ? (
+              found.size /
+              words.length
+            ) * 100
+          : 0;
 
       document.getElementById(
         "progress-fill"
       ).style.width =
-        `${found.size / words.length * 100}%`;
+        `${percentage}%`;
+
     }
 
 
     // ==========================================
-    // 7. REINICIAR E EMBARALHAR
+    // 31. INICIAR NOVA PARTIDA
     // ==========================================
 
     function startGame() {
 
-      // Gera um novo tabuleiro
-      letters = makeBoard();
+      /*
+        Primeiro, gera o novo tabuleiro.
 
-      // Zera palavras encontradas
-      found = new Set();
+        Caso ocorra algum erro, a partida
+        anterior permanece intacta.
+      */
 
-      // Cancela qualquer arraste anterior
+      const generated =
+        makeBoard();
+
+      // Atualiza o estado
+      letters =
+        generated.grid;
+
+      boardSize =
+        generated.size;
+
+      placements =
+        generated.placements;
+
+      found =
+        new Set();
+
       drag = null;
 
+      gameOver = false;
+
+      // Limpa encerramento anterior
+      board.classList.remove(
+        "locked"
+      );
+
+      legend.hidden = true;
+
+      // Reativa o botão desistir
+      giveupButton.disabled = false;
+
+      giveupButton.textContent =
+        "⚑ Desistir";
+
+      // Fecha eventual confirmação
+      if (giveupDialog.open) {
+
+        giveupDialog.close();
+
+      }
+
+      // Desenha novamente
       renderBoard();
+
       renderWords();
 
       feedback.textContent =
         "Encontre a primeira palavra!";
 
-      feedback.classList.remove("success");
+      feedback.className =
+        "feedback";
 
       error.textContent = "";
+
     }
 
 
     // ==========================================
-    // 8. IDENTIFICAÇÃO DAS CÉLULAS
+    // 32. IDENTIFICAR CÉLULA
     // ==========================================
 
     function coords(cell) {
 
       return [
-        Number(cell.dataset.row),
-        Number(cell.dataset.col)
+        Number(
+          cell.dataset.row
+        ),
+        Number(
+          cell.dataset.col
+        )
       ];
+
     }
 
     function hoveredCell(event) {
@@ -1335,16 +2047,23 @@
         );
 
       const cell =
-        target && target.closest(".cell");
+        target &&
+        target.closest(
+          ".cell"
+        );
 
-      return cell && board.contains(cell)
+      return (
+        cell &&
+        board.contains(cell)
+      )
         ? cell
         : null;
+
     }
 
 
     // ==========================================
-    // 9. CÁLCULO DO CAMINHO
+    // 33. CÁLCULO DAS 8 DIREÇÕES
     // ==========================================
 
     function getPath(start, end) {
@@ -1355,14 +2074,26 @@
       const deltaC =
         end[1] - start[1];
 
-      if (!deltaR && !deltaC) {
+      if (
+        !deltaR &&
+        !deltaC
+      ) {
+
         return [start];
+
       }
 
-      let best = DIRECTIONS[0];
-      let bestDot = -Infinity;
+      let best =
+        DIRECTIONS[0];
 
-      for (const direction of DIRECTIONS) {
+      let bestDot =
+        -Infinity;
+
+      // Identifica a direção mais próxima
+      for (
+        const direction
+        of DIRECTIONS
+      ) {
 
         const dot = (
           deltaR * direction[0] +
@@ -1372,7 +2103,9 @@
           direction[1]
         );
 
-        if (dot > bestDot) {
+        if (
+          dot > bestDot
+        ) {
 
           bestDot = dot;
           best = direction;
@@ -1381,22 +2114,38 @@
 
       }
 
-      const [dr, dc] = best;
+      const [dr, dc] =
+        best;
 
       const steps = Math.max(
         0,
         Math.round(
-          (deltaR * dr + deltaC * dc) /
-          (dr * dr + dc * dc)
+          (
+            deltaR * dr +
+            deltaC * dc
+          ) /
+          (
+            dr * dr +
+            dc * dc
+          )
         )
       );
 
       const path = [];
 
-      for (let i = 0; i <= steps; i++) {
+      for (
+        let i = 0;
+        i <= steps;
+        i++
+      ) {
 
-        const r = start[0] + i * dr;
-        const c = start[1] + i * dc;
+        const r =
+          start[0] +
+          i * dr;
+
+        const c =
+          start[1] +
+          i * dc;
 
         if (
           r < 0 ||
@@ -1404,18 +2153,22 @@
           r >= boardSize ||
           c >= boardSize
         ) {
+
           break;
+
         }
 
         path.push([r, c]);
+
       }
 
       return path;
+
     }
 
 
     // ==========================================
-    // 10. DESTAQUE DAS LETRAS
+    // 34. ACESSAR CÉLULA DO TABULEIRO
     // ==========================================
 
     function cellAt(row, col) {
@@ -1426,40 +2179,132 @@
 
     }
 
+
+    // ==========================================
+    // 35. DESTACAR SELEÇÃO
+    // ==========================================
+
     function highlight() {
 
       board
-        .querySelectorAll(".selected")
-        .forEach(cell => {
+        .querySelectorAll(
+          ".selected"
+        )
+        .forEach(
+          cell => {
 
-          cell.classList.remove("selected");
+            cell.classList.remove(
+              "selected"
+            );
 
-        });
+          }
+        );
 
-      if (drag) {
+      if (
+        !drag ||
+        gameOver
+      ) {
 
-        drag.path.forEach(([r, c]) => {
+        return;
 
-          cellAt(r, c).classList.add(
+      }
+
+      drag.path.forEach(
+        ([r, c]) => {
+
+          cellAt(
+            r,
+            c
+          ).classList.add(
             "selected"
           );
 
-        });
+        }
+      );
 
-      }
     }
 
 
     // ==========================================
-    // 11. INICIAR ARRASTE
+    // 36. COMPARAR CAMINHOS
+    // ==========================================
+
+    /*
+      Verifica se a seleção corresponde
+      à posição real de uma palavra.
+
+      Aceita ambos os sentidos.
+    */
+
+    function pathsMatch(
+      selectedPath,
+      actualPath
+    ) {
+
+      if (
+        !actualPath ||
+        selectedPath.length !==
+        actualPath.length
+      ) {
+
+        return false;
+
+      }
+
+      const forward =
+        selectedPath.every(
+          ([r, c], i) => {
+
+            return (
+              r === actualPath[i][0] &&
+              c === actualPath[i][1]
+            );
+
+          }
+        );
+
+      if (forward) {
+        return true;
+      }
+
+      const reverse =
+        selectedPath.every(
+          ([r, c], i) => {
+
+            const index =
+              actualPath.length -
+              1 - i;
+
+            return (
+              r === actualPath[index][0] &&
+              c === actualPath[index][1]
+            );
+
+          }
+        );
+
+      return reverse;
+
+    }
+
+
+    // ==========================================
+    // 37. INICIAR ARRASTE
     // ==========================================
 
     board.addEventListener(
       "pointerdown",
       event => {
 
+        // Bloqueia após o encerramento
+        if (gameOver || drag) {
+          return;
+        }
+
         const cell =
-          event.target.closest(".cell");
+          event.target.closest(
+            ".cell"
+          );
 
         if (
           !cell ||
@@ -1468,14 +2313,20 @@
             event.button !== 0
           )
         ) {
+
           return;
+
         }
 
         event.preventDefault();
 
+        const start =
+          coords(cell);
+
         drag = {
-          start: coords(cell),
-          path: [coords(cell)]
+          pointerId: event.pointerId,
+          start,
+          path: [start]
         };
 
         board.setPointerCapture(
@@ -1483,122 +2334,208 @@
         );
 
         highlight();
+
       }
     );
 
 
     // ==========================================
-    // 12. MOVIMENTAÇÃO
+    // 38. MOVIMENTAR ARRASTE
     // ==========================================
 
     board.addEventListener(
       "pointermove",
       event => {
 
-        if (!drag) {
+        if (
+          !drag ||
+          gameOver ||
+          event.pointerId !== drag.pointerId
+        ) {
+
           return;
+
         }
 
-        const cell = hoveredCell(event);
+        const cell =
+          hoveredCell(event);
 
         if (!cell) {
           return;
         }
 
-        drag.path = getPath(
-          drag.start,
-          coords(cell)
-        );
+        drag.path =
+          getPath(
+            drag.start,
+            coords(cell)
+          );
 
         highlight();
+
       }
     );
 
 
     // ==========================================
-    // 13. VALIDAR PALAVRA ENCONTRADA
+    // 39. FINALIZAR ARRASTE
     // ==========================================
 
     board.addEventListener(
       "pointerup",
       event => {
 
-        if (!drag) {
+        if (
+          !drag ||
+          gameOver ||
+          event.pointerId !== drag.pointerId
+        ) {
+
           return;
+
         }
 
-        const cell = hoveredCell(event);
+        const cell =
+          hoveredCell(event);
 
         if (cell) {
 
-          drag.path = getPath(
-            drag.start,
-            coords(cell)
-          );
+          drag.path =
+            getPath(
+              drag.start,
+              coords(cell)
+            );
 
         }
 
-        const path = drag.path;
+        const path =
+          drag.path;
 
         drag = null;
 
         highlight();
 
-        if (path.length < 2) {
+        if (
+          path.length < 2
+        ) {
+
           return;
+
         }
 
+        // Letras selecionadas
         const selected = path
-          .map(([r, c]) => letters[r][c])
+          .map(
+            ([r, c]) =>
+              letters[r][c]
+          )
           .join("");
 
-        const reverse = [...selected]
+        const reverse = [
+          ...selected
+        ]
           .reverse()
           .join("");
 
-        const match = words.find(w =>
+        /*
+          A palavra precisa:
+          - Estar na lista;
+          - Ainda não ter sido encontrada;
+          - Ter as letras corretas;
+          - Corresponder à posição real.
+        */
 
-          !found.has(w.clean) &&
+        const match =
+          words.find(
+            word => {
 
-          (
-            w.clean === selected ||
-            w.clean === reverse
-          )
+              if (
+                found.has(
+                  word.clean
+                )
+              ) {
 
-        );
+                return false;
 
+              }
+
+              const correctLetters =
+                (
+                  word.clean === selected ||
+                  word.clean === reverse
+                );
+
+              if (
+                !correctLetters
+              ) {
+
+                return false;
+
+              }
+
+              const actualPath =
+                placements.get(
+                  word.clean
+                );
+
+              return pathsMatch(
+                path,
+                actualPath
+              );
+
+            }
+          );
+
+        // Não encontrou
         if (!match) {
 
           feedback.textContent =
-            "Essa sequência não é uma palavra " +
-            "da lista. Tente novamente!";
+            "Essa sequência não corresponde " +
+            "a uma palavra da lista. " +
+            "Tente novamente!";
 
-          feedback.classList.remove(
-            "success"
-          );
+          feedback.className =
+            "feedback";
 
           return;
+
         }
 
-        // Marca a palavra encontrada
-        found.add(match.clean);
+        // Registra o acerto
+        found.add(
+          match.clean
+        );
 
-        // Destaca as células permanentemente
-        path.forEach(([r, c]) => {
+        // Marca de verde
+        path.forEach(
+          ([r, c]) => {
 
-          cellAt(r, c).classList.add(
-            "found"
-          );
+            cellAt(
+              r,
+              c
+            ).classList.add(
+              "found"
+            );
 
-        });
+          }
+        );
 
-        // Atualiza a lista de palavras
         renderWords();
 
+        // Conclusão
         const complete =
-          found.size === words.length;
+          found.size ===
+          words.length;
 
         if (complete) {
+
+          gameOver = true;
+
+          giveupButton.disabled =
+            true;
+
+          board.classList.add(
+            "locked"
+          );
 
           feedback.textContent =
             "🎉 Parabéns! Você encontrou " +
@@ -1611,62 +2548,46 @@
 
         }
 
-        feedback.classList.add("success");
+        feedback.className =
+          "feedback success";
 
       }
     );
 
 
     // ==========================================
-    // 14. CANCELAR SELEÇÃO
+    // 40. CANCELAR ARRASTE
     // ==========================================
 
     board.addEventListener(
       "pointercancel",
-      () => {
+      event => {
 
-        drag = null;
+        if (
+          drag &&
+          event.pointerId === drag.pointerId
+        ) {
 
-        highlight();
+          drag = null;
+          highlight();
+
+        }
 
       }
     );
 
 
     // ==========================================
-    // 15. BOTÃO EMBARALHAR
+    // 41. BOTÃO EMBARALHAR
     // ==========================================
 
     document
-      .getElementById("shuffle")
-      .addEventListener("click", () => {
-
-        try {
-
-          startGame();
-
-        } catch (err) {
-
-          error.textContent = err.message;
-
-        }
-
-      });
-
-
-    // ==========================================
-    // 16. PERSONALIZAR AS PALAVRAS
-    // ==========================================
-
-    document
-      .getElementById("apply")
-      .addEventListener("click", () => {
-
-        try {
-
-          const previous = words;
-
-          words = parseWords(input.value);
+      .getElementById(
+        "shuffle"
+      )
+      .addEventListener(
+        "click",
+        () => {
 
           try {
 
@@ -1674,70 +2595,305 @@
 
           } catch (err) {
 
-            words = previous;
-
-            throw err;
+            error.textContent =
+              err.message;
 
           }
 
-          // Guarda a lista personalizada
-          try {
+        }
+      );
 
-            localStorage.setItem(
-              STORAGE_KEY,
-              words
-                .map(w => w.label)
-                .join("\n")
-            );
 
-          } catch (_) {}
+    // ==========================================
+    // 42. SOLICITAR CONFIRMAÇÃO
+    // ==========================================
 
-        } catch (err) {
+    giveupButton.addEventListener(
+      "click",
+      () => {
 
-          error.textContent = err.message;
+        if (gameOver) {
+          return;
+        }
+
+        giveupDialog.showModal();
+
+      }
+    );
+
+
+    // ==========================================
+    // 43. CANCELAR DESISTÊNCIA
+    // ==========================================
+
+    document
+      .getElementById(
+        "keep-playing"
+      )
+      .addEventListener(
+        "click",
+        () => {
+
+          giveupDialog.close();
+
+        }
+      );
+
+
+    // ==========================================
+    // 44. CONFIRMAR DESISTÊNCIA
+    // ==========================================
+
+    document
+      .getElementById(
+        "confirm-giveup"
+      )
+      .addEventListener(
+        "click",
+        () => {
+
+          giveupDialog.close();
+
+          revealMissedWords();
+
+        }
+      );
+
+
+    // ==========================================
+    // 45. REVELAR PALAVRAS NÃO ENCONTRADAS
+    // ==========================================
+
+    function revealMissedWords() {
+
+      if (gameOver) {
+        return;
+      }
+
+      // Encerra definitivamente a partida
+      gameOver = true;
+
+      drag = null;
+
+      highlight();
+
+      board.classList.add(
+        "locked"
+      );
+
+      // Desabilita nova desistência
+      giveupButton.disabled =
+        true;
+
+      giveupButton.textContent =
+        "⚑ Desistiu";
+
+      // Mostra a legenda
+      legend.hidden = false;
+
+      /*
+        Percorre todas as palavras.
+
+        Se a palavra já foi encontrada,
+        mantém o destaque verde.
+
+        Se não foi encontrada, recupera
+        sua localização e marca de vermelho.
+      */
+
+      for (
+        const word
+        of words
+      ) {
+
+        if (
+          found.has(
+            word.clean
+          )
+        ) {
+
+          continue;
 
         }
 
-      });
+        const path =
+          placements.get(
+            word.clean
+          );
 
+        if (!path) {
+          continue;
+        }
 
-    // ==========================================
-    // 17. INICIALIZAÇÃO AUTOMÁTICA
-    // ==========================================
+        // Marca todas as letras da palavra
+        path.forEach(
+          ([row, col]) => {
 
-    // Primeiro, carrega a preferência visual
-    loadTheme();
+            const cell =
+              cellAt(
+                row,
+                col
+              );
 
-    // Depois, recupera a lista de palavras
-    let saved = DEFAULT_WORDS.join("\n");
+            cell.classList.add(
+              "missed"
+            );
 
-    try {
+          }
+        );
 
-      saved =
-        localStorage.getItem(
-          STORAGE_KEY
-        ) || saved;
+      }
 
-    } catch (_) {}
+      // Atualiza a lista lateral
+      renderWords();
 
-    try {
+      // Mensagem final
+      const missing =
+        words.length -
+        found.size;
 
-      words = parseWords(saved);
+      feedback.className =
+        "feedback gave-up";
 
-    } catch (_) {
-
-      words = parseWords(
-        DEFAULT_WORDS.join("\n")
-      );
+      feedback.textContent =
+        "Partida encerrada! " +
+        `${missing} palavra(s) não encontrada(s). ` +
+        "As respostas restantes estão " +
+        "destacadas em vermelho.";
 
     }
 
-    input.value = words
-      .map(w => w.label)
-      .join("\n");
 
-    // Sempre gera um novo tabuleiro
-    startGame();
+    // ==========================================
+    // 46. PERSONALIZAR O JOGO
+    // ==========================================
+
+    document
+      .getElementById(
+        "apply"
+      )
+      .addEventListener(
+        "click",
+        () => {
+
+          try {
+
+            const previous =
+              words;
+
+            // Prepara a nova lista
+            words =
+              parseWords(
+                input.value
+              );
+
+            try {
+
+              // Gera uma nova partida
+              startGame();
+
+            } catch (err) {
+
+              // Restaura lista anterior
+              words = previous;
+
+              throw err;
+
+            }
+
+            // Salva no navegador
+            try {
+
+              localStorage.setItem(
+                STORAGE_KEY,
+                words
+                  .map(
+                    w => w.label
+                  )
+                  .join("\n")
+              );
+
+            } catch (_) {}
+
+          } catch (err) {
+
+            error.textContent =
+              err.message;
+
+          }
+
+        }
+      );
+
+
+    // ==========================================
+    // 47. INICIALIZAÇÃO AUTOMÁTICA
+    // ==========================================
+
+    function initialize() {
+
+      // Carrega a preferência de tema
+      loadTheme();
+
+      // Palavras iniciais
+      let saved =
+        DEFAULT_WORDS.join(
+          "\n"
+        );
+
+      // Recupera a lista personalizada
+      try {
+
+        saved =
+          localStorage.getItem(
+            STORAGE_KEY
+          ) || saved;
+
+      } catch (_) {}
+
+      // Valida as palavras
+      try {
+
+        words =
+          parseWords(
+            saved
+          );
+
+      } catch (_) {
+
+        words =
+          parseWords(
+            DEFAULT_WORDS.join(
+              "\n"
+            )
+          );
+
+      }
+
+      // Preenche a caixa de edição
+      input.value =
+        words
+          .map(
+            w => w.label
+          )
+          .join("\n");
+
+      // Inicia o jogo
+      try {
+
+        startGame();
+
+      } catch (err) {
+
+        error.textContent =
+          err.message;
+
+      }
+
+    }
+
+    // Executa ao abrir ou atualizar a página
+    initialize();
 
   </script>
 

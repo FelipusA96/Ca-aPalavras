@@ -1,0 +1,1270 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <title>Caça-Palavras | Desafio</title>
+
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      color: #17233c;
+      background: #f3f6fc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 5% 0%, #dcecff 0, transparent 36%),
+        #f3f6fc;
+    }
+
+    button, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 20px max(20px, calc((100vw - 1160px)/2));
+      background: #fff;
+      border-bottom: 1px solid #e6ebf5;
+    }
+
+    .brand {
+      font-weight: 850;
+      font-size: 1.22rem;
+      letter-spacing: -.04em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: #4f46e5;
+      color: #fff;
+      font-size: 1.4rem;
+    }
+
+    .button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: 750;
+      transition: transform .14s, background .14s;
+    }
+
+    .button:active {
+      transform: scale(.97);
+    }
+
+    .button:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid #a5b4fc;
+      outline-offset: 3px;
+    }
+
+    .button-primary {
+      background: #4f46e5;
+      color: white;
+    }
+
+    .button-primary:hover {
+      background: #4338ca;
+    }
+
+    .button-outline {
+      background: #eef2ff;
+      color: #4338ca;
+    }
+
+    .button-outline:hover {
+      background: #e0e7ff;
+    }
+
+    .app {
+      width: min(1160px, calc(100% - 36px));
+      margin: 38px auto;
+      display: grid;
+      grid-template-columns: minmax(0,1fr) 300px;
+      align-items: start;
+      gap: 24px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e7ecf5;
+      border-radius: 22px;
+      box-shadow: 0 12px 36px rgba(44, 65, 110, .06);
+      padding: 26px;
+    }
+
+    h1, h2, p {
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      letter-spacing: -.055em;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.13rem;
+      letter-spacing: -.025em;
+    }
+
+    .muted {
+      color: #64748b;
+      line-height: 1.55;
+      font-size: .92rem;
+    }
+
+    .score {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-weight: 750;
+      margin: 24px 0 9px;
+      font-size: .89rem;
+    }
+
+    .progress {
+      height: 9px;
+      background: #edf1f8;
+      overflow: hidden;
+      border-radius: 99px;
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg,#6366f1,#10b981);
+      border-radius: inherit;
+      transition: width .3s ease;
+    }
+
+    .board-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 25px;
+      overflow-x: auto;
+      padding: 3px 0 6px;
+    }
+
+    .board {
+      --size: 14;
+      display: grid;
+      grid-template-columns: repeat(var(--size), minmax(0, 1fr));
+      gap: 3px;
+      width: min(100%, 650px);
+      min-width: min(100%, 330px);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .cell {
+      min-width: 0;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      background: #f2f5fb;
+      color: #243553;
+      font-size: clamp(9px, 1.55vw, 18px);
+      font-weight: 800;
+      transition: background .08s, color .08s;
+    }
+
+    .cell.selected {
+      background: #c7d2fe;
+      color: #312e81;
+    }
+
+    .cell.found {
+      background: #bbf7d0;
+      color: #166534;
+    }
+
+    .cell.selected.found {
+      background: #a5b4fc;
+      color: #1e1b4b;
+    }
+
+    .feedback {
+      min-height: 28px;
+      text-align: center;
+      margin: 17px 0 0;
+      font-size: .92rem;
+      font-weight: 650;
+      color: #475569;
+    }
+
+    .feedback.success {
+      color: #15803d;
+    }
+
+    .sidebar .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .count {
+      font-size: .76rem;
+      font-weight: 750;
+      color: #4338ca;
+      background: #eef2ff;
+      border-radius: 99px;
+      padding: 5px 9px;
+    }
+
+    .word-list {
+      padding: 0;
+      margin: 18px 0 25px;
+      list-style: none;
+      display: grid;
+      gap: 9px;
+    }
+
+    .word {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f7f9fd;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: .9rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .word-mark {
+      display: grid;
+      place-items: center;
+      height: 19px;
+      width: 19px;
+      flex: 0 0 19px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      color: transparent;
+      font-size: 12px;
+    }
+
+    .word.found {
+      background: #f0fdf4;
+      color: #15803d;
+    }
+
+    .word.found .word-mark {
+      background: #16a34a;
+      color: white;
+      border-color: #16a34a;
+    }
+
+    .word.found .word-text {
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      opacity: .75;
+    }
+
+    .editor {
+      border-top: 1px solid #e9edf5;
+      padding-top: 20px;
+    }
+
+    .editor label {
+      display: block;
+      font-weight: 800;
+      margin-bottom: 9px;
+      font-size: .95rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      background: #fbfcff;
+      border: 1px solid #d8e0ed;
+      border-radius: 11px;
+      resize: vertical;
+      color: #17233c;
+      line-height: 1.55;
+    }
+
+    .editor .button {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .hint {
+      color: #748197;
+      font-size: .76rem;
+      line-height: 1.5;
+      margin: 10px 0 0;
+    }
+
+    .error {
+      color: #b91c1c;
+      font-size: .82rem;
+      margin-top: 9px;
+      min-height: 20px;
+    }
+
+    footer {
+      text-align: center;
+      margin: 20px;
+      color: #8794aa;
+      font-size: .8rem;
+    }
+
+    @media (max-width: 850px) {
+      .app {
+        grid-template-columns: 1fr;
+        max-width: 720px;
+      }
+
+      .word-list {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 500px) {
+      .topbar {
+        padding: 14px 16px;
+      }
+
+      .brand {
+        font-size: 1.03rem;
+      }
+
+      .brand-icon {
+        width: 32px;
+        height: 32px;
+      }
+
+      .button {
+        padding: 10px 12px;
+        font-size: .86rem;
+      }
+
+      .app {
+        width: calc(100% - 20px);
+        gap: 16px;
+        margin: 18px auto;
+      }
+
+      .card {
+        padding: 15px;
+        border-radius: 16px;
+      }
+
+      .board {
+        gap: 2px;
+      }
+
+      .cell {
+        border-radius: 3px;
+        font-size: clamp(8px, 2.6vw, 13px);
+      }
+
+      .word-list {
+        gap: 7px;
+      }
+
+      .word {
+        font-size: .78rem;
+        padding: 9px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- CABEÇALHO -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">✦</span>
+      Caça-Palavras
+    </div>
+
+    <button
+      id="shuffle"
+      class="button button-outline"
+      type="button"
+    >
+      ↻ Embaralhar
+    </button>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="app">
+
+    <!-- ÁREA DO JOGO -->
+    <section class="card" aria-labelledby="game-title">
+
+      <h1 id="game-title">
+        Encontre as palavras
+      </h1>
+
+      <p class="muted">
+        Arraste sobre as letras na horizontal,
+        vertical ou diagonal, em qualquer sentido.
+      </p>
+
+      <!-- PROGRESSO -->
+      <div class="score">
+        <span>Seu progresso</span>
+        <span id="score">0 / 0 encontradas</span>
+      </div>
+
+      <div class="progress" aria-hidden="true">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <!-- TABULEIRO -->
+      <div class="board-wrap">
+        <div
+          id="board"
+          class="board"
+          role="grid"
+          aria-label="Tabuleiro de caça-palavras"
+        ></div>
+      </div>
+
+      <!-- MENSAGENS -->
+      <p
+        id="feedback"
+        class="feedback"
+        role="status"
+        aria-live="polite"
+      >
+        Encontre a primeira palavra!
+      </p>
+
+    </section>
+
+    <!-- BARRA LATERAL -->
+    <aside
+      class="card sidebar"
+      aria-label="Lista de palavras e configuração"
+    >
+
+      <div class="section-title">
+        <h2>Palavras para encontrar</h2>
+        <span id="badge" class="count">0 restantes</span>
+      </div>
+
+      <!-- LISTA DE PALAVRAS -->
+      <ul id="word-list" class="word-list"></ul>
+
+      <!-- PERSONALIZAÇÃO -->
+      <div class="editor">
+
+        <label for="words-input">
+          Personalize o desafio
+        </label>
+
+        <textarea
+          id="words-input"
+          spellcheck="false"
+          aria-describedby="input-hint"
+        ></textarea>
+
+        <button
+          id="apply"
+          class="button button-primary"
+          type="button"
+        >
+          Criar novo jogo
+        </button>
+
+        <p id="input-hint" class="hint">
+          Separe as palavras por vírgula ou linha.
+          Acentos e espaços são ignorados no tabuleiro.
+          Máximo: 25 palavras, com até 20 letras cada.
+        </p>
+
+        <div id="error" class="error" role="alert"></div>
+
+      </div>
+
+    </aside>
+
+  </main>
+
+  <footer>
+    O tabuleiro é gerado novamente a cada atualização da página.
+  </footer>
+
+  <script>
+
+    // ==========================================
+    // 1. CONFIGURAÇÕES INICIAIS
+    // ==========================================
+
+    // ALTERE AQUI AS PALAVRAS PADRÃO DO JOGO
+
+    const DEFAULT_WORDS = [
+      "CAÇA-PALAVRAS",
+      "DESAFIO",
+      "LÓGICA",
+      "ATENÇÃO",
+      "APRENDER",
+      "DIVERSÃO",
+      "RACIOCÍNIO",
+      "MEMÓRIA"
+    ];
+
+    // Identificador utilizado no armazenamento local
+    const STORAGE_KEY = "caca-palavras-lista-v1";
+
+    // Oito direções permitidas
+    const DIRECTIONS = [
+      [-1, -1],
+      [-1,  0],
+      [-1,  1],
+      [ 0, -1],
+      [ 0,  1],
+      [ 1, -1],
+      [ 1,  0],
+      [ 1,  1]
+    ];
+
+    const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    // Elementos da interface
+    const board = document.getElementById("board");
+    const input = document.getElementById("words-input");
+    const feedback = document.getElementById("feedback");
+    const error = document.getElementById("error");
+
+    // Estado atual do jogo
+    let words = [];
+    let letters = [];
+    let boardSize = 0;
+
+    let found = new Set();
+    let drag = null;
+
+
+    // ==========================================
+    // 2. TRATAMENTO DAS PALAVRAS
+    // ==========================================
+
+    // Remove acentos, espaços e caracteres especiais
+    function normalize(word) {
+      return word
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase()
+        .replace(/[^A-Z]/g, "");
+    }
+
+    // Lê, valida e prepara as palavras
+    function parseWords(text) {
+
+      const entries = text
+        .split(/[,;\n]+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      if (!entries.length) {
+        throw new Error("Digite pelo menos uma palavra.");
+      }
+
+      if (entries.length > 25) {
+        throw new Error("Utilize no máximo 25 palavras.");
+      }
+
+      const unique = new Map();
+
+      for (const label of entries) {
+
+        const clean = normalize(label);
+
+        if (clean.length < 2 || clean.length > 20) {
+          throw new Error(
+            `A palavra “${label}” deve ter entre 2 e 20 letras.`
+          );
+        }
+
+        if (!unique.has(clean)) {
+          unique.set(clean, {
+            label: label.toUpperCase(),
+            clean
+          });
+        }
+
+      }
+
+      return [...unique.values()];
+    }
+
+
+    // ==========================================
+    // 3. GERAÇÃO ALEATÓRIA DO TABULEIRO
+    // ==========================================
+
+    // Gera um número aleatório de 0 até n-1
+    function random(n) {
+      return Math.floor(Math.random() * n);
+    }
+
+    // Verifica se é possível colocar a palavra
+    function canPlace(grid, word, row, col, dr, dc) {
+
+      for (let i = 0; i < word.length; i++) {
+
+        const r = row + i * dr;
+        const c = col + i * dc;
+
+        if (
+          r < 0 ||
+          c < 0 ||
+          r >= grid.length ||
+          c >= grid.length
+        ) {
+          return false;
+        }
+
+        if (grid[r][c] && grid[r][c] !== word[i]) {
+          return false;
+        }
+
+      }
+
+      return true;
+    }
+
+    // Tenta inserir uma palavra em posição aleatória
+    function place(grid, word) {
+
+      const size = grid.length;
+
+      for (let tries = 0; tries < 600; tries++) {
+
+        const [dr, dc] =
+          DIRECTIONS[random(DIRECTIONS.length)];
+
+        const minR = dr < 0 ? word.length - 1 : 0;
+        const maxR = dr > 0 ? size - word.length : size - 1;
+
+        const minC = dc < 0 ? word.length - 1 : 0;
+        const maxC = dc > 0 ? size - word.length : size - 1;
+
+        if (minR > maxR || minC > maxC) {
+          continue;
+        }
+
+        const row = minR + random(maxR - minR + 1);
+        const col = minC + random(maxC - minC + 1);
+
+        if (!canPlace(grid, word, row, col, dr, dc)) {
+          continue;
+        }
+
+        for (let i = 0; i < word.length; i++) {
+          grid[row + i * dr][col + i * dc] = word[i];
+        }
+
+        return true;
+      }
+
+      return false;
+    }
+
+    // Monta o tabuleiro completo
+    function makeBoard() {
+
+      const longest = Math.max(
+        ...words.map(w => w.clean.length)
+      );
+
+      const total = words.reduce(
+        (n, w) => n + w.clean.length,
+        0
+      );
+
+      const firstSize = Math.max(
+        12,
+        longest,
+        Math.min(
+          24,
+          Math.ceil(Math.sqrt(total * 2.4))
+        )
+      );
+
+      // Tenta diferentes tamanhos de tabuleiro
+      for (let size = firstSize; size <= 24; size++) {
+
+        for (let attempt = 0; attempt < 60; attempt++) {
+
+          const grid = Array.from(
+            { length: size },
+            () => Array(size).fill("")
+          );
+
+          // Insere primeiro as palavras maiores
+          const sorted = [...words].sort(
+            (a, b) => b.clean.length - a.clean.length
+          );
+
+          if (!sorted.every(w => place(grid, w.clean))) {
+            continue;
+          }
+
+          // Preenche espaços vazios com letras
+          for (let r = 0; r < size; r++) {
+
+            for (let c = 0; c < size; c++) {
+
+              if (!grid[r][c]) {
+                grid[r][c] =
+                  ALPHABET[random(ALPHABET.length)];
+              }
+
+            }
+
+          }
+
+          boardSize = size;
+
+          return grid;
+        }
+
+      }
+
+      throw new Error(
+        "Não foi possível encaixar todas as palavras. " +
+        "Tente uma lista menor."
+      );
+    }
+
+
+    // ==========================================
+    // 4. EXIBIÇÃO DO TABULEIRO
+    // ==========================================
+
+    function renderBoard() {
+
+      board.style.setProperty("--size", boardSize);
+
+      const fragment = document.createDocumentFragment();
+
+      letters.forEach((line, r) => {
+
+        line.forEach((letter, c) => {
+
+          const cell = document.createElement("div");
+
+          cell.className = "cell";
+
+          cell.setAttribute("role", "gridcell");
+
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+
+          cell.textContent = letter;
+
+          fragment.appendChild(cell);
+
+        });
+
+      });
+
+      board.replaceChildren(fragment);
+    }
+
+
+    // ==========================================
+    // 5. LISTA DE PALAVRAS E PROGRESSO
+    // ==========================================
+
+    function renderWords() {
+
+      const list = document.getElementById("word-list");
+
+      const fragment = document.createDocumentFragment();
+
+      for (const word of words) {
+
+        const item = document.createElement("li");
+
+        item.className =
+          "word" + (found.has(word.clean) ? " found" : "");
+
+        const mark = document.createElement("span");
+
+        mark.className = "word-mark";
+
+        mark.textContent =
+          found.has(word.clean) ? "✓" : "";
+
+        const label = document.createElement("span");
+
+        label.className = "word-text";
+        label.textContent = word.label;
+
+        item.append(mark, label);
+
+        fragment.appendChild(item);
+      }
+
+      list.replaceChildren(fragment);
+
+      // Atualiza os indicadores
+      document.getElementById("score").textContent =
+        `${found.size} / ${words.length} encontradas`;
+
+      document.getElementById("badge").textContent =
+        `${words.length - found.size} restantes`;
+
+      document.getElementById("progress-fill").style.width =
+        `${found.size / words.length * 100}%`;
+    }
+
+
+    // ==========================================
+    // 6. INICIAR OU REINICIAR O JOGO
+    // ==========================================
+
+    function startGame() {
+
+      // Gera posições e letras novamente
+      letters = makeBoard();
+
+      // Limpa o progresso
+      found = new Set();
+
+      // Cancela qualquer seleção anterior
+      drag = null;
+
+      // Atualiza a tela
+      renderBoard();
+      renderWords();
+
+      feedback.textContent =
+        "Encontre a primeira palavra!";
+
+      feedback.classList.remove("success");
+
+      error.textContent = "";
+    }
+
+
+    // ==========================================
+    // 7. IDENTIFICAÇÃO DAS CÉLULAS
+    // ==========================================
+
+    function coords(cell) {
+
+      return [
+        Number(cell.dataset.row),
+        Number(cell.dataset.col)
+      ];
+    }
+
+    // Descobre qual célula está sob o mouse ou dedo
+    function hoveredCell(event) {
+
+      const target = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      );
+
+      const cell =
+        target && target.closest(".cell");
+
+      return cell && board.contains(cell)
+        ? cell
+        : null;
+    }
+
+
+    // ==========================================
+    // 8. CAMINHO DO ARRASTE
+    // ==========================================
+
+    // Ajusta a seleção para uma das 8 direções
+    function getPath(start, end) {
+
+      const deltaR = end[0] - start[0];
+      const deltaC = end[1] - start[1];
+
+      if (!deltaR && !deltaC) {
+        return [start];
+      }
+
+      let best = DIRECTIONS[0];
+      let bestDot = -Infinity;
+
+      for (const direction of DIRECTIONS) {
+
+        const dot =
+          (
+            deltaR * direction[0] +
+            deltaC * direction[1]
+          ) / Math.hypot(
+            direction[0],
+            direction[1]
+          );
+
+        if (dot > bestDot) {
+          bestDot = dot;
+          best = direction;
+        }
+
+      }
+
+      const [dr, dc] = best;
+
+      const steps = Math.round(
+        (deltaR * dr + deltaC * dc) /
+        (dr * dr + dc * dc)
+      );
+
+      const path = [];
+
+      for (let i = 0; i <= steps; i++) {
+
+        const r = start[0] + i * dr;
+        const c = start[1] + i * dc;
+
+        if (
+          r < 0 ||
+          c < 0 ||
+          r >= boardSize ||
+          c >= boardSize
+        ) {
+          break;
+        }
+
+        path.push([r, c]);
+
+      }
+
+      return path;
+    }
+
+
+    // ==========================================
+    // 9. DESTAQUE VISUAL DA SELEÇÃO
+    // ==========================================
+
+    function cellAt(row, col) {
+      return board.children[row * boardSize + col];
+    }
+
+    function highlight() {
+
+      // Remove o destaque temporário anterior
+      board
+        .querySelectorAll(".selected")
+        .forEach(cell => {
+          cell.classList.remove("selected");
+        });
+
+      // Destaca o caminho selecionado
+      if (drag) {
+
+        drag.path.forEach(([r, c]) => {
+          cellAt(r, c).classList.add("selected");
+        });
+
+      }
+    }
+
+
+    // ==========================================
+    // 10. INÍCIO DO ARRASTE
+    // ==========================================
+
+    board.addEventListener("pointerdown", event => {
+
+      const cell = event.target.closest(".cell");
+
+      if (
+        !cell ||
+        (
+          event.pointerType === "mouse" &&
+          event.button !== 0
+        )
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      drag = {
+        start: coords(cell),
+        path: [coords(cell)]
+      };
+
+      board.setPointerCapture(event.pointerId);
+
+      highlight();
+    });
+
+
+    // ==========================================
+    // 11. MOVIMENTO DO ARRASTE
+    // ==========================================
+
+    board.addEventListener("pointermove", event => {
+
+      if (!drag) {
+        return;
+      }
+
+      const cell = hoveredCell(event);
+
+      if (!cell) {
+        return;
+      }
+
+      drag.path = getPath(
+        drag.start,
+        coords(cell)
+      );
+
+      highlight();
+    });
+
+
+    // ==========================================
+    // 12. FINALIZAÇÃO E VALIDAÇÃO
+    // ==========================================
+
+    board.addEventListener("pointerup", event => {
+
+      if (!drag) {
+        return;
+      }
+
+      const cell = hoveredCell(event);
+
+      if (cell) {
+        drag.path = getPath(
+          drag.start,
+          coords(cell)
+        );
+      }
+
+      const path = drag.path;
+
+      drag = null;
+
+      highlight();
+
+      if (path.length < 2) {
+        return;
+      }
+
+      // Junta as letras selecionadas
+      const selected = path
+        .map(([r, c]) => letters[r][c])
+        .join("");
+
+      // Também verifica a palavra invertida
+      const reverse = [...selected]
+        .reverse()
+        .join("");
+
+      // Procura uma palavra válida ainda não encontrada
+      const match = words.find(w =>
+        !found.has(w.clean) &&
+        (
+          w.clean === selected ||
+          w.clean === reverse
+        )
+      );
+
+      // Caso a sequência esteja incorreta
+      if (!match) {
+
+        feedback.textContent =
+          "Essa sequência não é uma palavra da lista. " +
+          "Tente novamente!";
+
+        feedback.classList.remove("success");
+
+        return;
+      }
+
+      // Marca a palavra como encontrada
+      found.add(match.clean);
+
+      // Mantém as letras destacadas no tabuleiro
+      path.forEach(([r, c]) => {
+        cellAt(r, c).classList.add("found");
+      });
+
+      // Risca a palavra na lista
+      renderWords();
+
+      // Verifica se o jogador concluiu tudo
+      const complete = found.size === words.length;
+
+      if (complete) {
+
+        feedback.textContent =
+          "🎉 Parabéns! Você encontrou todas as palavras!";
+
+      } else {
+
+        feedback.textContent =
+          `✓ Você encontrou: ${match.label}`;
+
+      }
+
+      feedback.classList.add("success");
+    });
+
+
+    // ==========================================
+    // 13. CANCELAMENTO DE SELEÇÃO
+    // ==========================================
+
+    board.addEventListener("pointercancel", () => {
+
+      drag = null;
+
+      highlight();
+    });
+
+
+    // ==========================================
+    // 14. BOTÃO EMBARALHAR
+    // ==========================================
+
+    document
+      .getElementById("shuffle")
+      .addEventListener("click", () => {
+
+        try {
+
+          // Reinicia e redistribui as palavras
+          startGame();
+
+        } catch (err) {
+
+          error.textContent = err.message;
+
+        }
+
+      });
+
+
+    // ==========================================
+    // 15. CRIAR JOGO COM NOVAS PALAVRAS
+    // ==========================================
+
+    document
+      .getElementById("apply")
+      .addEventListener("click", () => {
+
+        try {
+
+          const previous = words;
+
+          // Lê as novas palavras digitadas
+          words = parseWords(input.value);
+
+          try {
+
+            startGame();
+
+          } catch (err) {
+
+            words = previous;
+
+            throw err;
+
+          }
+
+          // Salva as palavras no navegador
+          try {
+
+            localStorage.setItem(
+              STORAGE_KEY,
+              words.map(w => w.label).join("\n")
+            );
+
+          } catch (_) {
+            // O jogo continua se o armazenamento falhar
+          }
+
+        } catch (err) {
+
+          error.textContent = err.message;
+
+        }
+
+      });
+
+
+    // ==========================================
+    // 16. INICIALIZAÇÃO AUTOMÁTICA
+    // ==========================================
+
+    // Recupera as palavras salvas
+    let saved = DEFAULT_WORDS.join("\n");
+
+    try {
+
+      saved =
+        localStorage.getItem(STORAGE_KEY) || saved;
+
+    } catch (_) {
+      // Utiliza as palavras padrão
+    }
+
+    // Valida as palavras recuperadas
+    try {
+
+      words = parseWords(saved);
+
+    } catch (_) {
+
+      words = parseWords(
+        DEFAULT_WORDS.join("\n")
+      );
+
+    }
+
+    // Preenche a caixa de personalização
+    input.value = words
+      .map(w => w.label)
+      .join("\n");
+
+    // Sempre gera um novo tabuleiro ao carregar
+    startGame();
+
+  </script>
+
+</body>
+</html>

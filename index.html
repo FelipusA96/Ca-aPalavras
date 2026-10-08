@@ -1,17 +1,84 @@
 
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#f3f6fc">
   <title>Caça-Palavras | Desafio</title>
 
   <style>
+    /* =====================================
+       CONFIGURAÇÃO DOS TEMAS
+    ===================================== */
+
     :root {
       font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-      color: #17233c;
-      background: #f3f6fc;
+      color-scheme: light;
+
+      --bg: #f3f6fc;
+      --glow: #dcecff;
+      --panel: #ffffff;
+      --text: #17233c;
+      --muted: #64748b;
+      --border: #e6ebf5;
+      --shadow: rgba(44,65,110,.07);
+
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --button-bg: #eef2ff;
+      --button-text: #4338ca;
+
+      --cell-bg: #f2f5fb;
+      --cell-text: #243553;
+      --cell-selected: #c7d2fe;
+      --cell-selected-text: #312e81;
+      --cell-found: #bbf7d0;
+      --cell-found-text: #166534;
+
+      --word-bg: #f7f9fd;
+      --word-found-bg: #f0fdf4;
+      --word-found-text: #15803d;
+
+      --input-bg: #fbfcff;
+      --input-border: #d8e0ed;
+      --progress-bg: #edf1f8;
+      --check-border: #cbd5e1;
+    }
+
+    /* TEMA ESCURO */
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+
+      --bg: #0b1221;
+      --glow: #172554;
+      --panel: #141e30;
+      --text: #e8eefb;
+      --muted: #94a3b8;
+      --border: #29364c;
+      --shadow: rgba(0,0,0,.28);
+
+      --primary: #6366f1;
+      --primary-hover: #818cf8;
+      --button-bg: #263454;
+      --button-text: #c7d2fe;
+
+      --cell-bg: #253349;
+      --cell-text: #e2e8f0;
+      --cell-selected: #6366f1;
+      --cell-selected-text: #ffffff;
+      --cell-found: #166534;
+      --cell-found-text: #dcfce7;
+
+      --word-bg: #202d43;
+      --word-found-bg: #143b30;
+      --word-found-text: #86efac;
+
+      --input-bg: #101a2b;
+      --input-border: #35435c;
+      --progress-bg: #263349;
+      --check-border: #64748b;
     }
 
     * {
@@ -22,8 +89,17 @@
       margin: 0;
       min-height: 100vh;
       background:
-        radial-gradient(circle at 5% 0%, #dcecff 0, transparent 36%),
-        #f3f6fc;
+        radial-gradient(
+          circle at 5% 0%,
+          var(--glow) 0,
+          transparent 36%
+        ),
+        var(--bg);
+
+      color: var(--text);
+      transition:
+        background .25s ease,
+        color .25s ease;
     }
 
     button, textarea {
@@ -34,23 +110,31 @@
       cursor: pointer;
     }
 
+    /* =====================================
+       CABEÇALHO
+    ===================================== */
+
     .topbar {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
       gap: 14px;
-      padding: 20px max(20px, calc((100vw - 1160px)/2));
-      background: #fff;
-      border-bottom: 1px solid #e6ebf5;
+      padding: 20px max(
+        20px,
+        calc((100vw - 1160px)/2)
+      );
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
     }
 
     .brand {
-      font-weight: 850;
-      font-size: 1.22rem;
-      letter-spacing: -.04em;
       display: flex;
       align-items: center;
       gap: 10px;
+      font-weight: 850;
+      font-size: 1.22rem;
+      letter-spacing: -.04em;
     }
 
     .brand-icon {
@@ -59,17 +143,30 @@
       width: 38px;
       height: 38px;
       border-radius: 12px;
-      background: #4f46e5;
-      color: #fff;
+      background: var(--primary);
+      color: #ffffff;
       font-size: 1.4rem;
     }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* =====================================
+       BOTÕES
+    ===================================== */
 
     .button {
       border: 0;
       border-radius: 12px;
       padding: 12px 16px;
       font-weight: 750;
-      transition: transform .14s, background .14s;
+      transition:
+        transform .14s,
+        background .14s,
+        color .14s;
     }
 
     .button:active {
@@ -83,38 +180,68 @@
     }
 
     .button-primary {
-      background: #4f46e5;
-      color: white;
+      background: var(--primary);
+      color: #ffffff;
     }
 
     .button-primary:hover {
-      background: #4338ca;
+      background: var(--primary-hover);
     }
 
     .button-outline {
-      background: #eef2ff;
-      color: #4338ca;
+      background: var(--button-bg);
+      color: var(--button-text);
     }
 
     .button-outline:hover {
-      background: #e0e7ff;
+      filter: brightness(.95);
     }
+
+    html[data-theme="dark"] .button-outline:hover {
+      filter: brightness(1.2);
+    }
+
+    /* BOTÃO DE TEMA */
+
+    .theme-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 130px;
+    }
+
+    .theme-icon {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    /* =====================================
+       LAYOUT PRINCIPAL
+    ===================================== */
 
     .app {
       width: min(1160px, calc(100% - 36px));
       margin: 38px auto;
+
       display: grid;
-      grid-template-columns: minmax(0,1fr) 300px;
+      grid-template-columns:
+        minmax(0, 1fr) 300px;
+
       align-items: start;
       gap: 24px;
     }
 
     .card {
-      background: #fff;
-      border: 1px solid #e7ecf5;
+      background: var(--panel);
+      border: 1px solid var(--border);
       border-radius: 22px;
-      box-shadow: 0 12px 36px rgba(44, 65, 110, .06);
+      box-shadow:
+        0 12px 36px var(--shadow);
       padding: 26px;
+      transition:
+        background .25s,
+        border-color .25s;
     }
 
     h1, h2, p {
@@ -133,16 +260,21 @@
     }
 
     .muted {
-      color: #64748b;
+      color: var(--muted);
       line-height: 1.55;
       font-size: .92rem;
     }
+
+    /* =====================================
+       PROGRESSO
+    ===================================== */
 
     .score {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
+
       font-weight: 750;
       margin: 24px 0 9px;
       font-size: .89rem;
@@ -150,7 +282,7 @@
 
     .progress {
       height: 9px;
-      background: #edf1f8;
+      background: var(--progress-bg);
       overflow: hidden;
       border-radius: 99px;
     }
@@ -158,10 +290,20 @@
     .progress-fill {
       width: 0;
       height: 100%;
-      background: linear-gradient(90deg,#6366f1,#10b981);
+      background:
+        linear-gradient(
+          90deg,
+          #6366f1,
+          #10b981
+        );
+
       border-radius: inherit;
       transition: width .3s ease;
     }
+
+    /* =====================================
+       TABULEIRO
+    ===================================== */
 
     .board-wrap {
       display: flex;
@@ -173,11 +315,16 @@
 
     .board {
       --size: 14;
+
       display: grid;
-      grid-template-columns: repeat(var(--size), minmax(0, 1fr));
+      grid-template-columns:
+        repeat(var(--size), minmax(0, 1fr));
+
       gap: 3px;
+
       width: min(100%, 650px);
       min-width: min(100%, 330px);
+
       touch-action: none;
       user-select: none;
       -webkit-user-select: none;
@@ -186,46 +333,61 @@
     .cell {
       min-width: 0;
       aspect-ratio: 1;
+
       display: flex;
       align-items: center;
       justify-content: center;
+
       border-radius: 6px;
-      background: #f2f5fb;
-      color: #243553;
+      background: var(--cell-bg);
+      color: var(--cell-text);
+
       font-size: clamp(9px, 1.55vw, 18px);
       font-weight: 800;
-      transition: background .08s, color .08s;
+
+      transition:
+        background .1s,
+        color .1s;
     }
 
     .cell.selected {
-      background: #c7d2fe;
-      color: #312e81;
+      background: var(--cell-selected);
+      color: var(--cell-selected-text);
     }
 
     .cell.found {
-      background: #bbf7d0;
-      color: #166534;
+      background: var(--cell-found);
+      color: var(--cell-found-text);
     }
 
     .cell.selected.found {
-      background: #a5b4fc;
-      color: #1e1b4b;
+      background: var(--cell-selected);
+      color: var(--cell-selected-text);
     }
 
     .feedback {
       min-height: 28px;
       text-align: center;
       margin: 17px 0 0;
+
       font-size: .92rem;
       font-weight: 650;
-      color: #475569;
+      color: var(--muted);
     }
 
     .feedback.success {
-      color: #15803d;
+      color: #16a34a;
     }
 
-    .sidebar .section-title {
+    html[data-theme="dark"] .feedback.success {
+      color: #86efac;
+    }
+
+    /* =====================================
+       LISTA DE PALAVRAS
+    ===================================== */
+
+    .section-title {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -235,8 +397,9 @@
     .count {
       font-size: .76rem;
       font-weight: 750;
-      color: #4338ca;
-      background: #eef2ff;
+      color: var(--button-text);
+      background: var(--button-bg);
+
       border-radius: 99px;
       padding: 5px 9px;
     }
@@ -245,6 +408,7 @@
       padding: 0;
       margin: 18px 0 25px;
       list-style: none;
+
       display: grid;
       gap: 9px;
     }
@@ -253,9 +417,11 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      background: #f7f9fd;
+
+      background: var(--word-bg);
       border-radius: 10px;
       padding: 10px 12px;
+
       font-size: .9rem;
       font-weight: 700;
       overflow-wrap: anywhere;
@@ -264,24 +430,27 @@
     .word-mark {
       display: grid;
       place-items: center;
+
       height: 19px;
       width: 19px;
       flex: 0 0 19px;
+
       border-radius: 50%;
-      border: 2px solid #cbd5e1;
+      border: 2px solid var(--check-border);
       color: transparent;
+
       font-size: 12px;
     }
 
     .word.found {
-      background: #f0fdf4;
-      color: #15803d;
+      background: var(--word-found-bg);
+      color: var(--word-found-text);
     }
 
     .word.found .word-mark {
       background: #16a34a;
-      color: white;
       border-color: #16a34a;
+      color: #ffffff;
     }
 
     .word.found .word-text {
@@ -290,8 +459,12 @@
       opacity: .75;
     }
 
+    /* =====================================
+       EDITOR DE PALAVRAS
+    ===================================== */
+
     .editor {
-      border-top: 1px solid #e9edf5;
+      border-top: 1px solid var(--border);
       padding-top: 20px;
     }
 
@@ -306,11 +479,13 @@
       width: 100%;
       min-height: 120px;
       padding: 12px;
-      background: #fbfcff;
-      border: 1px solid #d8e0ed;
+
+      background: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--input-border);
       border-radius: 11px;
+
       resize: vertical;
-      color: #17233c;
       line-height: 1.55;
     }
 
@@ -320,14 +495,14 @@
     }
 
     .hint {
-      color: #748197;
+      color: var(--muted);
       font-size: .76rem;
       line-height: 1.5;
       margin: 10px 0 0;
     }
 
     .error {
-      color: #b91c1c;
+      color: #ef4444;
       font-size: .82rem;
       margin-top: 9px;
       min-height: 20px;
@@ -336,22 +511,30 @@
     footer {
       text-align: center;
       margin: 20px;
-      color: #8794aa;
+      color: var(--muted);
       font-size: .8rem;
     }
 
+    /* =====================================
+       RESPONSIVIDADE
+    ===================================== */
+
     @media (max-width: 850px) {
+
       .app {
         grid-template-columns: 1fr;
         max-width: 720px;
       }
 
       .word-list {
-        grid-template-columns: repeat(2, minmax(0,1fr));
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
       }
+
     }
 
     @media (max-width: 500px) {
+
       .topbar {
         padding: 14px 16px;
       }
@@ -365,9 +548,21 @@
         height: 32px;
       }
 
+      .header-actions {
+        gap: 6px;
+      }
+
       .button {
-        padding: 10px 12px;
-        font-size: .86rem;
+        padding: 10px 11px;
+        font-size: .8rem;
+      }
+
+      .theme-button {
+        min-width: 0;
+      }
+
+      .theme-button .theme-label {
+        display: none;
       }
 
       .app {
@@ -398,32 +593,63 @@
         font-size: .78rem;
         padding: 9px;
       }
+
     }
+
   </style>
 </head>
 
 <body>
 
-  <!-- CABEÇALHO -->
+  <!-- ====================================
+       CABEÇALHO
+  ==================================== -->
+
   <header class="topbar">
+
     <div class="brand">
-      <span class="brand-icon" aria-hidden="true">✦</span>
+      <span class="brand-icon">✦</span>
       Caça-Palavras
     </div>
 
-    <button
-      id="shuffle"
-      class="button button-outline"
-      type="button"
-    >
-      ↻ Embaralhar
-    </button>
+    <div class="header-actions">
+
+      <!-- BOTÃO DE TEMA -->
+      <button
+        id="theme-toggle"
+        class="button button-outline theme-button"
+        type="button"
+        aria-label="Ativar modo escuro"
+        aria-pressed="false"
+      >
+        <span id="theme-icon" class="theme-icon">
+          ☾
+        </span>
+        <span id="theme-label" class="theme-label">
+          Modo escuro
+        </span>
+      </button>
+
+      <!-- EMBARALHAR -->
+      <button
+        id="shuffle"
+        class="button button-outline"
+        type="button"
+      >
+        ↻ Embaralhar
+      </button>
+
+    </div>
+
   </header>
 
-  <!-- CONTEÚDO PRINCIPAL -->
+
+  <!-- ====================================
+       JOGO
+  ==================================== -->
+
   <main class="app">
 
-    <!-- ÁREA DO JOGO -->
     <section class="card" aria-labelledby="game-title">
 
       <h1 id="game-title">
@@ -435,27 +661,34 @@
         vertical ou diagonal, em qualquer sentido.
       </p>
 
-      <!-- PROGRESSO -->
       <div class="score">
+
         <span>Seu progresso</span>
-        <span id="score">0 / 0 encontradas</span>
+
+        <span id="score">
+          0 / 0 encontradas
+        </span>
+
       </div>
 
-      <div class="progress" aria-hidden="true">
-        <div class="progress-fill" id="progress-fill"></div>
+      <div class="progress">
+        <div
+          id="progress-fill"
+          class="progress-fill"
+        ></div>
       </div>
 
-      <!-- TABULEIRO -->
       <div class="board-wrap">
+
         <div
           id="board"
           class="board"
           role="grid"
           aria-label="Tabuleiro de caça-palavras"
         ></div>
+
       </div>
 
-      <!-- MENSAGENS -->
       <p
         id="feedback"
         class="feedback"
@@ -467,21 +700,31 @@
 
     </section>
 
-    <!-- BARRA LATERAL -->
-    <aside
-      class="card sidebar"
-      aria-label="Lista de palavras e configuração"
-    >
+
+    <!-- ====================================
+         PAINEL LATERAL
+    ==================================== -->
+
+    <aside class="card sidebar">
 
       <div class="section-title">
+
         <h2>Palavras para encontrar</h2>
-        <span id="badge" class="count">0 restantes</span>
+
+        <span id="badge" class="count">
+          0 restantes
+        </span>
+
       </div>
 
-      <!-- LISTA DE PALAVRAS -->
-      <ul id="word-list" class="word-list"></ul>
+      <ul
+        id="word-list"
+        class="word-list"
+      ></ul>
+
 
       <!-- PERSONALIZAÇÃO -->
+
       <div class="editor">
 
         <label for="words-input">
@@ -491,7 +734,6 @@
         <textarea
           id="words-input"
           spellcheck="false"
-          aria-describedby="input-hint"
         ></textarea>
 
         <button
@@ -502,13 +744,17 @@
           Criar novo jogo
         </button>
 
-        <p id="input-hint" class="hint">
+        <p class="hint">
           Separe as palavras por vírgula ou linha.
           Acentos e espaços são ignorados no tabuleiro.
           Máximo: 25 palavras, com até 20 letras cada.
         </p>
 
-        <div id="error" class="error" role="alert"></div>
+        <div
+          id="error"
+          class="error"
+          role="alert"
+        ></div>
 
       </div>
 
@@ -517,16 +763,15 @@
   </main>
 
   <footer>
-    O tabuleiro é gerado novamente a cada atualização da página.
+    Um novo tabuleiro é gerado a cada atualização da página.
   </footer>
+
 
   <script>
 
     // ==========================================
-    // 1. CONFIGURAÇÕES INICIAIS
+    // 1. CONFIGURAÇÕES
     // ==========================================
-
-    // ALTERE AQUI AS PALAVRAS PADRÃO DO JOGO
 
     const DEFAULT_WORDS = [
       "CAÇA-PALAVRAS",
@@ -539,10 +784,11 @@
       "MEMÓRIA"
     ];
 
-    // Identificador utilizado no armazenamento local
     const STORAGE_KEY = "caca-palavras-lista-v1";
 
-    // Oito direções permitidas
+    // Armazenamento separado para o tema
+    const THEME_KEY = "caca-palavras-tema-v1";
+
     const DIRECTIONS = [
       [-1, -1],
       [-1,  0],
@@ -556,13 +802,11 @@
 
     const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    // Elementos da interface
     const board = document.getElementById("board");
     const input = document.getElementById("words-input");
     const feedback = document.getElementById("feedback");
     const error = document.getElementById("error");
 
-    // Estado atual do jogo
     let words = [];
     let letters = [];
     let boardSize = 0;
@@ -572,19 +816,137 @@
 
 
     // ==========================================
-    // 2. TRATAMENTO DAS PALAVRAS
+    // 2. CONTROLE DE TEMA CLARO / ESCURO
     // ==========================================
 
-    // Remove acentos, espaços e caracteres especiais
+    const themeButton =
+      document.getElementById("theme-toggle");
+
+    const themeIcon =
+      document.getElementById("theme-icon");
+
+    const themeLabel =
+      document.getElementById("theme-label");
+
+    let currentTheme = "light";
+
+    // Aplica visualmente o tema escolhido
+    function applyTheme(theme) {
+
+      currentTheme = theme;
+
+      const isDark = theme === "dark";
+
+      // Altera o atributo no HTML
+      document.documentElement.setAttribute(
+        "data-theme",
+        theme
+      );
+
+      // Modifica o ícone
+      themeIcon.textContent =
+        isDark ? "☀" : "☾";
+
+      // Modifica o texto do botão
+      themeLabel.textContent =
+        isDark ? "Modo claro" : "Modo escuro";
+
+      // Acessibilidade
+      themeButton.setAttribute(
+        "aria-label",
+        isDark
+          ? "Ativar modo claro"
+          : "Ativar modo escuro"
+      );
+
+      themeButton.setAttribute(
+        "aria-pressed",
+        String(isDark)
+      );
+
+      // Altera a cor da barra do navegador
+      const metaTheme = document.querySelector(
+        'meta[name="theme-color"]'
+      );
+
+      if (metaTheme) {
+
+        metaTheme.setAttribute(
+          "content",
+          isDark ? "#0b1221" : "#f3f6fc"
+        );
+
+      }
+
+    }
+
+    // Recupera o tema salvo anteriormente
+    function loadTheme() {
+
+      let savedTheme = null;
+
+      try {
+
+        savedTheme =
+          localStorage.getItem(THEME_KEY);
+
+      } catch (_) {}
+
+      // Se não houver preferência salva,
+      // utiliza o tema do sistema operacional
+      if (
+        savedTheme !== "dark" &&
+        savedTheme !== "light"
+      ) {
+
+        savedTheme = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches
+          ? "dark"
+          : "light";
+
+      }
+
+      applyTheme(savedTheme);
+    }
+
+    // Alterna entre claro e escuro
+    themeButton.addEventListener("click", () => {
+
+      const nextTheme =
+        currentTheme === "dark"
+          ? "light"
+          : "dark";
+
+      applyTheme(nextTheme);
+
+      // Salva a preferência no navegador
+      try {
+
+        localStorage.setItem(
+          THEME_KEY,
+          nextTheme
+        );
+
+      } catch (_) {}
+
+    });
+
+
+    // ==========================================
+    // 3. TRATAMENTO DAS PALAVRAS
+    // ==========================================
+
     function normalize(word) {
+
       return word
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toUpperCase()
         .replace(/[^A-Z]/g, "");
+
     }
 
-    // Lê, valida e prepara as palavras
     function parseWords(text) {
 
       const entries = text
@@ -593,11 +955,15 @@
         .filter(Boolean);
 
       if (!entries.length) {
-        throw new Error("Digite pelo menos uma palavra.");
+        throw new Error(
+          "Digite pelo menos uma palavra."
+        );
       }
 
       if (entries.length > 25) {
-        throw new Error("Utilize no máximo 25 palavras.");
+        throw new Error(
+          "Utilize no máximo 25 palavras."
+        );
       }
 
       const unique = new Map();
@@ -606,17 +972,25 @@
 
         const clean = normalize(label);
 
-        if (clean.length < 2 || clean.length > 20) {
+        if (
+          clean.length < 2 ||
+          clean.length > 20
+        ) {
+
           throw new Error(
-            `A palavra “${label}” deve ter entre 2 e 20 letras.`
+            `A palavra "${label}" deve ter ` +
+            "entre 2 e 20 letras."
           );
+
         }
 
         if (!unique.has(clean)) {
+
           unique.set(clean, {
             label: label.toUpperCase(),
             clean
           });
+
         }
 
       }
@@ -626,16 +1000,21 @@
 
 
     // ==========================================
-    // 3. GERAÇÃO ALEATÓRIA DO TABULEIRO
+    // 4. GERAÇÃO DO TABULEIRO
     // ==========================================
 
-    // Gera um número aleatório de 0 até n-1
     function random(n) {
       return Math.floor(Math.random() * n);
     }
 
-    // Verifica se é possível colocar a palavra
-    function canPlace(grid, word, row, col, dr, dc) {
+    function canPlace(
+      grid,
+      word,
+      row,
+      col,
+      dr,
+      dc
+    ) {
 
       for (let i = 0; i < word.length; i++) {
 
@@ -651,7 +1030,10 @@
           return false;
         }
 
-        if (grid[r][c] && grid[r][c] !== word[i]) {
+        if (
+          grid[r][c] &&
+          grid[r][c] !== word[i]
+        ) {
           return false;
         }
 
@@ -660,7 +1042,6 @@
       return true;
     }
 
-    // Tenta inserir uma palavra em posição aleatória
     function place(grid, word) {
 
       const size = grid.length;
@@ -670,25 +1051,49 @@
         const [dr, dc] =
           DIRECTIONS[random(DIRECTIONS.length)];
 
-        const minR = dr < 0 ? word.length - 1 : 0;
-        const maxR = dr > 0 ? size - word.length : size - 1;
+        const minR =
+          dr < 0 ? word.length - 1 : 0;
 
-        const minC = dc < 0 ? word.length - 1 : 0;
-        const maxC = dc > 0 ? size - word.length : size - 1;
+        const maxR =
+          dr > 0 ? size - word.length : size - 1;
 
-        if (minR > maxR || minC > maxC) {
+        const minC =
+          dc < 0 ? word.length - 1 : 0;
+
+        const maxC =
+          dc > 0 ? size - word.length : size - 1;
+
+        if (
+          minR > maxR ||
+          minC > maxC
+        ) {
           continue;
         }
 
-        const row = minR + random(maxR - minR + 1);
-        const col = minC + random(maxC - minC + 1);
+        const row =
+          minR + random(maxR - minR + 1);
 
-        if (!canPlace(grid, word, row, col, dr, dc)) {
+        const col =
+          minC + random(maxC - minC + 1);
+
+        if (
+          !canPlace(
+            grid,
+            word,
+            row,
+            col,
+            dr,
+            dc
+          )
+        ) {
           continue;
         }
 
         for (let i = 0; i < word.length; i++) {
-          grid[row + i * dr][col + i * dc] = word[i];
+
+          grid[row + i * dr][col + i * dc] =
+            word[i];
+
         }
 
         return true;
@@ -697,7 +1102,6 @@
       return false;
     }
 
-    // Monta o tabuleiro completo
     function makeBoard() {
 
       const longest = Math.max(
@@ -718,33 +1122,48 @@
         )
       );
 
-      // Tenta diferentes tamanhos de tabuleiro
-      for (let size = firstSize; size <= 24; size++) {
+      for (
+        let size = firstSize;
+        size <= 24;
+        size++
+      ) {
 
-        for (let attempt = 0; attempt < 60; attempt++) {
+        for (
+          let attempt = 0;
+          attempt < 60;
+          attempt++
+        ) {
 
           const grid = Array.from(
             { length: size },
             () => Array(size).fill("")
           );
 
-          // Insere primeiro as palavras maiores
           const sorted = [...words].sort(
-            (a, b) => b.clean.length - a.clean.length
+            (a, b) =>
+              b.clean.length - a.clean.length
           );
 
-          if (!sorted.every(w => place(grid, w.clean))) {
+          if (
+            !sorted.every(
+              w => place(grid, w.clean)
+            )
+          ) {
             continue;
           }
 
-          // Preenche espaços vazios com letras
+          // Preenche os espaços restantes
           for (let r = 0; r < size; r++) {
 
             for (let c = 0; c < size; c++) {
 
               if (!grid[r][c]) {
+
                 grid[r][c] =
-                  ALPHABET[random(ALPHABET.length)];
+                  ALPHABET[
+                    random(ALPHABET.length)
+                  ];
+
               }
 
             }
@@ -759,31 +1178,39 @@
       }
 
       throw new Error(
-        "Não foi possível encaixar todas as palavras. " +
-        "Tente uma lista menor."
+        "Não foi possível encaixar todas " +
+        "as palavras. Tente uma lista menor."
       );
     }
 
 
     // ==========================================
-    // 4. EXIBIÇÃO DO TABULEIRO
+    // 5. EXIBIÇÃO DO TABULEIRO
     // ==========================================
 
     function renderBoard() {
 
-      board.style.setProperty("--size", boardSize);
+      board.style.setProperty(
+        "--size",
+        boardSize
+      );
 
-      const fragment = document.createDocumentFragment();
+      const fragment =
+        document.createDocumentFragment();
 
       letters.forEach((line, r) => {
 
         line.forEach((letter, c) => {
 
-          const cell = document.createElement("div");
+          const cell =
+            document.createElement("div");
 
           cell.className = "cell";
 
-          cell.setAttribute("role", "gridcell");
+          cell.setAttribute(
+            "role",
+            "gridcell"
+          );
 
           cell.dataset.row = r;
           cell.dataset.col = c;
@@ -801,32 +1228,39 @@
 
 
     // ==========================================
-    // 5. LISTA DE PALAVRAS E PROGRESSO
+    // 6. LISTA E PROGRESSO
     // ==========================================
 
     function renderWords() {
 
-      const list = document.getElementById("word-list");
+      const list =
+        document.getElementById("word-list");
 
-      const fragment = document.createDocumentFragment();
+      const fragment =
+        document.createDocumentFragment();
 
       for (const word of words) {
 
-        const item = document.createElement("li");
+        const item =
+          document.createElement("li");
 
         item.className =
-          "word" + (found.has(word.clean) ? " found" : "");
+          "word" +
+          (found.has(word.clean) ? " found" : "");
 
-        const mark = document.createElement("span");
+        const mark =
+          document.createElement("span");
 
         mark.className = "word-mark";
 
         mark.textContent =
           found.has(word.clean) ? "✓" : "";
 
-        const label = document.createElement("span");
+        const label =
+          document.createElement("span");
 
         label.className = "word-text";
+
         label.textContent = word.label;
 
         item.append(mark, label);
@@ -836,34 +1270,38 @@
 
       list.replaceChildren(fragment);
 
-      // Atualiza os indicadores
-      document.getElementById("score").textContent =
+      document.getElementById(
+        "score"
+      ).textContent =
         `${found.size} / ${words.length} encontradas`;
 
-      document.getElementById("badge").textContent =
+      document.getElementById(
+        "badge"
+      ).textContent =
         `${words.length - found.size} restantes`;
 
-      document.getElementById("progress-fill").style.width =
+      document.getElementById(
+        "progress-fill"
+      ).style.width =
         `${found.size / words.length * 100}%`;
     }
 
 
     // ==========================================
-    // 6. INICIAR OU REINICIAR O JOGO
+    // 7. REINICIAR E EMBARALHAR
     // ==========================================
 
     function startGame() {
 
-      // Gera posições e letras novamente
+      // Gera um novo tabuleiro
       letters = makeBoard();
 
-      // Limpa o progresso
+      // Zera palavras encontradas
       found = new Set();
 
-      // Cancela qualquer seleção anterior
+      // Cancela qualquer arraste anterior
       drag = null;
 
-      // Atualiza a tela
       renderBoard();
       renderWords();
 
@@ -877,7 +1315,7 @@
 
 
     // ==========================================
-    // 7. IDENTIFICAÇÃO DAS CÉLULAS
+    // 8. IDENTIFICAÇÃO DAS CÉLULAS
     // ==========================================
 
     function coords(cell) {
@@ -888,13 +1326,13 @@
       ];
     }
 
-    // Descobre qual célula está sob o mouse ou dedo
     function hoveredCell(event) {
 
-      const target = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      );
+      const target =
+        document.elementFromPoint(
+          event.clientX,
+          event.clientY
+        );
 
       const cell =
         target && target.closest(".cell");
@@ -906,14 +1344,16 @@
 
 
     // ==========================================
-    // 8. CAMINHO DO ARRASTE
+    // 9. CÁLCULO DO CAMINHO
     // ==========================================
 
-    // Ajusta a seleção para uma das 8 direções
     function getPath(start, end) {
 
-      const deltaR = end[0] - start[0];
-      const deltaC = end[1] - start[1];
+      const deltaR =
+        end[0] - start[0];
+
+      const deltaC =
+        end[1] - start[1];
 
       if (!deltaR && !deltaC) {
         return [start];
@@ -924,27 +1364,31 @@
 
       for (const direction of DIRECTIONS) {
 
-        const dot =
-          (
-            deltaR * direction[0] +
-            deltaC * direction[1]
-          ) / Math.hypot(
-            direction[0],
-            direction[1]
-          );
+        const dot = (
+          deltaR * direction[0] +
+          deltaC * direction[1]
+        ) / Math.hypot(
+          direction[0],
+          direction[1]
+        );
 
         if (dot > bestDot) {
+
           bestDot = dot;
           best = direction;
+
         }
 
       }
 
       const [dr, dc] = best;
 
-      const steps = Math.round(
-        (deltaR * dr + deltaC * dc) /
-        (dr * dr + dc * dc)
+      const steps = Math.max(
+        0,
+        Math.round(
+          (deltaR * dr + deltaC * dc) /
+          (dr * dr + dc * dc)
+        )
       );
 
       const path = [];
@@ -964,7 +1408,6 @@
         }
 
         path.push([r, c]);
-
       }
 
       return path;
@@ -972,27 +1415,35 @@
 
 
     // ==========================================
-    // 9. DESTAQUE VISUAL DA SELEÇÃO
+    // 10. DESTAQUE DAS LETRAS
     // ==========================================
 
     function cellAt(row, col) {
-      return board.children[row * boardSize + col];
+
+      return board.children[
+        row * boardSize + col
+      ];
+
     }
 
     function highlight() {
 
-      // Remove o destaque temporário anterior
       board
         .querySelectorAll(".selected")
         .forEach(cell => {
+
           cell.classList.remove("selected");
+
         });
 
-      // Destaca o caminho selecionado
       if (drag) {
 
         drag.path.forEach(([r, c]) => {
-          cellAt(r, c).classList.add("selected");
+
+          cellAt(r, c).classList.add(
+            "selected"
+          );
+
         });
 
       }
@@ -1000,165 +1451,190 @@
 
 
     // ==========================================
-    // 10. INÍCIO DO ARRASTE
+    // 11. INICIAR ARRASTE
     // ==========================================
 
-    board.addEventListener("pointerdown", event => {
+    board.addEventListener(
+      "pointerdown",
+      event => {
 
-      const cell = event.target.closest(".cell");
+        const cell =
+          event.target.closest(".cell");
 
-      if (
-        !cell ||
-        (
-          event.pointerType === "mouse" &&
-          event.button !== 0
-        )
-      ) {
-        return;
+        if (
+          !cell ||
+          (
+            event.pointerType === "mouse" &&
+            event.button !== 0
+          )
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+
+        drag = {
+          start: coords(cell),
+          path: [coords(cell)]
+        };
+
+        board.setPointerCapture(
+          event.pointerId
+        );
+
+        highlight();
       }
-
-      event.preventDefault();
-
-      drag = {
-        start: coords(cell),
-        path: [coords(cell)]
-      };
-
-      board.setPointerCapture(event.pointerId);
-
-      highlight();
-    });
+    );
 
 
     // ==========================================
-    // 11. MOVIMENTO DO ARRASTE
+    // 12. MOVIMENTAÇÃO
     // ==========================================
 
-    board.addEventListener("pointermove", event => {
+    board.addEventListener(
+      "pointermove",
+      event => {
 
-      if (!drag) {
-        return;
-      }
+        if (!drag) {
+          return;
+        }
 
-      const cell = hoveredCell(event);
+        const cell = hoveredCell(event);
 
-      if (!cell) {
-        return;
-      }
+        if (!cell) {
+          return;
+        }
 
-      drag.path = getPath(
-        drag.start,
-        coords(cell)
-      );
-
-      highlight();
-    });
-
-
-    // ==========================================
-    // 12. FINALIZAÇÃO E VALIDAÇÃO
-    // ==========================================
-
-    board.addEventListener("pointerup", event => {
-
-      if (!drag) {
-        return;
-      }
-
-      const cell = hoveredCell(event);
-
-      if (cell) {
         drag.path = getPath(
           drag.start,
           coords(cell)
         );
+
+        highlight();
       }
-
-      const path = drag.path;
-
-      drag = null;
-
-      highlight();
-
-      if (path.length < 2) {
-        return;
-      }
-
-      // Junta as letras selecionadas
-      const selected = path
-        .map(([r, c]) => letters[r][c])
-        .join("");
-
-      // Também verifica a palavra invertida
-      const reverse = [...selected]
-        .reverse()
-        .join("");
-
-      // Procura uma palavra válida ainda não encontrada
-      const match = words.find(w =>
-        !found.has(w.clean) &&
-        (
-          w.clean === selected ||
-          w.clean === reverse
-        )
-      );
-
-      // Caso a sequência esteja incorreta
-      if (!match) {
-
-        feedback.textContent =
-          "Essa sequência não é uma palavra da lista. " +
-          "Tente novamente!";
-
-        feedback.classList.remove("success");
-
-        return;
-      }
-
-      // Marca a palavra como encontrada
-      found.add(match.clean);
-
-      // Mantém as letras destacadas no tabuleiro
-      path.forEach(([r, c]) => {
-        cellAt(r, c).classList.add("found");
-      });
-
-      // Risca a palavra na lista
-      renderWords();
-
-      // Verifica se o jogador concluiu tudo
-      const complete = found.size === words.length;
-
-      if (complete) {
-
-        feedback.textContent =
-          "🎉 Parabéns! Você encontrou todas as palavras!";
-
-      } else {
-
-        feedback.textContent =
-          `✓ Você encontrou: ${match.label}`;
-
-      }
-
-      feedback.classList.add("success");
-    });
+    );
 
 
     // ==========================================
-    // 13. CANCELAMENTO DE SELEÇÃO
+    // 13. VALIDAR PALAVRA ENCONTRADA
     // ==========================================
 
-    board.addEventListener("pointercancel", () => {
+    board.addEventListener(
+      "pointerup",
+      event => {
 
-      drag = null;
+        if (!drag) {
+          return;
+        }
 
-      highlight();
-    });
+        const cell = hoveredCell(event);
+
+        if (cell) {
+
+          drag.path = getPath(
+            drag.start,
+            coords(cell)
+          );
+
+        }
+
+        const path = drag.path;
+
+        drag = null;
+
+        highlight();
+
+        if (path.length < 2) {
+          return;
+        }
+
+        const selected = path
+          .map(([r, c]) => letters[r][c])
+          .join("");
+
+        const reverse = [...selected]
+          .reverse()
+          .join("");
+
+        const match = words.find(w =>
+
+          !found.has(w.clean) &&
+
+          (
+            w.clean === selected ||
+            w.clean === reverse
+          )
+
+        );
+
+        if (!match) {
+
+          feedback.textContent =
+            "Essa sequência não é uma palavra " +
+            "da lista. Tente novamente!";
+
+          feedback.classList.remove(
+            "success"
+          );
+
+          return;
+        }
+
+        // Marca a palavra encontrada
+        found.add(match.clean);
+
+        // Destaca as células permanentemente
+        path.forEach(([r, c]) => {
+
+          cellAt(r, c).classList.add(
+            "found"
+          );
+
+        });
+
+        // Atualiza a lista de palavras
+        renderWords();
+
+        const complete =
+          found.size === words.length;
+
+        if (complete) {
+
+          feedback.textContent =
+            "🎉 Parabéns! Você encontrou " +
+            "todas as palavras!";
+
+        } else {
+
+          feedback.textContent =
+            `✓ Você encontrou: ${match.label}`;
+
+        }
+
+        feedback.classList.add("success");
+
+      }
+    );
 
 
     // ==========================================
-    // 14. BOTÃO EMBARALHAR
+    // 14. CANCELAR SELEÇÃO
+    // ==========================================
+
+    board.addEventListener(
+      "pointercancel",
+      () => {
+
+        drag = null;
+
+        highlight();
+
+      }
+    );
+
+
+    // ==========================================
+    // 15. BOTÃO EMBARALHAR
     // ==========================================
 
     document
@@ -1167,7 +1643,6 @@
 
         try {
 
-          // Reinicia e redistribui as palavras
           startGame();
 
         } catch (err) {
@@ -1180,7 +1655,7 @@
 
 
     // ==========================================
-    // 15. CRIAR JOGO COM NOVAS PALAVRAS
+    // 16. PERSONALIZAR AS PALAVRAS
     // ==========================================
 
     document
@@ -1191,7 +1666,6 @@
 
           const previous = words;
 
-          // Lê as novas palavras digitadas
           words = parseWords(input.value);
 
           try {
@@ -1206,17 +1680,17 @@
 
           }
 
-          // Salva as palavras no navegador
+          // Guarda a lista personalizada
           try {
 
             localStorage.setItem(
               STORAGE_KEY,
-              words.map(w => w.label).join("\n")
+              words
+                .map(w => w.label)
+                .join("\n")
             );
 
-          } catch (_) {
-            // O jogo continua se o armazenamento falhar
-          }
+          } catch (_) {}
 
         } catch (err) {
 
@@ -1228,22 +1702,24 @@
 
 
     // ==========================================
-    // 16. INICIALIZAÇÃO AUTOMÁTICA
+    // 17. INICIALIZAÇÃO AUTOMÁTICA
     // ==========================================
 
-    // Recupera as palavras salvas
+    // Primeiro, carrega a preferência visual
+    loadTheme();
+
+    // Depois, recupera a lista de palavras
     let saved = DEFAULT_WORDS.join("\n");
 
     try {
 
       saved =
-        localStorage.getItem(STORAGE_KEY) || saved;
+        localStorage.getItem(
+          STORAGE_KEY
+        ) || saved;
 
-    } catch (_) {
-      // Utiliza as palavras padrão
-    }
+    } catch (_) {}
 
-    // Valida as palavras recuperadas
     try {
 
       words = parseWords(saved);
@@ -1256,12 +1732,11 @@
 
     }
 
-    // Preenche a caixa de personalização
     input.value = words
       .map(w => w.label)
       .join("\n");
 
-    // Sempre gera um novo tabuleiro ao carregar
+    // Sempre gera um novo tabuleiro
     startGame();
 
   </script>

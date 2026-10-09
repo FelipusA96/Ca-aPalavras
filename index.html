@@ -3,644 +3,944 @@
 <html lang="pt-BR" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f4f7fd">
 <title>Caça-Palavras Interativo</title>
 
 <style>
-/* ========================================
-   CORES E TEMAS
-======================================== */
+/* =========================================
+   CORES
+========================================= */
 :root {
-  font-family: system-ui,-apple-system,Segoe UI,sans-serif;
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
   color-scheme: light;
-  --page:#f4f7fd;
-  --card:#fff;
-  --text:#1c2944;
-  --muted:#65748c;
-  --border:#e2e8f3;
-  --soft:#f1f5fc;
-  --primary:#5148df;
-  --primaryText:#fff;
-  --selected:#c7d2fe;
-  --selectedText:#312e81;
-  --found:#bbf7d0;
-  --foundText:#166534;
-  --missed:#fecaca;
-  --missedText:#991b1b;
-  --danger:#dc2626;
-  --shadow:rgba(31,51,94,.08);
-}
-html[data-theme="dark"] {
-  color-scheme:dark;
-  --page:#0c1322;
-  --card:#151f31;
-  --text:#e8eefb;
-  --muted:#a0aec4;
-  --border:#2c3a50;
-  --soft:#243148;
-  --primary:#7771f4;
-  --primaryText:#fff;
-  --selected:#655fd5;
-  --selectedText:#fff;
-  --found:#166534;
-  --foundText:#dcfce7;
-  --missed:#991b1b;
-  --missedText:#fee2e2;
-  --danger:#fb7185;
-  --shadow:rgba(0,0,0,.27);
+  --page: #f4f7fd;
+  --card: #fff;
+  --text: #1c2944;
+  --muted: #65748c;
+  --border: #e2e8f3;
+  --soft: #f1f5fc;
+  --primary: #5148df;
+  --primaryText: #fff;
+  --selected: #c7d2fe;
+  --selectedText: #312e81;
+  --found: #bbf7d0;
+  --foundText: #166534;
+  --missed: #fecaca;
+  --missedText: #991b1b;
+  --danger: #dc2626;
+  --shadow: rgba(31,51,94,.08);
 }
 
-* { box-sizing:border-box; }
-[hidden] { display:none!important; }
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0c1322;
+  --card: #151f31;
+  --text: #e8eefb;
+  --muted: #a0aec4;
+  --border: #2c3a50;
+  --soft: #243148;
+  --primary: #7771f4;
+  --primaryText: #fff;
+  --selected: #655fd5;
+  --selectedText: #fff;
+  --found: #166534;
+  --foundText: #dcfce7;
+  --missed: #991b1b;
+  --missedText: #fee2e2;
+  --danger: #fb7185;
+  --shadow: rgba(0,0,0,.27);
+}
+
+/* =========================================
+   GERAL
+========================================= */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
-  margin:0;
-  min-height:100vh;
-  background:var(--page);
-  color:var(--text);
-  transition:background .2s,color .2s;
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page);
+  color: var(--text);
+  transition: background .2s, color .2s;
 }
-button,input,textarea,select { font:inherit; }
-button { cursor:pointer; }
-button:disabled { opacity:.55;cursor:not-allowed; }
+
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+button:disabled { opacity: .55; cursor: not-allowed; }
 
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline:3px solid #a5b4fc;
-  outline-offset:2px;
+  outline: 3px solid #a5b4fc;
+  outline-offset: 2px;
 }
 
-/* ========================================
-   CABEÇALHO
-======================================== */
-.topbar {
-  background:var(--card);
-  border-bottom:1px solid var(--border);
-  padding:17px max(16px,calc((100vw - 1200px)/2));
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:14px;
-  flex-wrap:wrap;
-}
-.brand {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-size:1.15rem;
-  font-weight:850;
-}
-.brand-icon {
-  width:38px;
-  height:38px;
-  display:grid;
-  place-items:center;
-  border-radius:12px;
-  background:var(--primary);
-  color:#fff;
-  font-size:1.4rem;
-}
-.actions {
-  display:flex;
-  align-items:center;
-  gap:9px;
-  flex-wrap:wrap;
-}
-.btn {
-  border:0;
-  border-radius:11px;
-  padding:11px 14px;
-  font-weight:730;
-  background:var(--soft);
-  color:var(--text);
-  transition:filter .15s,transform .15s;
-}
-.btn:hover:not(:disabled) { filter:brightness(.95); }
-.btn:active:not(:disabled) { transform:scale(.97); }
-.btn.primary { background:var(--primary);color:var(--primaryText); }
-.btn.danger { background:var(--danger);color:#fff; }
-.btn.danger-outline { color:var(--danger); }
-.btn.small { padding:8px 10px;font-size:.79rem; }
-
-/* ========================================
-   LAYOUT
-======================================== */
-.layout {
-  max-width:1200px;
-  margin:29px auto;
-  padding:0 16px;
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 325px;
-  gap:20px;
-  align-items:start;
-}
-.card {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:19px;
-  padding:23px;
-  box-shadow:0 9px 29px var(--shadow);
-}
 h1 {
-  margin:0 0 7px;
-  font-size:clamp(1.45rem,3vw,2rem);
+  margin: 0 0 7px;
+  font-size: clamp(1.45rem,3vw,2rem);
+  letter-spacing: -.045em;
 }
-h2 { margin:0 0 13px;font-size:1.04rem; }
-p { line-height:1.48; }
-.muted,.helper { color:var(--muted); }
-.muted { margin:0;font-size:.9rem; }
-.helper { font-size:.77rem;line-height:1.45;margin:7px 0 0; }
 
-/* ========================================
-   PROGRESSO E CRONÔMETRO
-======================================== */
+h2 {
+  margin: 0 0 13px;
+  font-size: 1.04rem;
+}
+
+p { line-height: 1.48; }
+
+.muted, .helper { color: var(--muted); }
+.muted { margin: 0; font-size: .9rem; }
+
+.helper {
+  font-size: .77rem;
+  line-height: 1.45;
+  margin: 7px 0 0;
+}
+
+/* =========================================
+   CABEÇALHO
+========================================= */
+.topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 17px max(16px,calc((100vw - 1200px)/2));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 850;
+  letter-spacing: -.03em;
+}
+
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: white;
+  background: var(--primary);
+  font-size: 1.4rem;
+}
+
+.actions {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* =========================================
+   BOTÕES
+========================================= */
+.btn {
+  border: 0;
+  border-radius: 11px;
+  padding: 11px 14px;
+  font-weight: 730;
+  background: var(--soft);
+  color: var(--text);
+  transition: filter .15s, transform .15s;
+}
+
+.btn:hover:not(:disabled) { filter: brightness(.95); }
+.btn:active:not(:disabled) { transform: scale(.97); }
+
+.btn.primary {
+  background: var(--primary);
+  color: var(--primaryText);
+}
+
+.btn.danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn.danger-outline {
+  background: var(--soft);
+  color: var(--danger);
+}
+
+.btn.small {
+  padding: 8px 10px;
+  font-size: .79rem;
+}
+
+/* =========================================
+   LAYOUT PRINCIPAL
+========================================= */
+.layout {
+  max-width: 1200px;
+  margin: 29px auto;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 325px;
+  gap: 20px;
+  align-items: start;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 19px;
+  padding: 23px;
+  box-shadow: 0 9px 29px var(--shadow);
+}
+
+/* =========================================
+   PROGRESSO
+========================================= */
 .score {
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  margin:23px 0 9px;
-  font-size:.9rem;
-  font-weight:700;
-}
-.progress {
-  height:9px;
-  border-radius:20px;
-  background:var(--soft);
-  overflow:hidden;
-}
-.progress-fill {
-  height:100%;
-  width:0;
-  background:linear-gradient(90deg,#6660e8,#19b67b);
-  transition:width .2s;
-}
-.timer-display {
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  margin-top:14px;
-  padding:9px 13px;
-  border:1px solid var(--border);
-  border-radius:12px;
-  background:var(--soft);
-  font-variant-numeric:tabular-nums;
-  font-weight:800;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 23px 0 9px;
+  font-size: .9rem;
+  font-weight: 700;
 }
 
-/* ========================================
+.progress {
+  height: 9px;
+  border-radius: 20px;
+  background: var(--soft);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg,#6660e8,#19b67b);
+  transition: width .2s;
+}
+
+.timer-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 9px 13px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--soft);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.timer-display strong {
+  font-size: 1.12rem;
+  letter-spacing: .025em;
+}
+
+/* =========================================
    TABULEIRO
-======================================== */
+========================================= */
 .board-wrap {
-  margin:24px auto 0;
-  max-width:660px;
-  overflow-x:auto;
+  margin: 24px auto 0;
+  max-width: 660px;
+  overflow-x: auto;
 }
+
 .board {
-  --size:14;
-  display:grid;
-  grid-template-columns:repeat(var(--size),minmax(0,1fr));
-  gap:3px;
-  width:100%;
-  touch-action:none;
-  user-select:none;
-  cursor:crosshair;
+  --size: 14;
+  display: grid;
+  grid-template-columns: repeat(var(--size),minmax(0,1fr));
+  gap: 3px;
+  width: 100%;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: crosshair;
 }
+
 .cell {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  aspect-ratio:1;
-  min-width:0;
-  background:var(--soft);
-  border-radius:5px;
-  font-size:clamp(8px,1.5vw,17px);
-  font-weight:800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  background: var(--soft);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: clamp(8px,1.5vw,17px);
+  font-weight: 800;
 }
+
 .cell.selected {
-  background:var(--selected);
-  color:var(--selectedText);
-  outline:2px solid var(--primary);
-  outline-offset:-2px;
+  background: var(--selected);
+  color: var(--selectedText);
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
 }
+
 .cell.found {
-  background:var(--found);
-  color:var(--foundText);
+  background: var(--found);
+  color: var(--foundText);
 }
+
 .cell.missed {
-  background:var(--missed);
-  color:var(--missedText);
+  background: var(--missed);
+  color: var(--missedText);
 }
+
 .cell.found.missed {
-  background:linear-gradient(
+  background: linear-gradient(
     135deg,
     var(--found) 50%,
     var(--missed) 50%
   );
-}
-.board.locked { cursor:default; }
-.feedback {
-  min-height:23px;
-  margin:18px 0 0;
-  text-align:center;
-  color:var(--muted);
-  font-size:.89rem;
-  font-weight:650;
-}
-.feedback.success { color:#16a34a; }
-.feedback.alert { color:var(--danger); }
-.legend {
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  font-size:.8rem;
-  color:var(--muted);
-  margin-top:13px;
-}
-.dot {
-  display:inline-block;
-  width:12px;
-  height:12px;
-  border-radius:3px;
-  margin-right:4px;
-}
-.dot.found { background:var(--found); }
-.dot.missed { background:var(--missed); }
-.current-theme {
-  display:block;
-  margin:10px 0 0;
-  color:var(--primary);
-  font-weight:750;
-  font-size:.85rem;
-}
-.next-theme {
-  display:block;
-  margin:16px auto 0;
+  color: var(--text);
 }
 
-/* ========================================
-   LISTA DE PALAVRAS
-======================================== */
+.board.locked { cursor: default; }
+
+.feedback {
+  min-height: 23px;
+  margin: 18px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: .89rem;
+  font-weight: 650;
+}
+
+.feedback.success { color: #16a34a; }
+.feedback.alert { color: var(--danger); }
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: .8rem;
+  color: var(--muted);
+  margin-top: 13px;
+}
+
+.dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 4px;
+}
+
+.dot.found { background: var(--found); }
+.dot.missed { background: var(--missed); }
+
+.current-theme {
+  display: inline-block;
+  margin: 10px 0 0;
+  color: var(--primary);
+  font-weight: 750;
+  font-size: .85rem;
+}
+
+.next-theme {
+  margin: 16px auto 0;
+  display: block;
+}
+
+/* =========================================
+   PALAVRAS
+========================================= */
 .section-head {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
+
 .pill {
-  background:var(--soft);
-  padding:5px 9px;
-  border-radius:20px;
-  color:var(--muted);
-  font-size:.74rem;
-  font-weight:750;
+  display: inline-block;
+  background: var(--soft);
+  padding: 5px 9px;
+  border-radius: 20px;
+  color: var(--muted);
+  font-size: .74rem;
+  font-weight: 750;
 }
+
 .words {
-  list-style:none;
-  padding:0;
-  margin:12px 0 20px;
-  display:grid;
-  gap:8px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 20px;
+  display: grid;
+  gap: 8px;
 }
+
 .word {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:9px 11px;
-  background:var(--soft);
-  border-radius:9px;
-  font-size:.85rem;
-  font-weight:720;
-  overflow-wrap:anywhere;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--soft);
+  padding: 9px 11px;
+  border-radius: 9px;
+  font-size: .85rem;
+  font-weight: 720;
+  overflow-wrap: anywhere;
 }
+
 .mark {
-  width:18px;
-  height:18px;
-  flex:0 0 18px;
-  border:2px solid var(--muted);
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  font-size:.74rem;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: .74rem;
 }
+
 .word.found {
-  background:var(--found);
-  color:var(--foundText);
+  color: var(--foundText);
+  background: var(--found);
 }
+
 .word.missed {
-  background:var(--missed);
-  color:var(--missedText);
+  color: var(--missedText);
+  background: var(--missed);
 }
+
 .word.found .mark,
 .word.missed .mark {
-  border-color:currentColor;
+  border-color: currentColor;
 }
+
 .word.found .word-label {
-  text-decoration:line-through;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
 }
 
-/* ========================================
-   FORMULÁRIOS
-======================================== */
+/* =========================================
+   FORMULÁRIOS E MODELOS
+========================================= */
 .panel-section {
-  border-top:1px solid var(--border);
-  padding-top:18px;
-  margin-top:18px;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  margin-top: 18px;
 }
+
 label {
-  display:block;
-  font-size:.86rem;
-  font-weight:750;
-  margin-bottom:7px;
+  display: block;
+  font-size: .86rem;
+  font-weight: 750;
+  margin-bottom: 7px;
 }
-input,textarea,select {
-  width:100%;
-  padding:11px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--soft);
-  color:var(--text);
+
+input, textarea, select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--soft);
+  padding: 11px;
+  color: var(--text);
 }
+
 textarea {
-  min-height:110px;
-  resize:vertical;
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.5;
 }
-.full { width:100%; }
-.row { display:flex;align-items:center;gap:8px; }
-.row > input { min-width:0;flex:1; }
+
+.full { width: 100%; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row > input {
+  min-width: 0;
+  flex: 1;
+}
+
+.row > .btn { flex-shrink: 0; }
+
 .status {
-  font-size:.8rem;
-  min-height:19px;
-  margin:9px 0 0;
-  line-height:1.4;
-  color:var(--muted);
-  overflow-wrap:anywhere;
+  font-size: .8rem;
+  min-height: 19px;
+  line-height: 1.4;
+  margin: 9px 0 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
-.status.error { color:var(--danger); }
-.status.ok { color:#16a34a; }
+
+.status.error { color: var(--danger); }
+.status.ok { color: #16a34a; }
+
 .user-details {
-  font-size:.79rem;
-  color:var(--muted);
+  font-size: .79rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  max-width: 180px;
 }
+
 .model-list {
-  list-style:none;
-  padding:0;
-  display:grid;
-  gap:10px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  gap: 10px;
 }
+
 .model-item {
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:10px;
-  display:grid;
-  gap:7px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  display: grid;
+  gap: 7px;
 }
-.model-name { font-weight:750; }
+
+.model-name {
+  font-weight: 750;
+  font-size: .86rem;
+  overflow-wrap: anywhere;
+}
+
 .model-code {
-  font-family:monospace;
-  color:var(--muted);
-  font-size:.78rem;
+  font-family: ui-monospace,monospace;
+  font-size: .78rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
+
 .model-buttons {
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
-/* ========================================
+/* =========================================
    JANELAS
-======================================== */
+========================================= */
 dialog {
-  background:var(--card);
-  color:var(--text);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:25px;
-  width:min(430px,calc(100vw - 28px));
-  box-shadow:0 24px 80px rgba(0,0,0,.2);
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 25px;
+  width: min(430px,calc(100vw - 28px));
+  box-shadow: 0 24px 80px rgba(0,0,0,.2);
 }
+
 dialog::backdrop {
-  background:rgba(0,0,0,.64);
-  backdrop-filter:blur(3px);
+  background: rgba(0,0,0,.64);
+  backdrop-filter: blur(3px);
 }
+
+dialog h2 {
+  margin-bottom: 7px;
+  font-size: 1.3rem;
+}
+
 dialog p {
-  color:var(--muted);
-  font-size:.91rem;
+  font-size: .91rem;
+  color: var(--muted);
 }
+
 .dialog-actions {
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
-  margin-top:20px;
-  flex-wrap:wrap;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
 }
+
 .login-form {
-  display:grid;
-  gap:13px;
-  margin-top:17px;
+  display: grid;
+  gap: 13px;
+  margin-top: 17px;
 }
+
+.login-form .suffix {
+  font-size: .78rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
 .login-footer {
-  display:flex;
-  justify-content:flex-end;
-  gap:8px;
-}
-.suffix {
-  font-size:.78rem;
-  color:var(--muted);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-/* ========================================
-   SELEÇÃO DE TEMA E DIFICULDADE
-======================================== */
+/* =========================================
+   SELEÇÃO DE DIFICULDADE
+========================================= */
 #theme-dialog {
-  width:min(555px,calc(100vw - 28px));
-  max-height:90vh;
-  overflow-y:auto;
-}
-.theme-fields {
-  display:grid;
-  gap:12px;
-  margin-top:18px;
-}
-.difficulty-fieldset {
-  border:0;
-  margin:17px 0 0;
-  padding:0;
-  min-width:0;
-}
-.difficulty-fieldset legend {
-  font-size:.91rem;
-  font-weight:750;
-  margin-bottom:10px;
-}
-.difficulty-grid {
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:9px;
-}
-.difficulty-card {
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-  margin:0;
-  padding:12px;
-  border:2px solid var(--border);
-  border-radius:12px;
-  background:var(--soft);
-  cursor:pointer;
-}
-.difficulty-card input {
-  position:absolute;
-  opacity:0;
-  width:1px;
-  height:1px;
-  padding:0;
-}
-.difficulty-card:has(input:checked) {
-  border-color:var(--primary);
-  background:var(--card);
-}
-.difficulty-card:has(input:focus-visible) {
-  outline:3px solid #a5b4fc;
-  outline-offset:2px;
-}
-.difficulty-name {
-  font-weight:800;
-  font-size:.9rem;
-}
-.difficulty-subtitle {
-  font-size:.75rem;
-  color:var(--muted);
-  font-weight:500;
-}
-.difficulty-info {
-  font-size:.79rem;
-  color:var(--muted);
-  margin:9px 0 0;
-  line-height:1.45;
-}
-.theme-choice-actions {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
-  margin-top:16px;
-}
-.theme-choice-actions .btn {
-  min-height:50px;
+  width: min(555px,calc(100vw - 28px));
+  max-height: min(90vh,820px);
+  overflow-y: auto;
 }
 
-/* ========================================
+.theme-fields {
+  display: grid;
+  gap: 11px;
+  margin-top: 18px;
+}
+
+.difficulty-fieldset {
+  border: 0;
+  margin: 17px 0 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.difficulty-fieldset legend {
+  font-weight: 750;
+  font-size: .91rem;
+  margin-bottom: 10px;
+}
+
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+}
+
+.difficulty-card {
+  position: relative;
+  padding: 12px;
+  border: 2px solid var(--border);
+  background: var(--soft);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  transition: border-color .16s,background .16s;
+}
+
+.difficulty-card input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+}
+
+.difficulty-card:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--card);
+}
+
+.difficulty-card:has(input:focus-visible) {
+  outline: 3px solid #a5b4fc;
+  outline-offset: 2px;
+}
+
+.difficulty-name {
+  font-size: .9rem;
+  font-weight: 800;
+}
+
+.difficulty-subtitle {
+  font-size: .75rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.difficulty-info {
+  font-size: .79rem;
+  line-height: 1.4;
+  color: var(--muted);
+  margin: 9px 0 0;
+}
+
+.theme-choice-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.theme-choice-actions .btn {
+  min-height: 50px;
+}
+
+/* =========================================
+   RANKING
+========================================= */
+.ranking-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.ranking-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ranking-heading h2 {
+  margin: 0;
+  font-size: 1.12rem;
+}
+
+.ranking-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 17px 0 12px;
+}
+
+.ranking-tab {
+  font-size: .82rem;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+}
+
+.ranking-tab[aria-pressed="true"] {
+  color: var(--primaryText);
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.ranking-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+  display: grid;
+  gap: 7px;
+}
+
+.ranking-item {
+  display: grid;
+  grid-template-columns: 44px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 11px;
+  border: 1px solid var(--border);
+  background: var(--soft);
+  border-radius: 11px;
+}
+
+.ranking-position {
+  font-weight: 850;
+  text-align: center;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ranking-identity { min-width: 0; }
+
+.ranking-name {
+  display: block;
+  font-weight: 750;
+  font-size: .88rem;
+  overflow-wrap: anywhere;
+}
+
+.ranking-theme {
+  display: block;
+  font-size: .73rem;
+  color: var(--muted);
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+}
+
+.ranking-time {
+  font-size: .99rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ranking-item.is-me {
+  border-color: var(--primary);
+}
+
+.ranking-entry {
+  margin-top: 16px;
+  padding: 15px;
+  border-radius: 13px;
+  border: 1px solid var(--border);
+}
+
+.ranking-entry h3 {
+  margin: 0 0 6px;
+  font-size: .94rem;
+}
+
+.ranking-entry .row { margin-top: 10px; }
+.ranking-entry input { min-width: 0; }
+.ranking-entry .btn { white-space: nowrap; }
+
+/* =========================================
    VITÓRIA E CONFETES
-======================================== */
+========================================= */
 .win-overlay {
-  position:fixed;
-  inset:0;
-  z-index:30;
-  background:rgba(6,13,32,.68);
-  display:grid;
-  place-items:center;
-  padding:18px;
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(6,13,32,.68);
+  display: grid;
+  place-items: center;
+  padding: 18px;
 }
+
 .win-card {
-  background:var(--card);
-  padding:31px 24px;
-  border-radius:24px;
-  max-width:440px;
-  width:100%;
-  text-align:center;
-  animation:pop .4s ease both;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 31px 24px;
+  border-radius: 24px;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 25px 90px rgba(0,0,0,.28);
+  animation: pop .4s ease both;
 }
+
 .win-icon {
-  display:block;
-  font-size:3.5rem;
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: 5px;
 }
+
 .win-card h2 {
-  font-size:1.9rem;
+  font-size: 1.9rem;
+  margin: 0 0 9px;
 }
+
+.win-card p { color: var(--muted); }
+
 .win-time {
-  font-weight:800;
-  color:var(--primary);
+  font-weight: 800;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
 }
+
 @keyframes pop {
-  from { transform:scale(.75);opacity:0; }
-  to { transform:scale(1);opacity:1; }
+  from {
+    transform: scale(.75);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
+
 .confetti-layer {
-  position:fixed;
-  inset:0;
-  z-index:31;
-  pointer-events:none;
-  overflow:hidden;
+  position: fixed;
+  inset: 0;
+  z-index: 31;
+  pointer-events: none;
+  overflow: hidden;
 }
+
 .confetti {
-  position:absolute;
-  top:-25px;
-  left:var(--x);
-  width:9px;
-  height:14px;
-  background:var(--color);
+  position: absolute;
+  top: -25px;
+  left: var(--x);
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--color);
+  opacity: 0;
   animation:
     confetti-fall var(--duration)
     linear var(--delay) forwards;
 }
+
 @keyframes confetti-fall {
-  from {
-    transform:translate3d(0,-5vh,0) rotate(0);
-    opacity:1;
+  0% {
+    transform: translate3d(0,-5vh,0) rotate(0);
+    opacity: 1;
   }
-  to {
+
+  100% {
     transform:
       translate3d(var(--drift),110vh,0)
       rotate(850deg);
-    opacity:0;
+    opacity: 0;
   }
-}
-footer {
-  padding:20px;
-  text-align:center;
-  color:var(--muted);
-  font-size:.77rem;
 }
 
-/* ========================================
+footer {
+  padding: 10px 20px 30px;
+  text-align: center;
+  color: var(--muted);
+  font-size: .77rem;
+}
+
+/* =========================================
    RESPONSIVIDADE
-======================================== */
-@media(max-width:900px) {
+========================================= */
+@media (max-width: 900px) {
   .layout {
-    grid-template-columns:1fr;
-    max-width:740px;
+    grid-template-columns: 1fr;
+    max-width: 740px;
   }
+
   .words {
-    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-columns: repeat(2,minmax(0,1fr));
   }
 }
-@media(max-width:530px) {
-  .topbar { padding:12px; }
-  .brand { font-size:1rem; }
-  .actions { gap:5px; }
-  .btn { padding:9px 10px;font-size:.8rem; }
-  .theme-label { display:none; }
+
+@media (max-width: 530px) {
+  .topbar { padding: 12px; }
+  .brand { font-size: 1rem; }
+  .actions { gap: 5px; }
+  .btn { padding: 9px 10px; font-size: .8rem; }
+  .theme-label { display: none; }
+
   .layout {
-    margin:16px auto;
-    padding:0 9px;
-    gap:14px;
+    padding: 0 9px;
+    margin: 16px auto;
+    gap: 14px;
   }
-  .card { padding:14px; }
-  .board { gap:2px; }
-  .cell { font-size:clamp(8px,2.5vw,12px); }
-  .dialog-actions { flex-direction:column; }
-  .dialog-actions .btn { width:100%; }
+
+  .card { padding: 14px; }
+  .board { gap: 2px; }
+
+  .cell {
+    font-size: clamp(8px,2.5vw,12px);
+  }
+
+  .dialog-actions {
+    flex-direction: column;
+  }
+
+  .dialog-actions .btn {
+    width: 100%;
+  }
+
+  .ranking-entry .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ranking-entry .row > .btn {
+    width: 100%;
+  }
 }
-@media(max-width:440px) {
-  .theme-choice-actions { grid-template-columns:1fr; }
+
+@media (max-width: 440px) {
+  .theme-choice-actions {
+    grid-template-columns: 1fr;
+  }
 }
-@media(prefers-reduced-motion:reduce) {
-  *,*::before,*::after {
-    animation-duration:.01ms!important;
-    transition-duration:.01ms!important;
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
   }
 }
 </style>
@@ -648,9 +948,9 @@ footer {
 
 <body>
 
-<!-- ========================================
+<!-- =========================================
      CABEÇALHO
-======================================== -->
+========================================= -->
 <header class="topbar">
   <div class="brand">
     <span class="brand-icon">✦</span>
@@ -658,11 +958,15 @@ footer {
   </div>
 
   <div class="actions">
-    <button class="btn" id="theme-toggle">
+    <button type="button" class="btn" id="theme-toggle">
       ☾ <span class="theme-label" id="theme-label">Escuro</span>
     </button>
-    <button class="btn" id="shuffle">↻ Embaralhar</button>
-    <button class="btn danger-outline" id="giveup">
+
+    <button type="button" class="btn" id="shuffle">
+      ↻ Embaralhar
+    </button>
+
+    <button type="button" class="btn danger-outline" id="giveup">
       ⚑ Desistir
     </button>
   </div>
@@ -671,42 +975,67 @@ footer {
     <span class="user-details" id="user-details">
       Modo visitante
     </span>
-    <button class="btn primary" id="login" disabled>Entrar</button>
-    <button class="btn" id="logout" hidden>Sair</button>
+
+    <button type="button" class="btn primary" id="login" disabled>
+      Entrar
+    </button>
+
+    <button type="button" class="btn" id="logout" hidden>
+      Sair
+    </button>
   </div>
 </header>
 
-<!-- ========================================
-     JOGO
-======================================== -->
+<!-- =========================================
+     JOGO PRINCIPAL
+========================================= -->
 <main class="layout">
-  <section class="card">
-    <h1>Encontre as palavras</h1>
+
+  <section class="card" aria-labelledby="game-title">
+
+    <h1 id="game-title">Encontre as palavras</h1>
+
     <p class="muted">
-      Arraste pelas letras na horizontal,
-      vertical ou diagonal. As direções
-      dependem da dificuldade.
+      Arraste pelas letras na horizontal, vertical ou diagonal.
+      As direções dependem da dificuldade.
     </p>
 
     <div class="score">
       <span>Seu progresso</span>
       <span id="score">0 / 0 encontradas</span>
     </div>
+
     <div class="progress">
       <div class="progress-fill" id="progress-fill"></div>
     </div>
 
     <p id="current-theme" class="current-theme" hidden></p>
 
-    <div id="timer-display" class="timer-display" hidden>
+    <div
+      id="timer-display"
+      class="timer-display"
+      role="timer"
+      aria-label="Tempo decorrido"
+      hidden
+    >
       ⏱ <strong id="timer-value">00:00</strong>
     </div>
 
     <div class="board-wrap">
-      <div class="board" id="board" role="grid"></div>
+      <div
+        class="board"
+        id="board"
+        role="grid"
+        aria-label="Tabuleiro de caça-palavras"
+      ></div>
     </div>
 
-    <p class="feedback" id="feedback" role="status">
+    <p
+      class="feedback"
+      id="feedback"
+      role="status"
+      aria-live="polite"
+    >
       Encontre a primeira palavra!
     </p>
 
@@ -716,18 +1045,153 @@ footer {
     </div>
 
     <button
-      class="btn primary next-theme"
       id="next-theme"
+      type="button"
+      class="btn primary next-theme"
       hidden
     >
       🎲 Escolher próximo tema
     </button>
+
+    <!-- =====================================
+         RANKING PÚBLICO
+    ===================================== -->
+    <section
+      class="ranking-section"
+      id="ranking-section"
+      aria-labelledby="ranking-title"
+    >
+
+      <div class="ranking-heading">
+        <h2 id="ranking-title">
+          🏅 Ranking de melhores tempos
+        </h2>
+        <span class="pill" id="ranking-level-title">
+          Médio
+        </span>
+      </div>
+
+      <p class="helper">
+        Apenas partidas concluídas com cronômetro.
+        Cada participante aparece com seu melhor tempo
+        por dificuldade.
+      </p>
+
+      <nav
+        class="ranking-tabs"
+        aria-label="Visualizar ranking por dificuldade"
+      >
+        <button
+          type="button"
+          class="btn ranking-tab"
+          data-ranking-level="facil"
+          aria-pressed="false"
+        >
+          Fácil
+        </button>
+
+        <button
+          type="button"
+          class="btn ranking-tab"
+          data-ranking-level="medio"
+          aria-pressed="true"
+        >
+          Médio
+        </button>
+
+        <button
+          type="button"
+          class="btn ranking-tab"
+          data-ranking-level="dificil"
+          aria-pressed="false"
+        >
+          Difícil
+        </button>
+
+        <button
+          type="button"
+          class="btn ranking-tab"
+          data-ranking-level="extremo"
+          aria-pressed="false"
+        >
+          Extremo
+        </button>
+      </nav>
+
+      <ol
+        id="ranking-list"
+        class="ranking-list"
+        aria-live="polite"
+      ></ol>
+
+      <p
+        id="ranking-list-status"
+        class="status"
+        role="status"
+      >
+        Carregando ranking...
+      </p>
+
+      <button
+        type="button"
+        class="btn small"
+        id="ranking-refresh"
+      >
+        ↻ Atualizar ranking
+      </button>
+
+      <div class="ranking-entry">
+        <h3>Quero participar do ranking</h3>
+
+        <p class="helper">
+          Participação opcional. Você pode informar
+          um apelido sem criar conta. O apelido
+          e o tempo ficarão públicos.
+        </p>
+
+        <label
+          for="ranking-nickname"
+          style="margin-top:12px"
+        >
+          Seu apelido no ranking
+        </label>
+
+        <div class="row">
+          <input
+            id="ranking-nickname"
+            maxlength="24"
+            autocomplete="nickname"
+            placeholder="Como quer aparecer?"
+          >
+
+          <button
+            type="button"
+            class="btn primary"
+            id="ranking-submit"
+            disabled
+          >
+            Registrar meu tempo
+          </button>
+        </div>
+
+        <p
+          id="ranking-entry-status"
+          class="status"
+          role="status"
+        >
+          Conclua uma partida com cronômetro
+          para registrar seu tempo.
+        </p>
+      </div>
+
+    </section>
   </section>
 
-  <!-- ======================================
+  <!-- =====================================
        PAINEL LATERAL
-  ====================================== -->
+  ===================================== -->
   <aside class="card">
+
     <div class="section-head">
       <h2>Palavras para encontrar</h2>
       <span id="badge" class="pill">0 restantes</span>
@@ -737,33 +1201,50 @@ footer {
 
     <section class="panel-section">
       <h2>Personalizar o desafio</h2>
+
       <label for="words-input">
         Palavras (uma por linha ou separadas por vírgula)
       </label>
-      <textarea id="words-input"></textarea>
+
+      <textarea
+        id="words-input"
+        spellcheck="false"
+      ></textarea>
 
       <p class="helper">
-        Cadastre até 25 palavras com 2 a 20 letras.
-        O nível determina quantas entram na partida.
+        Cadastre até 25 palavras, com 2 a 20 letras.
+        O nível seleciona quantas entram na partida.
+        Os acentos não aparecem no tabuleiro.
       </p>
 
-      <button class="btn primary full" id="apply">
+      <button
+        type="button"
+        class="btn primary full"
+        id="apply"
+        style="margin-top:10px"
+      >
         Criar novo jogo
       </button>
-      <p id="local-status" class="status"></p>
+
+      <p id="local-status" class="status" role="status"></p>
     </section>
 
     <section class="panel-section">
       <h2>Carregar modelo da nuvem</h2>
+
       <label for="preset-code">
         Código do modelo (sem login)
       </label>
+
       <div class="row">
         <input
           id="preset-code"
           placeholder="CP-XXXX-XXXX-XXXX"
+          autocomplete="off"
         >
+
         <button
+          type="button"
           class="btn primary"
           id="load-preset"
           disabled
@@ -771,10 +1252,11 @@ footer {
           Carregar
         </button>
       </div>
-      <p id="preset-status" class="status"></p>
+
+      <p id="preset-status" class="status" role="status"></p>
     </section>
 
-    <!-- VISÍVEL APENAS COM LOGIN -->
+    <!-- OCULTO PARA VISITANTES -->
     <section
       class="panel-section"
       id="cloud-save-section"
@@ -782,42 +1264,60 @@ footer {
     >
       <h2>Salvar na nuvem ☁</h2>
 
-      <label for="model-name">Nome do modelo</label>
+      <label for="model-name">
+        Nome do modelo
+      </label>
+
       <input
         id="model-name"
         maxlength="80"
-        placeholder="Ex.: Meu desafio"
+        placeholder="Ex.: Treinamento de qualidade"
       >
 
       <button
+        type="button"
         class="btn primary full"
         id="save-preset"
         disabled
+        style="margin-top:10px"
       >
         Salvar modelo na nuvem
       </button>
 
       <p class="helper" id="save-hint">
-        Serão salvas as palavras desta partida.
+        Serão salvas as palavras usadas nesta partida.
       </p>
 
-      <p id="save-status" class="status"></p>
+      <p id="save-status" class="status" role="status"></p>
 
       <div id="saved-share" hidden>
         <label for="saved-code">
           Código do modelo salvo
         </label>
+
         <div class="row">
           <input id="saved-code" readonly>
-          <button class="btn" id="copy-code">Copiar</button>
+          <button
+            type="button"
+            class="btn"
+            id="copy-code"
+          >
+            Copiar
+          </button>
         </div>
-        <button class="btn full" id="copy-link">
+
+        <button
+          type="button"
+          class="btn full"
+          id="copy-link"
+          style="margin-top:8px"
+        >
           Copiar link para jogar
         </button>
       </div>
     </section>
 
-    <!-- VISÍVEL APENAS COM LOGIN -->
+    <!-- OCULTO PARA VISITANTES -->
     <section
       class="panel-section"
       id="my-models-section"
@@ -825,21 +1325,39 @@ footer {
     >
       <div class="section-head">
         <h2>Meus modelos</h2>
-        <button class="btn small" id="refresh-models">
+
+        <button
+          type="button"
+          class="btn small"
+          id="refresh-models"
+        >
           Atualizar
         </button>
       </div>
+
+      <p class="helper">
+        Você pode carregar ou excluir modelos
+        da sua conta.
+      </p>
+
       <ul class="model-list" id="my-models"></ul>
-      <p id="models-status" class="status"></p>
+      <p id="models-status" class="status" role="status"></p>
     </section>
+
   </aside>
 </main>
 
-<!-- ========================================
-     ESCOLHA DO DESAFIO
-======================================== -->
-<dialog id="theme-dialog">
-  <h2>🎲 Escolha o próximo desafio</h2>
+<!-- =========================================
+     SELEÇÃO DO DESAFIO
+========================================= -->
+<dialog
+  id="theme-dialog"
+  aria-labelledby="theme-title"
+>
+  <h2 id="theme-title">
+    🎲 Escolha o próximo desafio
+  </h2>
+
   <p>
     Escolha o tema, a dificuldade e se deseja
     usar cronômetro.
@@ -850,23 +1368,25 @@ footer {
       <label for="category-select">Categoria</label>
       <select id="category-select"></select>
     </div>
+
     <div id="subtheme-field">
       <label for="subtheme-select">Subtema</label>
       <select id="subtheme-select"></select>
     </div>
   </div>
 
-  <!-- QUATRO NÍVEIS -->
   <fieldset class="difficulty-fieldset">
     <legend>Dificuldade</legend>
 
     <div class="difficulty-grid">
+
       <label class="difficulty-card">
         <input
           type="radio"
           name="difficulty"
           value="facil"
         >
+
         <span class="difficulty-name">🌱 Fácil</span>
         <span class="difficulty-subtitle">
           5 palavras · 2 direções
@@ -880,6 +1400,7 @@ footer {
           value="medio"
           checked
         >
+
         <span class="difficulty-name">🧩 Médio</span>
         <span class="difficulty-subtitle">
           7 palavras · 4 direções
@@ -892,6 +1413,7 @@ footer {
           name="difficulty"
           value="dificil"
         >
+
         <span class="difficulty-name">🔥 Difícil</span>
         <span class="difficulty-subtitle">
           9 palavras · 6 direções
@@ -904,11 +1426,13 @@ footer {
           name="difficulty"
           value="extremo"
         >
+
         <span class="difficulty-name">👑 Extremo</span>
         <span class="difficulty-subtitle">
           10 palavras · 8 direções
         </span>
       </label>
+
     </div>
 
     <p
@@ -918,37 +1442,61 @@ footer {
     ></p>
   </fieldset>
 
-  <!-- NÃO EXIBE AS PALAVRAS ANTES DO JOGO -->
+  <!-- PALAVRAS NÃO SÃO REVELADAS NESTA TELA -->
   <p
     id="theme-error"
     class="status error"
+    role="alert"
     hidden
   ></p>
 
-  <p><strong>Deseja jogar com cronômetro?</strong></p>
+  <p style="margin:17px 0 0">
+    <strong>Deseja jogar com cronômetro?</strong>
+  </p>
 
   <div class="theme-choice-actions">
-    <button class="btn primary" id="timer-yes">
+    <button
+      type="button"
+      class="btn primary"
+      id="timer-yes"
+    >
       ⏱ Com cronômetro
     </button>
-    <button class="btn" id="timer-no">
+
+    <button
+      type="button"
+      class="btn"
+      id="timer-no"
+    >
       Sem cronômetro
     </button>
   </div>
 
   <div class="dialog-actions">
-    <button class="btn small" id="theme-cancel" hidden>
+    <button
+      type="button"
+      class="btn small"
+      id="theme-cancel"
+      hidden
+    >
       Cancelar e continuar
     </button>
   </div>
 </dialog>
 
-<!-- ========================================
-     LOGIN
-======================================== -->
-<dialog id="login-dialog">
-  <h2>Acesso à nuvem</h2>
-  <p>Entre com seu login e senha cadastrados no Firebase.</p>
+<!-- =========================================
+     LOGIN FIREBASE
+========================================= -->
+<dialog
+  id="login-dialog"
+  aria-labelledby="login-title"
+>
+  <h2 id="login-title">Acesso à nuvem</h2>
+
+  <p>
+    Entre com o login e a senha cadastrados
+    no Firebase. Não é necessário entrar para jogar.
+  </p>
 
   <form id="login-form" class="login-form">
     <div>
@@ -956,12 +1504,16 @@ footer {
       <input
         id="login-username"
         type="text"
+        name="username"
         placeholder="felipe.valente"
         autocomplete="username"
+        autocapitalize="none"
+        spellcheck="false"
         required
       >
+
       <p class="suffix">
-        O domínio @painel.com.br será adicionado automaticamente.
+        Usaremos automaticamente @painel.com.br
       </p>
     </div>
 
@@ -970,81 +1522,134 @@ footer {
       <input
         id="login-password"
         type="password"
+        name="password"
         autocomplete="current-password"
         required
       >
     </div>
 
-    <p id="login-status" class="status"></p>
+    <p id="login-status" class="status" role="alert"></p>
 
     <div class="login-footer">
-      <button type="button" class="btn" id="cancel-login">
+      <button
+        type="button"
+        class="btn"
+        id="cancel-login"
+      >
         Cancelar
       </button>
-      <button type="submit" class="btn primary" id="submit-login">
+
+      <button
+        type="submit"
+        class="btn primary"
+        id="submit-login"
+      >
         Entrar
       </button>
     </div>
   </form>
 </dialog>
 
-<!-- ========================================
+<!-- =========================================
      DESISTÊNCIA
-======================================== -->
+========================================= -->
 <dialog id="giveup-dialog">
   <h2>⚠ Deseja desistir?</h2>
+
   <p>
-    As palavras não encontradas serão
-    reveladas em vermelho.
+    Se confirmar, a partida será encerrada
+    e as palavras restantes serão reveladas
+    em vermelho.
   </p>
+
   <div class="dialog-actions">
-    <button class="btn" id="keep-playing">
+    <button
+      type="button"
+      class="btn"
+      id="keep-playing"
+    >
       Continuar jogando
     </button>
-    <button class="btn danger" id="confirm-giveup">
+
+    <button
+      type="button"
+      class="btn danger"
+      id="confirm-giveup"
+    >
       Sim, desistir
     </button>
   </div>
 </dialog>
 
-<!-- ========================================
+<!-- =========================================
      VITÓRIA
-======================================== -->
-<div class="win-overlay" id="win-overlay" hidden>
+========================================= -->
+<div
+  class="win-overlay"
+  id="win-overlay"
+  role="dialog"
+  aria-modal="true"
+  hidden
+>
   <div class="win-card">
     <span class="win-icon">🏆🎉</span>
+
     <h2>Parabéns!</h2>
+
     <p id="win-message">
       Você encontrou todas as palavras!
     </p>
+
     <p id="win-time" class="win-time" hidden></p>
 
-    <button class="btn primary" id="play-again">
+    <button
+      type="button"
+      class="btn primary"
+      id="win-view-ranking"
+      hidden
+    >
+      🏅 Registrar meu tempo no ranking
+    </button>
+
+    <button
+      type="button"
+      class="btn primary"
+      id="play-again"
+    >
       🎲 Escolher próximo tema
     </button>
-    <button class="btn" id="close-win">
+
+    <button
+      type="button"
+      class="btn"
+      id="close-win"
+    >
       Ver meu tabuleiro
     </button>
   </div>
 </div>
 
-<div class="confetti-layer" id="confetti-layer"></div>
+<div
+  class="confetti-layer"
+  id="confetti-layer"
+  aria-hidden="true"
+></div>
 
 <footer>
-  Caça-Palavras Interativo · 4 níveis de dificuldade
+  Caça-Palavras Interativo ·
+  Quatro dificuldades e ranking de melhores tempos
 </footer>
 
-<!-- ========================================
+<!-- =========================================
      JAVASCRIPT DO JOGO
-======================================== -->
+========================================= -->
 <script>
 (() => {
   "use strict";
 
-  /* ======================================
-     1. CATEGORIAS E PALAVRAS
-  ====================================== */
-
+  /* =====================================
+     TEMAS E PALAVRAS
+  ===================================== */
   const THEMES = {
     "Cultura Pop e Entretenimento": {
       "Videogames Clássicos e RPGs": [
@@ -1119,76 +1724,56 @@ footer {
     }
   };
 
-  /* ======================================
-     2. NÍVEIS DE DIFICULDADE
-  ====================================== */
-
+  /* =====================================
+     NÍVEIS DE DIFICULDADE
+  ===================================== */
   const LEVELS = {
     facil: {
-      label:"Fácil",
-      count:5,
-      min:12,
-      max:15,
-      directions:[
-        [0,1],
-        [1,0]
-      ],
-      summary:"Horizontal e vertical, sem invertidas."
+      label: "Fácil",
+      count: 5,
+      min: 12,
+      max: 15,
+      directions: [[0,1],[1,0]],
+      summary: "Grade 12–15 · horizontal e vertical, sem invertidas."
     },
 
     medio: {
-      label:"Médio",
-      count:7,
-      min:15,
-      max:18,
-      directions:[
-        [0,1],
-        [1,0],
-        [1,1],
-        [1,-1]
-      ],
-      summary:"Inclui diagonais, sem palavras invertidas."
+      label: "Médio",
+      count: 7,
+      min: 15,
+      max: 18,
+      directions: [[0,1],[1,0],[1,1],[1,-1]],
+      summary: "Grade 15–18 · inclui diagonais, sem invertidas."
     },
 
     dificil: {
-      label:"Difícil",
-      count:9,
-      min:18,
-      max:21,
-      directions:[
-        [0,1],
-        [1,0],
-        [1,1],
-        [1,-1],
-        [0,-1],
-        [-1,0]
+      label: "Difícil",
+      count: 9,
+      min: 18,
+      max: 21,
+      directions: [
+        [0,1],[1,0],[1,1],[1,-1],[0,-1],[-1,0]
       ],
-      summary:"Inclui horizontais e verticais invertidas."
+      summary: "Grade 18–21 · inclui horizontais e verticais invertidas."
     },
 
     extremo: {
-      label:"Extremo",
-      count:10,
-      min:22,
-      max:24,
-      directions:[
-        [-1,-1],
-        [-1,0],
-        [-1,1],
-        [0,-1],
-        [0,1],
-        [1,-1],
-        [1,0],
-        [1,1]
+      label: "Extremo",
+      count: 10,
+      min: 22,
+      max: 24,
+      directions: [
+        [-1,-1],[-1,0],[-1,1],
+        [0,-1],[0,1],
+        [1,-1],[1,0],[1,1]
       ],
-      summary:"Todas as oito direções disponíveis."
+      summary: "Grade 22–24 · todas as oito direções."
     }
   };
 
-  /* ======================================
-     3. CONFIGURAÇÕES
-  ====================================== */
-
+  /* =====================================
+     CONFIGURAÇÕES E ESTADO
+  ===================================== */
   const $ = id => document.getElementById(id);
 
   const board = $("board");
@@ -1199,8 +1784,7 @@ footer {
   const LEVEL_KEY = "caca-palavras-dificuldade-v1";
 
   const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-  const ALL_DIRS = LEVELS.extremo.directions;
+  const DIRS = LEVELS.extremo.directions;
 
   let words = [];
   let customWords = [];
@@ -1217,6 +1801,7 @@ footer {
 
   let themeName = "";
   let currentLevel = LEVELS.medio;
+  let currentLevelId = "medio";
   let selectedTheme = "light";
 
   let timerEnabled = false;
@@ -1224,10 +1809,13 @@ footer {
   let clockStartedAt = 0;
   let clockHandle = null;
 
-  /* ======================================
-     4. NORMALIZAR PALAVRAS
-  ====================================== */
+  // Resultado habilitado somente após vitória
+  // com cronômetro.
+  let rankingResult = null;
 
+  /* =====================================
+     NORMALIZAÇÃO DAS PALAVRAS
+  ===================================== */
   function normalize(value) {
     return String(value)
       .normalize("NFD")
@@ -1246,7 +1834,9 @@ footer {
       .filter(Boolean);
 
     if (!entries.length || entries.length > 25) {
-      throw new Error("Informe entre 1 e 25 palavras.");
+      throw new Error(
+        "Informe entre 1 e 25 palavras."
+      );
     }
 
     const unique = new Map();
@@ -1264,7 +1854,7 @@ footer {
       if (!unique.has(clean)) {
         unique.set(clean,{
           clean,
-          label:label.toUpperCase()
+          label: label.toUpperCase()
         });
       }
     }
@@ -1272,17 +1862,17 @@ footer {
     return [...unique.values()];
   }
 
-  /* ======================================
-     5. ESCOLHA DAS CATEGORIAS
-  ====================================== */
-
+  /* =====================================
+     CATEGORIAS E SUBTEMAS
+  ===================================== */
   function fillCategories() {
     const select = $("category-select");
+
     select.replaceChildren();
 
     const categories = [
       ["aleatorio","🎲 Surpreenda-me (tema aleatório)"],
-      ...Object.keys(THEMES).map(n => [n,n]),
+      ...Object.keys(THEMES).map(name => [name,name]),
       ["personalizado","📝 Minhas palavras / modelo salvo"]
     ];
 
@@ -1301,23 +1891,24 @@ footer {
     select.replaceChildren();
 
     const isTheme = !!THEMES[category];
+
     $("subtheme-field").hidden = !isTheme;
 
     if (isTheme) {
-      for (const title of Object.keys(THEMES[category])) {
+      Object.keys(THEMES[category]).forEach(title => {
         select.add(new Option(title,title));
-      }
+      });
     }
 
     updateDifficultyInfo();
   }
 
   function selectedLevel() {
-    const selected = document.querySelector(
+    const choice = document.querySelector(
       'input[name="difficulty"]:checked'
     );
 
-    return LEVELS[selected?.value] || LEVELS.medio;
+    return LEVELS[choice?.value] || LEVELS.medio;
   }
 
   function updateDifficultyInfo() {
@@ -1330,12 +1921,15 @@ footer {
       ? customWords.length
       : 10;
 
-    const count = Math.min(level.count,available);
+    const number = Math.min(level.count,available);
+
+    const detail = available < level.count
+      ? `Esta lista possui ${available} palavra(s). `
+      : `${number} palavras sorteadas. `;
 
     $("difficulty-info").textContent =
-      `${count} palavra(s) · Grade ${level.min}–${level.max}. ` +
-      level.summary +
-      " A grade pode aumentar se houver palavras maiores.";
+      detail + level.summary +
+      " A grade pode aumentar para acomodar palavras maiores.";
   }
 
   $("category-select").addEventListener(
@@ -1348,20 +1942,16 @@ footer {
   ).forEach(input => {
     input.addEventListener("change",() => {
       try {
-        localStorage.setItem(
-          LEVEL_KEY,
-          input.value
-        );
+        localStorage.setItem(LEVEL_KEY,input.value);
       } catch (_) {}
 
       updateDifficultyInfo();
     });
   });
 
-  /* ======================================
-     6. ABRIR ESCOLHA DO DESAFIO
-  ====================================== */
-
+  /* =====================================
+     ESCOLHA DO DESAFIO
+  ===================================== */
   function openThemePicker(preferCustom = false) {
     pauseClock();
     hideWin();
@@ -1378,50 +1968,54 @@ footer {
     if (!picker.open) {
       picker.showModal();
     }
-  }
 
-  /* ======================================
-     7. ESCOLHER TEMA E PALAVRAS
-  ====================================== */
+    $("category-select").focus();
+  }
 
   function challengeForSelection() {
     let category = $("category-select").value;
 
     if (category === "personalizado") {
       return {
-        label:customName,
-        list:customWords.map(w => w.label)
+        label: customName,
+        list: customWords.map(w => w.label)
       };
     }
 
     if (category === "aleatorio") {
-      const all = [];
+      const categories = Object.keys(THEMES);
 
-      for (const [group,subthemes] of Object.entries(THEMES)) {
-        for (const [sub,items] of Object.entries(subthemes)) {
-          all.push({
-            label:group + " • " + sub,
-            list:items
-          });
-        }
-      }
+      category = categories[
+        Math.floor(Math.random() * categories.length)
+      ];
 
-      return all[Math.floor(Math.random() * all.length)];
+      const subthemes = Object.keys(THEMES[category]);
+
+      const sub = subthemes[
+        Math.floor(Math.random() * subthemes.length)
+      ];
+
+      return {
+        label: category + " • " + sub,
+        list: THEMES[category][sub]
+      };
     }
 
     const sub = $("subtheme-select").value;
 
     return {
-      label:category + " • " + sub,
-      list:THEMES[category][sub]
+      label: category + " • " + sub,
+      list: THEMES[category][sub]
     };
   }
 
   function chooseWords(list,count) {
-    const mixed = [...parseWords(list)];
+    const available = parseWords(list);
+    const mixed = [...available];
 
     for (let i = mixed.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
+
       [mixed[i],mixed[j]] = [mixed[j],mixed[i]];
     }
 
@@ -1438,10 +2032,16 @@ footer {
       words,
       themeName,
       timerEnabled,
-      currentLevel
+      currentLevel,
+      currentLevelId
     };
 
     try {
+      currentLevelId =
+        document.querySelector(
+          'input[name="difficulty"]:checked'
+        )?.value || "medio";
+
       currentLevel = selectedLevel();
 
       words = chooseWords(
@@ -1458,12 +2058,13 @@ footer {
         words.map(w => w.label).join("\n");
 
       picker.close();
-    }
-    catch (error) {
+
+    } catch (error) {
       words = previous.words;
       themeName = previous.themeName;
       timerEnabled = previous.timerEnabled;
       currentLevel = previous.currentLevel;
+      currentLevelId = previous.currentLevelId;
 
       $("theme-error").textContent = error.message;
       $("theme-error").hidden = false;
@@ -1493,25 +2094,22 @@ footer {
     }
   });
 
-  /* ======================================
-     8. CRONÔMETRO
-  ====================================== */
-
+  /* =====================================
+     CRONÔMETRO
+  ===================================== */
   function formatTime(ms) {
     const s = Math.floor(ms / 1000);
-    const hours = Math.floor(s / 3600);
+    const h = Math.floor(s / 3600);
 
-    const minutes = String(
+    const m = String(
       Math.floor((s % 3600) / 60)
     ).padStart(2,"0");
 
-    const seconds = String(
-      s % 60
-    ).padStart(2,"0");
+    const sec = String(s % 60).padStart(2,"0");
 
-    return hours
-      ? `${hours}:${minutes}:${seconds}`
-      : `${minutes}:${seconds}`;
+    return h
+      ? `${h}:${m}:${sec}`
+      : `${m}:${sec}`;
   }
 
   function getElapsed() {
@@ -1530,6 +2128,7 @@ footer {
   function pauseClock() {
     if (clockHandle !== null) {
       elapsedMs += Date.now() - clockStartedAt;
+
       clearInterval(clockHandle);
       clockHandle = null;
     }
@@ -1546,15 +2145,14 @@ footer {
     ) return;
 
     clockStartedAt = Date.now();
-    clockHandle = setInterval(updateClock,250);
 
+    clockHandle = setInterval(updateClock,250);
     updateClock();
   }
 
-  /* ======================================
-     9. GERAR TABULEIRO
-  ====================================== */
-
+  /* =====================================
+     POSICIONAMENTO DE PALAVRAS
+  ===================================== */
   const random = n =>
     Math.floor(Math.random() * n);
 
@@ -1581,18 +2179,21 @@ footer {
 
   function place(matrix,word) {
     const n = matrix.length;
-    const dirs = currentLevel.directions;
 
     for (let tries = 0; tries < 900; tries++) {
-      const [dr,dc] = dirs[random(dirs.length)];
+      const directions = currentLevel.directions;
+
+      const [dr,dc] =
+        directions[random(directions.length)];
 
       const minR = dr < 0 ? word.length - 1 : 0;
       const maxR = dr > 0 ? n - word.length : n - 1;
-
       const minC = dc < 0 ? word.length - 1 : 0;
       const maxC = dc > 0 ? n - word.length : n - 1;
 
-      if (minR > maxR || minC > maxC) continue;
+      if (minR > maxR || minC > maxC) {
+        continue;
+      }
 
       const r = minR + random(maxR - minR + 1);
       const c = minC + random(maxC - minC + 1);
@@ -1617,6 +2218,9 @@ footer {
     return null;
   }
 
+  /* =====================================
+     GERAR TABULEIRO
+  ===================================== */
   function generate() {
     const longest = Math.max(
       ...words.map(w => w.clean.length)
@@ -1651,10 +2255,7 @@ footer {
         let success = true;
 
         for (const word of sorted) {
-          const path = place(
-            matrix,
-            word.clean
-          );
+          const path = place(matrix,word.clean);
 
           if (!path) {
             success = false;
@@ -1684,14 +2285,14 @@ footer {
     }
 
     throw new Error(
-      "Não foi possível gerar o tabuleiro."
+      "Não foi possível encaixar as palavras. " +
+      "Experimente uma lista menor."
     );
   }
 
-  /* ======================================
-     10. EXIBIR TABULEIRO
-  ====================================== */
-
+  /* =====================================
+     EXIBIR TABULEIRO
+  ===================================== */
   const cellAt = (r,c) =>
     board.children[r * size + c];
 
@@ -1710,6 +2311,8 @@ footer {
         el.dataset.r = r;
         el.dataset.c = c;
 
+        el.setAttribute("role","gridcell");
+
         fragment.appendChild(el);
       });
     });
@@ -1721,13 +2324,15 @@ footer {
     const fragment =
       document.createDocumentFragment();
 
-    for (const word of words) {
+    words.forEach(word => {
       const yes = found.has(word.clean);
       const no = gameOver && !yes;
 
       const li = document.createElement("li");
+
       li.className =
-        "word" + (yes ? " found" : no ? " missed" : "");
+        "word" +
+        (yes ? " found" : no ? " missed" : "");
 
       const mark = document.createElement("span");
       mark.className = "mark";
@@ -1739,7 +2344,7 @@ footer {
 
       li.append(mark,label);
       fragment.appendChild(li);
-    }
+    });
 
     $("word-list").replaceChildren(fragment);
 
@@ -1748,10 +2353,12 @@ footer {
 
     $("badge").textContent = gameOver
       ? "Encerrado"
-      : `${words.length-found.size} restantes`;
+      : `${words.length - found.size} restantes`;
 
     $("progress-fill").style.width =
-      `${100 * found.size / words.length}%`;
+      `${words.length
+        ? 100 * found.size / words.length
+        : 0}%`;
   }
 
   function hideWin() {
@@ -1759,16 +2366,17 @@ footer {
     $("confetti-layer").replaceChildren();
   }
 
-  /* ======================================
-     11. INICIAR PARTIDA
-  ====================================== */
-
+  /* =====================================
+     INICIAR PARTIDA
+  ===================================== */
   function startGame() {
     const generated = generate();
 
     pauseClock();
     elapsedMs = 0;
     updateClock();
+
+    $("timer-display").hidden = !timerEnabled;
 
     grid = generated.matrix;
     size = generated.n;
@@ -1779,6 +2387,25 @@ footer {
     gameOver = false;
     hasStarted = true;
 
+    // Cada partida começa sem resultado
+    // elegível para registro no ranking.
+    rankingResult = null;
+    $("ranking-submit").disabled = true;
+
+    $("ranking-entry-status").textContent = timerEnabled
+      ? "Ao encontrar todas as palavras, você poderá registrar seu tempo."
+      : "Esta partida está sem cronômetro e não concorre ao ranking.";
+
+    // Informa ao ranking qual dificuldade
+    // está sendo jogada.
+    window.dispatchEvent(
+      new CustomEvent("wordgame:start",{
+        detail: {
+          level: currentLevelId
+        }
+      })
+    );
+
     renderBoard();
     renderWords();
 
@@ -1786,7 +2413,6 @@ footer {
       `${themeName} • ${currentLevel.label} • ${size}×${size}`;
 
     $("current-theme").hidden = false;
-    $("timer-display").hidden = !timerEnabled;
     $("next-theme").hidden = true;
     $("legend").hidden = true;
 
@@ -1799,6 +2425,10 @@ footer {
     $("feedback").textContent =
       "Encontre a primeira palavra!";
 
+    if ($("giveup-dialog").open) {
+      $("giveup-dialog").close();
+    }
+
     hideWin();
     resumeClock();
   }
@@ -1807,11 +2437,13 @@ footer {
     list,
     label = "Minhas palavras"
   ) {
-    customWords = parseWords(list);
+    const parsed = parseWords(list);
+
+    customWords = parsed;
     customName = label;
 
     $("words-input").value =
-      customWords.map(w => w.label).join("\n");
+      parsed.map(w => w.label).join("\n");
 
     try {
       localStorage.setItem(
@@ -1823,10 +2455,9 @@ footer {
     openThemePicker(true);
   }
 
-  /* ======================================
-     12. ARRASTE DAS LETRAS
-  ====================================== */
-
+  /* =====================================
+     ARRASTE E SELEÇÃO
+  ===================================== */
   function coords(el) {
     return [
       Number(el.dataset.r),
@@ -1840,7 +2471,9 @@ footer {
       event.clientY
     )?.closest(".cell");
 
-    return el && board.contains(el) ? el : null;
+    return el && board.contains(el)
+      ? el
+      : null;
   }
 
   function pathBetween(a,b) {
@@ -1849,10 +2482,10 @@ footer {
 
     if (!dy && !dx) return [a];
 
-    let best = ALL_DIRS[0];
+    let best = DIRS[0];
     let score = -Infinity;
 
-    for (const dir of ALL_DIRS) {
+    for (const dir of DIRS) {
       const dot =
         (dy * dir[0] + dx * dir[1]) /
         Math.hypot(...dir);
@@ -1904,9 +2537,10 @@ footer {
   }
 
   function samePath(selected,actual) {
-    if (!actual || selected.length !== actual.length) {
-      return false;
-    }
+    if (
+      !actual ||
+      selected.length !== actual.length
+    ) return false;
 
     const forward = selected.every(
       ([r,c],i) =>
@@ -1916,8 +2550,12 @@ footer {
 
     const reverse = selected.every(
       ([r,c],i) => {
-        const p = actual[actual.length-i-1];
-        return r === p[0] && c === p[1];
+        const p = actual[actual.length - i - 1];
+
+        return (
+          r === p[0] &&
+          c === p[1]
+        );
       }
     );
 
@@ -1944,9 +2582,9 @@ footer {
     const start = coords(cell);
 
     drag = {
-      pointerId:event.pointerId,
+      pointerId: event.pointerId,
       start,
-      path:[start]
+      path: [start]
     };
 
     board.setPointerCapture(event.pointerId);
@@ -1954,9 +2592,10 @@ footer {
   });
 
   board.addEventListener("pointermove",event => {
-    if (!drag || event.pointerId !== drag.pointerId) {
-      return;
-    }
+    if (
+      !drag ||
+      event.pointerId !== drag.pointerId
+    ) return;
 
     const cell = hover(event);
 
@@ -1971,20 +2610,23 @@ footer {
   });
 
   board.addEventListener("pointercancel",event => {
-    if (drag && drag.pointerId === event.pointerId) {
+    if (
+      drag &&
+      event.pointerId === drag.pointerId
+    ) {
       drag = null;
       highlight();
     }
   });
 
-  /* ======================================
-     13. VERIFICAR PALAVRA
-  ====================================== */
-
+  /* =====================================
+     RECONHECER PALAVRA
+  ===================================== */
   board.addEventListener("pointerup",event => {
-    if (!drag || event.pointerId !== drag.pointerId) {
-      return;
-    }
+    if (
+      !drag ||
+      event.pointerId !== drag.pointerId
+    ) return;
 
     const cell = hover(event);
 
@@ -1996,19 +2638,18 @@ footer {
     }
 
     const path = drag.path;
-    drag = null;
 
+    drag = null;
     highlight();
 
     if (gameOver || path.length < 2) return;
 
-    const match = words.find(
-      w =>
-        !found.has(w.clean) &&
-        samePath(
-          path,
-          placements.get(w.clean)
-        )
+    const match = words.find(w =>
+      !found.has(w.clean) &&
+      samePath(
+        path,
+        placements.get(w.clean)
+      )
     );
 
     if (!match) {
@@ -2024,8 +2665,6 @@ footer {
       cellAt(r,c).classList.add("found");
     });
 
-    renderWords();
-
     if (found.size === words.length) {
       pauseClock();
 
@@ -2039,19 +2678,42 @@ footer {
       $("feedback").textContent =
         "🎉 Você encontrou todas as palavras!";
 
+      // Apenas vitórias COM cronômetro
+      // podem registrar tempos.
+      if (timerEnabled) {
+        rankingResult = {
+          id: crypto.randomUUID(),
+          level: currentLevelId,
+          tempoMs: Math.max(
+            1,
+            Math.round(getElapsed())
+          ),
+          tema: themeName
+        };
+
+        $("ranking-submit").disabled = false;
+
+        $("ranking-entry-status").textContent =
+          `Parabéns! Seu tempo foi ` +
+          `${formatTime(rankingResult.tempoMs)}. ` +
+          `Informe seu apelido para participar.`;
+      }
+
+      renderWords();
       congratulate();
       return;
     }
+
+    renderWords();
 
     $("feedback").className = "feedback success";
     $("feedback").textContent =
       `✓ Palavra encontrada: ${match.label}`;
   });
 
-  /* ======================================
-     14. CONFETES E VITÓRIA
-  ====================================== */
-
+  /* =====================================
+     CONFETES
+  ===================================== */
   function confetti() {
     if (
       matchMedia(
@@ -2063,8 +2725,12 @@ footer {
     layer.replaceChildren();
 
     const colors = [
-      "#f472b6","#34d399","#60a5fa",
-      "#facc15","#a78bfa","#fb923c"
+      "#f472b6",
+      "#34d399",
+      "#60a5fa",
+      "#facc15",
+      "#a78bfa",
+      "#fb923c"
     ];
 
     const fragment =
@@ -2072,27 +2738,32 @@ footer {
 
     for (let i = 0; i < 110; i++) {
       const el = document.createElement("span");
+
       el.className = "confetti";
 
       el.style.setProperty(
         "--x",
-        `${Math.random()*100}%`
+        `${Math.random() * 100}%`
       );
+
       el.style.setProperty(
         "--color",
-        colors[i%colors.length]
+        colors[i % colors.length]
       );
+
       el.style.setProperty(
         "--duration",
-        `${2.8+Math.random()*2.2}s`
+        `${2.8 + Math.random() * 2.2}s`
       );
+
       el.style.setProperty(
         "--delay",
-        `${Math.random()*.8}s`
+        `${Math.random() * .8}s`
       );
+
       el.style.setProperty(
         "--drift",
-        `${(Math.random()-.5)*240}px`
+        `${(Math.random() - .5) * 240}px`
       );
 
       fragment.appendChild(el);
@@ -2108,7 +2779,7 @@ footer {
   function congratulate() {
     $("win-message").textContent =
       `Você encontrou as ${words.length} palavras! ` +
-      `Nível ${currentLevel.label}. Excelente trabalho!`;
+      `Nível: ${currentLevel.label}. Excelente trabalho!`;
 
     $("win-time").hidden = !timerEnabled;
 
@@ -2118,8 +2789,28 @@ footer {
 
     $("win-overlay").hidden = false;
 
+    $("win-view-ranking").hidden =
+      !rankingResult;
+
     confetti();
+    $("play-again").focus();
   }
+
+  $("win-view-ranking").addEventListener(
+    "click",
+    () => {
+      hideWin();
+
+      $("ranking-section").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+      $("ranking-nickname").focus({
+        preventScroll: true
+      });
+    }
+  );
 
   $("play-again").addEventListener(
     "click",
@@ -2141,10 +2832,9 @@ footer {
     () => openThemePicker()
   );
 
-  /* ======================================
-     15. DESISTÊNCIA
-  ====================================== */
-
+  /* =====================================
+     DESISTÊNCIA
+  ===================================== */
   $("giveup").disabled = true;
 
   $("giveup").addEventListener("click",() => {
@@ -2170,6 +2860,7 @@ footer {
     if (gameOver) return;
 
     pauseClock();
+
     gameOver = true;
     drag = null;
 
@@ -2195,42 +2886,42 @@ footer {
 
     $("feedback").className = "feedback alert";
     $("feedback").textContent =
-      "Partida encerrada. As palavras restantes " +
-      "foram reveladas em vermelho.";
+      `Partida encerrada: ` +
+      `${words.length - found.size} ` +
+      `palavra(s) revelada(s) em vermelho.`;
   });
 
-  /* ======================================
-     16. PERSONALIZAR DESAFIO
-  ====================================== */
-
+  /* =====================================
+     PERSONALIZAR
+  ===================================== */
   $("apply").addEventListener("click",() => {
     try {
       setCustomWords($("words-input").value);
 
-      const u = new URL(location.href);
-      u.searchParams.delete("modelo");
+      const url = new URL(location.href);
+      url.searchParams.delete("modelo");
 
-      history.replaceState(null,"",u);
+      history.replaceState(null,"",url);
 
       $("local-status").className = "status ok";
       $("local-status").textContent =
         "Lista preparada! Escolha a dificuldade " +
-        "e o cronômetro.";
-    }
-    catch (error) {
+        "e o cronômetro para jogar.";
+
+    } catch (error) {
       $("local-status").className = "status error";
       $("local-status").textContent = error.message;
     }
   });
 
-  /* ======================================
-     17. MODO CLARO / ESCURO
-  ====================================== */
-
+  /* =====================================
+     TEMA CLARO / ESCURO
+  ===================================== */
   function applyTheme(theme) {
     selectedTheme = theme;
 
     const dark = theme === "dark";
+
     document.documentElement.dataset.theme = theme;
 
     $("theme-toggle").firstChild.textContent =
@@ -2239,9 +2930,18 @@ footer {
     $("theme-label").textContent =
       dark ? "Claro" : "Escuro";
 
+    $("theme-toggle").setAttribute(
+      "aria-label",
+      dark
+        ? "Ativar modo claro"
+        : "Ativar modo escuro"
+    );
+
     document.querySelector(
       'meta[name="theme-color"]'
-    ).content = dark ? "#0c1322" : "#f4f7fd";
+    ).content = dark
+      ? "#0c1322"
+      : "#f4f7fd";
   }
 
   $("theme-toggle").addEventListener("click",() => {
@@ -2257,19 +2957,19 @@ footer {
     } catch (_) {}
   });
 
-  /* ======================================
-     18. INICIALIZAÇÃO
-  ====================================== */
-
-  let savedTheme;
+  /* =====================================
+     INICIALIZAÇÃO
+  ===================================== */
+  let initialTheme;
 
   try {
-    savedTheme = localStorage.getItem(THEME_KEY);
+    initialTheme =
+      localStorage.getItem(THEME_KEY);
   } catch (_) {}
 
   applyTheme(
-    ["light","dark"].includes(savedTheme)
-      ? savedTheme
+    ["light","dark"].includes(initialTheme)
+      ? initialTheme
       : (
           matchMedia(
             "(prefers-color-scheme: dark)"
@@ -2293,8 +2993,7 @@ footer {
     customWords = parseWords(
       savedWords || DEFAULT_WORDS
     );
-  }
-  catch (_) {
+  } catch (_) {
     customWords = parseWords(DEFAULT_WORDS);
   }
 
@@ -2306,41 +3005,50 @@ footer {
   fillCategories();
 
   try {
-    const lastLevel = localStorage.getItem(LEVEL_KEY);
+    const lastLevel = localStorage.getItem(
+      LEVEL_KEY
+    );
 
-    const input = document.querySelector(
+    const control = document.querySelector(
       `input[name="difficulty"][value="${lastLevel}"]`
     );
 
-    if (input) input.checked = true;
+    if (control) control.checked = true;
   } catch (_) {}
 
   updateDifficultyInfo();
   openThemePicker();
 
-  /* ======================================
-     19. INTEGRAÇÃO COM FIREBASE
-  ====================================== */
-
+  /* =====================================
+     API PARA INTEGRAÇÃO COM FIREBASE
+  ===================================== */
   window.WordGame = {
-    getWords:() => words.map(w => w.label),
+    getWords: () =>
+      words.map(w => w.label),
 
-    loadWords:(
+    getRankingResult: () =>
+      rankingResult && {...rankingResult},
+
+    getLevel: () =>
+      currentLevelId,
+
+    loadWords: (
       list,
       name = "Modelo compartilhado"
     ) => setCustomWords(list,name),
 
-    showLocalError:text => {
+    showLocalError: text => {
       $("local-status").className = "status error";
       $("local-status").textContent = text;
     }
   };
+
 })();
 </script>
 
-<!-- ========================================
+<!-- =========================================
      FIREBASE AUTHENTICATION + FIRESTORE
-======================================== -->
+========================================= -->
 <script type="module">
 
 import {
@@ -2350,6 +3058,7 @@ import {
 import {
   getAuth,
   signInWithEmailAndPassword,
+  signInAnonymously,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -2362,23 +3071,23 @@ import {
   getDocs,
   query,
   where,
+  orderBy,
   limit,
   deleteDoc,
   runTransaction,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-/* ======================================
-   CONFIGURAÇÃO FIREBASE
-====================================== */
-
+/* =====================================
+   CONFIGURAÇÃO DO FIREBASE
+===================================== */
 const firebaseConfig = {
-  apiKey:"AIzaSyBt5PxI4qIfc23Vr2ytTd9VYFIGvSwv2fE",
-  authDomain:"cacapalavrasinterativo.firebaseapp.com",
-  projectId:"cacapalavrasinterativo",
-  storageBucket:"cacapalavrasinterativo.firebasestorage.app",
-  messagingSenderId:"167586064732",
-  appId:"1:167586064732:web:4b7450d7cbbbcf09717999"
+  apiKey: "AIzaSyBt5PxI4qIfc23Vr2ytTd9VYFIGvSwv2fE",
+  authDomain: "cacapalavrasinterativo.firebaseapp.com",
+  projectId: "cacapalavrasinterativo",
+  storageBucket: "cacapalavrasinterativo.firebasestorage.app",
+  messagingSenderId: "167586064732",
+  appId: "1:167586064732:web:4b7450d7cbbbcf09717999"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -2397,12 +3106,12 @@ const CHARS =
 
 let currentUser = null;
 
-/* ======================================
-   MENSAGENS
-====================================== */
-
-function status(id,text,type="") {
+/* =====================================
+   MENSAGENS E UTILITÁRIOS
+===================================== */
+function status(id,text,type = "") {
   $(id).textContent = text;
+
   $(id).className =
     "status" + (type ? " " + type : "");
 }
@@ -2413,7 +3122,7 @@ function friendlyError(error) {
   }
 
   if (error.code === "auth/unauthorized-domain") {
-    return "Domínio não autorizado no Firebase Authentication.";
+    return "Adicione o domínio do GitHub Pages aos domínios autorizados.";
   }
 
   if ([
@@ -2422,24 +3131,31 @@ function friendlyError(error) {
     "auth/user-not-found",
     "auth/invalid-email"
   ].includes(error.code)) {
-    return "Login ou senha incorretos.";
+    return "Login ou senha incorretos, ou conta inexistente.";
   }
 
-  return error.message || "Erro ao acessar o Firebase.";
+  if (error.code === "unavailable") {
+    return "Firebase indisponível. Verifique a conexão.";
+  }
+
+  return error.message ||
+    "Ocorreu um erro ao acessar o Firebase.";
 }
 
-/* ======================================
-   GERAR CÓDIGO
-====================================== */
+function canonicalCode(value) {
+  return String(value)
+    .trim()
+    .toUpperCase();
+}
 
 function newCode() {
   const bytes = crypto.getRandomValues(
     new Uint8Array(12)
   );
 
-  const raw = [...bytes].map(
-    b => CHARS[b % CHARS.length]
-  ).join("");
+  const raw = [...bytes]
+    .map(b => CHARS[b % CHARS.length])
+    .join("");
 
   return (
     `CP-${raw.slice(0,4)}` +
@@ -2449,22 +3165,24 @@ function newCode() {
 }
 
 function linkFor(code) {
-  const u = new URL(location.href);
-  u.searchParams.set("modelo",code);
-  return u.href;
+  const url = new URL(location.href);
+
+  url.searchParams.set("modelo",code);
+
+  return url.href;
 }
 
 async function copyText(text) {
   await navigator.clipboard.writeText(text);
 }
 
-/* ======================================
-   LOGIN
-====================================== */
-
+/* =====================================
+   LOGIN COM USUÁRIO E SENHA
+===================================== */
 $("login").addEventListener("click",() => {
   status("login-status","");
   $("login-dialog").showModal();
+  $("login-username").focus();
 });
 
 $("cancel-login").addEventListener("click",() => {
@@ -2472,93 +3190,105 @@ $("cancel-login").addEventListener("click",() => {
   $("login-password").value = "";
 });
 
-$("login-form").addEventListener("submit",async event => {
-  event.preventDefault();
+$("login-form").addEventListener(
+  "submit",
+  async event => {
+    event.preventDefault();
 
-  const username = $("login-username")
-    .value.trim().toLowerCase();
+    const username = $("login-username")
+      .value.trim().toLowerCase();
 
-  const password = $("login-password").value;
+    const password = $("login-password").value;
 
-  if (
-    !/^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$/.test(
-      username
-    )
-  ) {
+    if (
+      !/^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$/.test(
+        username
+      )
+    ) {
+      status(
+        "login-status",
+        "Digite apenas o login, por exemplo: felipe.valente",
+        "error"
+      );
+      return;
+    }
+
+    $("submit-login").disabled = true;
+
     status(
       "login-status",
-      "Digite apenas seu nome de usuário.",
-      "error"
-    );
-    return;
-  }
-
-  $("submit-login").disabled = true;
-
-  try {
-    await signInWithEmailAndPassword(
-      auth,
-      username + LOGIN_DOMAIN,
-      password
+      "Verificando suas credenciais..."
     );
 
-    $("login-password").value = "";
-    $("login-dialog").close();
+    try {
+      await signInWithEmailAndPassword(
+        auth,
+        username + LOGIN_DOMAIN,
+        password
+      );
 
-    status(
-      "save-status",
-      "Acesso à nuvem liberado.",
-      "ok"
-    );
-  }
-  catch (error) {
-    status(
-      "login-status",
-      friendlyError(error),
-      "error"
-    );
-  }
-  finally {
-    $("submit-login").disabled = false;
-  }
-});
+      $("login-password").value = "";
+      $("login-dialog").close();
 
-/* ======================================
-   SAIR
-====================================== */
+      status(
+        "save-status",
+        "Acesso à nuvem liberado.",
+        "ok"
+      );
+
+    } catch (error) {
+      status(
+        "login-status",
+        friendlyError(error),
+        "error"
+      );
+
+    } finally {
+      $("submit-login").disabled = false;
+    }
+  }
+);
 
 $("logout").addEventListener("click",async () => {
   try {
     await signOut(auth);
-  }
-  catch (error) {
-    alert(friendlyError(error));
+  } catch (error) {
+    status(
+      "save-status",
+      friendlyError(error),
+      "error"
+    );
   }
 });
 
-/* ======================================
-   ESTADO DA AUTENTICAÇÃO
-====================================== */
-
+/* =====================================
+   IDENTIFICAR USUÁRIO AUTENTICADO
+===================================== */
 onAuthStateChanged(auth,user => {
   currentUser = user;
 
-  $("login").hidden = !!user;
-  $("logout").hidden = !user;
+  // Login anônimo permite registrar ranking,
+  // mas não concede acesso aos modelos privados.
+  const hasAccount =
+    !!user && !user.isAnonymous;
 
-  $("user-details").textContent = user
+  $("cloud-save-section").hidden = !hasAccount;
+  $("my-models-section").hidden = !hasAccount;
+
+  $("login").hidden = hasAccount;
+  $("logout").hidden = !hasAccount;
+
+  $("user-details").textContent = hasAccount
     ? (user.email?.split("@")[0] || "Conectado")
     : "Modo visitante";
 
-  // Salvar na nuvem apenas com login.
-  $("cloud-save-section").hidden = !user;
+  $("save-preset").disabled = !hasAccount;
 
-  // Meus modelos apenas com login.
-  $("my-models-section").hidden = !user;
+  $("save-hint").textContent =
+    "Salve as palavras da partida atual; " +
+    "um código exclusivo será gerado.";
 
-  $("save-preset").disabled = !user;
-
-  if (!user) {
+  if (!hasAccount) {
     $("saved-share").hidden = true;
     $("my-models").replaceChildren();
     status("models-status","");
@@ -2567,12 +3297,11 @@ onAuthStateChanged(auth,user => {
   }
 });
 
-/* ======================================
-   CARREGAR MODELO
-====================================== */
-
+/* =====================================
+   CARREGAR MODELOS SALVOS
+===================================== */
 async function loadPreset(code) {
-  code = String(code).trim().toUpperCase();
+  code = canonicalCode(code);
 
   if (!CODE_REGEX.test(code)) {
     status(
@@ -2584,7 +3313,11 @@ async function loadPreset(code) {
   }
 
   $("load-preset").disabled = true;
-  status("preset-status","Consultando o Firebase...");
+
+  status(
+    "preset-status",
+    "Consultando o Firebase..."
+  );
 
   try {
     const snapshot = await getDoc(
@@ -2592,13 +3325,20 @@ async function loadPreset(code) {
     );
 
     if (!snapshot.exists()) {
-      throw new Error("Modelo não encontrado.");
+      status(
+        "preset-status",
+        "Modelo não encontrado. Verifique o código.",
+        "error"
+      );
+      return;
     }
 
     const data = snapshot.data();
 
     if (!Array.isArray(data.palavras)) {
-      throw new Error("Lista de palavras inválida.");
+      throw new Error(
+        "O modelo armazenado não possui uma lista válida."
+      );
     }
 
     window.WordGame.loadWords(
@@ -2610,23 +3350,24 @@ async function loadPreset(code) {
     $("model-name").value = data.nome || "";
 
     const url = new URL(location.href);
+
     url.searchParams.set("modelo",code);
     history.replaceState(null,"",url);
 
     status(
       "preset-status",
-      "Modelo carregado! Escolha a dificuldade.",
+      "Modelo carregado! Escolha a dificuldade e o cronômetro.",
       "ok"
     );
-  }
-  catch (error) {
+
+  } catch (error) {
     status(
       "preset-status",
       friendlyError(error),
       "error"
     );
-  }
-  finally {
+
+  } finally {
     $("load-preset").disabled = false;
   }
 }
@@ -2636,12 +3377,30 @@ $("load-preset").addEventListener(
   () => loadPreset($("preset-code").value)
 );
 
-/* ======================================
-   SALVAR MODELO
-====================================== */
+$("preset-code").addEventListener(
+  "keydown",
+  event => {
+    if (event.key === "Enter") {
+      loadPreset($("preset-code").value);
+    }
+  }
+);
 
+/* =====================================
+   SALVAR MODELO
+===================================== */
 $("save-preset").addEventListener("click",async () => {
-  if (!currentUser) return;
+  if (
+    !currentUser ||
+    currentUser.isAnonymous
+  ) {
+    status(
+      "save-status",
+      "Faça login para salvar.",
+      "error"
+    );
+    return;
+  }
 
   const name = $("model-name").value.trim();
 
@@ -2657,36 +3416,50 @@ $("save-preset").addEventListener("click",async () => {
   const creator = currentUser;
 
   const model = {
-    ownerUid:creator.uid,
-    nome:name,
-    palavras:window.WordGame.getWords(),
-    criadoEm:serverTimestamp()
+    ownerUid: creator.uid,
+    nome: name,
+    palavras: window.WordGame.getWords(),
+    criadoEm: serverTimestamp()
   };
 
   $("save-preset").disabled = true;
 
+  status(
+    "save-status",
+    "Salvando modelo na nuvem..."
+  );
+
   try {
     let code = null;
 
-    for (let attempt = 0; attempt < 4; attempt++) {
+    for (let tries = 0; tries < 4; tries++) {
       const candidate = newCode();
-      const ref = doc(db,"modelos",candidate);
+
+      const ref = doc(
+        db,
+        "modelos",
+        candidate
+      );
 
       try {
-        await runTransaction(db,async transaction => {
-          const snapshot = await transaction.get(ref);
+        await runTransaction(
+          db,
+          async transaction => {
+            const snapshot =
+              await transaction.get(ref);
 
-          if (snapshot.exists()) {
-            throw new Error("COLISAO");
+            if (snapshot.exists()) {
+              throw new Error("COLISAO");
+            }
+
+            transaction.set(ref,model);
           }
-
-          transaction.set(ref,model);
-        });
+        );
 
         code = candidate;
         break;
-      }
-      catch (error) {
+
+      } catch (error) {
         if (error.message === "COLISAO") {
           continue;
         }
@@ -2706,84 +3479,107 @@ $("save-preset").addEventListener("click",async () => {
 
     status(
       "save-status",
-      "Modelo salvo com sucesso!",
+      "Modelo salvo! Compartilhe o código ou link.",
       "ok"
     );
 
-    await refreshModels();
-  }
-  catch (error) {
+    if (
+      auth.currentUser?.uid === creator.uid
+    ) {
+      await refreshModels();
+    }
+
+  } catch (error) {
     status(
       "save-status",
       friendlyError(error),
       "error"
     );
-  }
-  finally {
-    $("save-preset").disabled = !auth.currentUser;
+
+  } finally {
+    $("save-preset").disabled =
+      !auth.currentUser ||
+      auth.currentUser.isAnonymous;
   }
 });
 
-/* ======================================
-   COPIAR CÓDIGO E LINK
-====================================== */
-
+/* =====================================
+   COMPARTILHAR
+===================================== */
 $("copy-code").addEventListener("click",async () => {
   try {
     await copyText($("saved-code").value);
-    status("save-status","Código copiado!","ok");
-  }
-  catch (_) {
-    status("save-status","Não foi possível copiar.","error");
+
+    status(
+      "save-status",
+      "Código copiado!",
+      "ok"
+    );
+  } catch (_) {
+    status(
+      "save-status",
+      "Não foi possível copiar automaticamente.",
+      "error"
+    );
   }
 });
 
 $("copy-link").addEventListener("click",async () => {
   try {
-    await copyText(linkFor($("saved-code").value));
-    status("save-status","Link copiado!","ok");
-  }
-  catch (_) {
-    status("save-status","Não foi possível copiar.","error");
+    await copyText(
+      linkFor($("saved-code").value)
+    );
+
+    status(
+      "save-status",
+      "Link copiado!",
+      "ok"
+    );
+  } catch (_) {
+    status(
+      "save-status",
+      "Não foi possível copiar o link.",
+      "error"
+    );
   }
 });
 
-/* ======================================
+/* =====================================
    MEUS MODELOS
-====================================== */
-
+===================================== */
 async function refreshModels() {
   const user = currentUser;
 
-  if (!user) return;
+  if (!user || user.isAnonymous) return;
 
-  status("models-status","Carregando modelos...");
+  status(
+    "models-status",
+    "Carregando seus modelos..."
+  );
 
   try {
-    const q = query(
+    const modelsQuery = query(
       collection(db,"modelos"),
       where("ownerUid","==",user.uid),
       limit(50)
     );
 
-    const snapshots = await getDocs(q);
+    const snapshots = await getDocs(modelsQuery);
 
     if (currentUser?.uid !== user.uid) return;
 
     const fragment =
       document.createDocumentFragment();
 
-    const entries = snapshots.docs.sort(
-      (a,b) => {
-        const left =
-          a.data().criadoEm?.toMillis?.() || 0;
+    const entries = snapshots.docs.sort((a,b) => {
+      const left =
+        a.data().criadoEm?.toMillis?.() || 0;
 
-        const right =
-          b.data().criadoEm?.toMillis?.() || 0;
+      const right =
+        b.data().criadoEm?.toMillis?.() || 0;
 
-        return right - left;
-      }
-    );
+      return right - left;
+    });
 
     for (const snapshot of entries) {
       const data = snapshot.data();
@@ -2792,60 +3588,86 @@ async function refreshModels() {
       const li = document.createElement("li");
       li.className = "model-item";
 
-      const title = document.createElement("div");
-      title.className = "model-name";
-      title.textContent = data.nome || "Sem nome";
+      const name = document.createElement("div");
+      name.className = "model-name";
+      name.textContent = data.nome || "Sem nome";
 
-      const codeLabel = document.createElement("div");
-      codeLabel.className = "model-code";
-      codeLabel.textContent = code;
+      const codeText = document.createElement("div");
+      codeText.className = "model-code";
+      codeText.textContent = code;
 
       const actions = document.createElement("div");
       actions.className = "model-buttons";
 
       const open = document.createElement("button");
+      open.type = "button";
       open.className = "btn small";
       open.textContent = "Carregar";
-      open.onclick = () => loadPreset(code);
+
+      open.addEventListener(
+        "click",
+        () => loadPreset(code)
+      );
 
       const copy = document.createElement("button");
+      copy.type = "button";
       copy.className = "btn small";
       copy.textContent = "Copiar link";
 
-      copy.onclick = async () => {
+      copy.addEventListener("click",async () => {
         try {
           await copyText(linkFor(code));
-          status("models-status","Link copiado!","ok");
+
+          status(
+            "models-status",
+            "Link copiado!",
+            "ok"
+          );
+        } catch (_) {
+          status(
+            "models-status",
+            "Não foi possível copiar o link.",
+            "error"
+          );
         }
-        catch (_) {
-          status("models-status","Erro ao copiar.","error");
-        }
-      };
+      });
 
       const remove = document.createElement("button");
+      remove.type = "button";
       remove.className = "btn small danger-outline";
       remove.textContent = "Excluir";
 
-      remove.onclick = async () => {
-        if (!confirm(
-          `Excluir permanentemente "${data.nome}"?`
-        )) return;
+      remove.addEventListener("click",async () => {
+        if (
+          !confirm(
+            `Excluir permanentemente "${data.nome}" (${code})?`
+          )
+        ) return;
 
         try {
-          await deleteDoc(doc(db,"modelos",code));
+          await deleteDoc(
+            doc(db,"modelos",code)
+          );
+
           await refreshModels();
-        }
-        catch (error) {
+
+        } catch (error) {
           status(
             "models-status",
             friendlyError(error),
             "error"
           );
         }
-      };
+      });
 
       actions.append(open,copy,remove);
-      li.append(title,codeLabel,actions);
+
+      li.append(
+        name,
+        codeText,
+        actions
+      );
+
       fragment.appendChild(li);
     }
 
@@ -2853,10 +3675,12 @@ async function refreshModels() {
 
     status(
       "models-status",
-      `${entries.length} modelo(s) exibido(s).`
+      entries.length
+        ? `${entries.length} modelo(s) exibido(s).`
+        : "Você ainda não salvou nenhum modelo."
     );
-  }
-  catch (error) {
+
+  } catch (error) {
     status(
       "models-status",
       friendlyError(error),
@@ -2870,17 +3694,383 @@ $("refresh-models").addEventListener(
   refreshModels
 );
 
-/* ======================================
-   ATIVAR LOGIN E CARREGAMENTO
-====================================== */
+/* =====================================
+   RANKING DE MELHORES TEMPOS
+===================================== */
+const RANK_LEVELS = {
+  facil: "Fácil",
+  medio: "Médio",
+  dificil: "Difícil",
+  extremo: "Extremo"
+};
 
+const NICK_KEY =
+  "caca-palavras-apelido-ranking-v1";
+
+let rankingView = "medio";
+let rankingRequest = 0;
+let submittedRound = null;
+
+/* =====================================
+   FORMATAR TEMPO DO RANKING
+===================================== */
+function formatRankingTime(ms) {
+  const seconds = Math.floor(ms / 1000);
+  const h = Math.floor(seconds / 3600);
+
+  const m = String(
+    Math.floor((seconds % 3600) / 60)
+  ).padStart(2,"0");
+
+  const s = String(
+    seconds % 60
+  ).padStart(2,"0");
+
+  return h
+    ? `${h}:${m}:${s}`
+    : `${m}:${s}`;
+}
+
+/* =====================================
+   TROCAR DIFICULDADE DO RANKING
+===================================== */
+function selectRanking(level) {
+  if (!(level in RANK_LEVELS)) return;
+
+  rankingView = level;
+
+  $("ranking-level-title").textContent =
+    RANK_LEVELS[level];
+
+  document.querySelectorAll(
+    "[data-ranking-level]"
+  ).forEach(button => {
+    const active =
+      button.dataset.rankingLevel === level;
+
+    button.setAttribute(
+      "aria-pressed",
+      String(active)
+    );
+  });
+
+  refreshRanking();
+}
+
+/* =====================================
+   CONSULTAR RANKING NO FIRESTORE
+===================================== */
+async function refreshRanking() {
+  const requestId = ++rankingRequest;
+  const level = rankingView;
+
+  status(
+    "ranking-list-status",
+    "Carregando melhores tempos..."
+  );
+
+  try {
+    const rankingQuery = query(
+      collection(
+        db,
+        "rankings",
+        level,
+        "participantes"
+      ),
+      orderBy("tempoMs","asc"),
+      limit(50)
+    );
+
+    const snapshot = await getDocs(rankingQuery);
+
+    if (requestId !== rankingRequest) return;
+
+    const fragment =
+      document.createDocumentFragment();
+
+    snapshot.docs.forEach((entry,index) => {
+      const data = entry.data();
+
+      const li = document.createElement("li");
+      li.className = "ranking-item";
+
+      if (
+        auth.currentUser?.uid === entry.id
+      ) {
+        li.classList.add("is-me");
+      }
+
+      const position = document.createElement("span");
+      position.className = "ranking-position";
+
+      position.textContent =
+        index === 0 ? "🥇" :
+        index === 1 ? "🥈" :
+        index === 2 ? "🥉" :
+        `#${index + 1}`;
+
+      const who = document.createElement("div");
+      who.className = "ranking-identity";
+
+      const nickname = document.createElement("span");
+      nickname.className = "ranking-name";
+
+      nickname.textContent =
+        typeof data.nome === "string"
+          ? data.nome
+          : "Participante";
+
+      const subtitle = document.createElement("span");
+      subtitle.className = "ranking-theme";
+
+      subtitle.textContent =
+        typeof data.tema === "string"
+          ? data.tema
+          : "";
+
+      who.append(nickname,subtitle);
+
+      const time = document.createElement("strong");
+      time.className = "ranking-time";
+
+      time.textContent =
+        formatRankingTime(
+          Number(data.tempoMs) || 0
+        );
+
+      li.append(position,who,time);
+      fragment.appendChild(li);
+    });
+
+    $("ranking-list").replaceChildren(fragment);
+
+    status(
+      "ranking-list-status",
+      snapshot.empty
+        ? "Ainda não há tempos registrados neste nível. Seja o primeiro!"
+        : `Exibindo ${snapshot.size} melhor(es) tempo(s).`
+    );
+
+  } catch (error) {
+    if (requestId !== rankingRequest) return;
+
+    $("ranking-list").replaceChildren();
+
+    status(
+      "ranking-list-status",
+      friendlyError(error),
+      "error"
+    );
+  }
+}
+
+/* =====================================
+   CONTROLES DO RANKING
+===================================== */
+document.querySelectorAll(
+  "[data-ranking-level]"
+).forEach(button => {
+  button.addEventListener("click",() => {
+    selectRanking(button.dataset.rankingLevel);
+  });
+});
+
+$("ranking-refresh").addEventListener(
+  "click",
+  refreshRanking
+);
+
+// Quando uma partida começar, mostrar
+// inicialmente o ranking daquela dificuldade.
+window.addEventListener(
+  "wordgame:start",
+  event => {
+    submittedRound = null;
+    selectRanking(event.detail.level);
+  }
+);
+
+// Recuperar apelido anteriormente informado.
+try {
+  $("ranking-nickname").value =
+    localStorage.getItem(NICK_KEY) || "";
+} catch (_) {}
+
+/* =====================================
+   REGISTRAR TEMPO NO RANKING
+===================================== */
+$("ranking-submit").addEventListener(
+  "click",
+  async () => {
+    const result =
+      window.WordGame.getRankingResult();
+
+    if (
+      !result ||
+      submittedRound === result.id
+    ) {
+      status(
+        "ranking-entry-status",
+        "Só é possível registrar uma vitória " +
+        "com cronômetro ainda não enviada.",
+        "error"
+      );
+      return;
+    }
+
+    const nickname = $("ranking-nickname")
+      .value
+      .trim()
+      .replace(/\s+/g," ");
+
+    if (
+      nickname.length < 2 ||
+      nickname.length > 24 ||
+      !/^[\p{L}\p{N} ._\-]+$/u.test(nickname)
+    ) {
+      status(
+        "ranking-entry-status",
+        "Digite um apelido de 2 a 24 caracteres, " +
+        "sem símbolos especiais.",
+        "error"
+      );
+      return;
+    }
+
+    $("ranking-submit").disabled = true;
+
+    status(
+      "ranking-entry-status",
+      "Registrando seu tempo..."
+    );
+
+    try {
+      // Visitante recebe autenticação anônima
+      // apenas após optar pela participação.
+      if (!auth.currentUser) {
+        await signInAnonymously(auth);
+      }
+
+      const user = auth.currentUser;
+
+      if (!user) {
+        throw new Error(
+          "Não foi possível iniciar a sessão anônima."
+        );
+      }
+
+      if (
+        window.WordGame.getRankingResult()?.id !==
+        result.id
+      ) {
+        throw new Error(
+          "A partida mudou. Conclua a nova " +
+          "partida antes de registrar."
+        );
+      }
+
+      const ref = doc(
+        db,
+        "rankings",
+        result.level,
+        "participantes",
+        user.uid
+      );
+
+      let previousBest = null;
+      let saved = false;
+
+      await runTransaction(
+        db,
+        async transaction => {
+          const previous =
+            await transaction.get(ref);
+
+          saved = false;
+
+          previousBest = previous.exists()
+            ? Number(previous.data().tempoMs)
+            : null;
+
+          // Mantém somente o melhor tempo.
+          if (
+            previousBest !== null &&
+            previousBest <= result.tempoMs
+          ) {
+            return;
+          }
+
+          transaction.set(ref,{
+            nome: nickname,
+            tempoMs: result.tempoMs,
+            tema: result.tema.slice(0,160),
+            atualizadoEm: serverTimestamp()
+          });
+
+          saved = true;
+        }
+      );
+
+      submittedRound = result.id;
+
+      try {
+        localStorage.setItem(
+          NICK_KEY,
+          nickname
+        );
+      } catch (_) {}
+
+      if (saved) {
+        status(
+          "ranking-entry-status",
+          `Tempo de ${formatRankingTime(result.tempoMs)} ` +
+          `registrado! Você entrou no ranking ` +
+          `de ${RANK_LEVELS[result.level]}.`,
+          "ok"
+        );
+
+      } else {
+        status(
+          "ranking-entry-status",
+          `Seu recorde anterior ` +
+          `(${formatRankingTime(previousBest)}) ` +
+          `continua melhor. Novo tempo não substituído.`,
+          "ok"
+        );
+      }
+
+      selectRanking(result.level);
+
+    } catch (error) {
+      status(
+        "ranking-entry-status",
+        friendlyError(error),
+        "error"
+      );
+
+    } finally {
+      const current =
+        window.WordGame.getRankingResult();
+
+      $("ranking-submit").disabled =
+        !current ||
+        submittedRound === current.id;
+    }
+  }
+);
+
+/* =====================================
+   INICIALIZAÇÃO FIREBASE
+===================================== */
 $("login").disabled = false;
 $("load-preset").disabled = false;
 
-/* ======================================
-   CARREGAMENTO PELO LINK
-====================================== */
+// Consulta pública do ranking.
+selectRanking(
+  window.WordGame.getLevel()
+);
 
+// Carregamento de modelos por link.
 const initialCode = new URLSearchParams(
   location.search
 ).get("modelo");

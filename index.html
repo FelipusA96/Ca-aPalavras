@@ -2,2758 +2,3167 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f4f7fd">
-  <title>Caça-Palavras Interativo</title>
-
-  <style>
-    /* ========== TEMA CLARO ========== */
-    :root {
-      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-      color-scheme: light;
-      --page: #f4f7fd;
-      --card: #fff;
-      --text: #1c2944;
-      --muted: #65748c;
-      --border: #e2e8f3;
-      --soft: #f1f5fc;
-      --primary: #5148df;
-      --primaryText: #fff;
-      --selected: #c7d2fe;
-      --selectedText: #312e81;
-      --found: #bbf7d0;
-      --foundText: #166534;
-      --missed: #fecaca;
-      --missedText: #991b1b;
-      --danger: #dc2626;
-      --shadow: rgba(31, 51, 94, .08);
-    }
-
-    /* ========== TEMA ESCURO ========== */
-    html[data-theme="dark"] {
-      color-scheme: dark;
-      --page: #0c1322;
-      --card: #151f31;
-      --text: #e8eefb;
-      --muted: #a0aec4;
-      --border: #2c3a50;
-      --soft: #243148;
-      --primary: #7771f4;
-      --primaryText: #fff;
-      --selected: #655fd5;
-      --selectedText: #fff;
-      --found: #166534;
-      --foundText: #dcfce7;
-      --missed: #991b1b;
-      --missedText: #fee2e2;
-      --danger: #fb7185;
-      --shadow: rgba(0, 0, 0, .27);
-    }
-
-    * { box-sizing: border-box; }
-    [hidden] { display: none !important; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--page);
-      color: var(--text);
-      transition: background .2s, color .2s;
-    }
-
-    button, input, textarea { font: inherit; }
-    button { cursor: pointer; }
-    button:disabled { opacity: .55; cursor: not-allowed; }
-
-    button:focus-visible,
-    input:focus-visible,
-    textarea:focus-visible {
-      outline: 3px solid #a5b4fc;
-      outline-offset: 2px;
-    }
-
-    /* ========== CABEÇALHO ========== */
-    .topbar {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 17px max(16px, calc((100vw - 1200px) / 2));
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.15rem;
-      font-weight: 850;
-      letter-spacing: -.03em;
-    }
-
-    .brand-icon {
-      width: 38px;
-      height: 38px;
-      display: grid;
-      place-items: center;
-      border-radius: 12px;
-      color: white;
-      background: var(--primary);
-      font-size: 1.4rem;
-    }
-
-    .actions {
-      display: flex;
-      gap: 9px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    /* ========== BOTÕES ========== */
-    .btn {
-      border: 0;
-      border-radius: 11px;
-      padding: 11px 14px;
-      font-weight: 730;
-      background: var(--soft);
-      color: var(--text);
-      transition: filter .15s, transform .15s;
-    }
-
-    .btn:hover:not(:disabled) { filter: brightness(.95); }
-    .btn:active:not(:disabled) { transform: scale(.97); }
-
-    html[data-theme="dark"] .btn:hover:not(:disabled) {
-      filter: brightness(1.16);
-    }
-
-    .btn.primary {
-      background: var(--primary);
-      color: var(--primaryText);
-    }
-
-    .btn.danger { background: var(--danger); color: #fff; }
-    .btn.danger-outline { background: var(--soft); color: var(--danger); }
-    .btn.small { padding: 8px 10px; font-size: .79rem; }
-
-    /* ========== LAYOUT ========== */
-    .layout {
-      max-width: 1200px;
-      margin: 29px auto;
-      padding: 0 16px;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 325px;
-      gap: 20px;
-      align-items: start;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 19px;
-      padding: 23px;
-      box-shadow: 0 9px 29px var(--shadow);
-    }
-
-    h1 {
-      margin: 0 0 7px;
-      font-size: clamp(1.45rem, 3vw, 2rem);
-      letter-spacing: -.045em;
-    }
-
-    h2 { margin: 0 0 13px; font-size: 1.04rem; }
-    p { line-height: 1.48; }
-    .muted, .helper { color: var(--muted); }
-    .muted { margin: 0; font-size: .9rem; }
-    .helper { font-size: .77rem; line-height: 1.45; margin: 7px 0 0; }
-
-    /* ========== PROGRESSO ========== */
-    .score {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin: 23px 0 9px;
-      font-size: .9rem;
-      font-weight: 700;
-    }
-
-    .progress {
-      height: 9px;
-      border-radius: 20px;
-      background: var(--soft);
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0;
-      border-radius: 20px;
-      background: linear-gradient(90deg, #6660e8, #19b67b);
-      transition: width .2s;
-    }
-
-    /* ========== CRONÔMETRO ========== */
-    .timer-display {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 14px;
-      padding: 9px 13px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--soft);
-      font-variant-numeric: tabular-nums;
-      font-weight: 800;
-    }
-
-    .timer-display strong {
-      font-size: 1.12rem;
-      letter-spacing: .025em;
-    }
-
-    .timer-choice-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .timer-choice-grid .btn { min-height: 56px; }
-
-    /* ========== LOGIN ========== */
-    .login-form { display: grid; gap: 13px; margin-top: 17px; }
-    .login-form label { margin-bottom: 5px; }
-    .login-form .suffix { font-size: .78rem; color: var(--muted); margin-top: 4px; }
-    .login-footer { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
-    .win-time { font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
-
-    /* ========== TABULEIRO ========== */
-    .board-wrap {
-      margin: 24px auto 0;
-      max-width: 660px;
-      overflow-x: auto;
-    }
-
-    .board {
-      --size: 14;
-      display: grid;
-      grid-template-columns: repeat(var(--size), minmax(0, 1fr));
-      gap: 3px;
-      width: 100%;
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-      cursor: crosshair;
-    }
-
-    .cell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      aspect-ratio: 1;
-      min-width: 0;
-      background: var(--soft);
-      border-radius: 5px;
-      color: var(--text);
-      font-size: clamp(8px, 1.5vw, 17px);
-      font-weight: 800;
-    }
-
-    .cell.selected {
-      background: var(--selected);
-      color: var(--selectedText);
-      outline: 2px solid var(--primary);
-      outline-offset: -2px;
-    }
-
-    .cell.found { background: var(--found); color: var(--foundText); }
-    .cell.missed { background: var(--missed); color: var(--missedText); }
-
-    .cell.found.missed {
-      background: linear-gradient(
-        135deg,
-        var(--found) 50%,
-        var(--missed) 50%
-      );
-      color: var(--text);
-    }
-
-    .board.locked { cursor: default; }
-
-    /* ========== FEEDBACK ========== */
-    .feedback {
-      min-height: 23px;
-      margin: 18px 0 0;
-      text-align: center;
-      color: var(--muted);
-      font-size: .89rem;
-      font-weight: 650;
-    }
-
-    .feedback.success { color: #16a34a; }
-    .feedback.alert { color: var(--danger); }
-
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      font-size: .8rem;
-      color: var(--muted);
-      margin-top: 13px;
-    }
-
-    .dot {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
-      vertical-align: middle;
-      margin-right: 4px;
-    }
-
-    .dot.found { background: var(--found); }
-    .dot.missed { background: var(--missed); }
-
-    /* ========== LISTA DE PALAVRAS ========== */
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .pill {
-      display: inline-block;
-      background: var(--soft);
-      padding: 5px 9px;
-      border-radius: 20px;
-      color: var(--muted);
-      font-size: .74rem;
-      font-weight: 750;
-    }
-
-    .words {
-      list-style: none;
-      padding: 0;
-      margin: 12px 0 20px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .word {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--soft);
-      padding: 9px 11px;
-      border-radius: 9px;
-      font-size: .85rem;
-      font-weight: 720;
-      overflow-wrap: anywhere;
-    }
-
-    .mark {
-      width: 18px;
-      height: 18px;
-      flex: 0 0 18px;
-      border: 2px solid var(--muted);
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: .74rem;
-    }
-
-    .word.found {
-      color: var(--foundText);
-      background: var(--found);
-    }
-
-    .word.missed {
-      color: var(--missedText);
-      background: var(--missed);
-    }
-
-    .word.found .mark,
-    .word.missed .mark {
-      border-color: currentColor;
-    }
-
-    .word.found .word-label {
-      text-decoration: line-through;
-      text-decoration-thickness: 2px;
-    }
-
-    /* ========== PAINÉIS ========== */
-    .panel-section {
-      border-top: 1px solid var(--border);
-      padding-top: 18px;
-      margin-top: 18px;
-    }
-
-    label {
-      display: block;
-      font-size: .86rem;
-      font-weight: 750;
-      margin-bottom: 7px;
-    }
-
-    input, textarea {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--soft);
-      padding: 11px;
-      color: var(--text);
-    }
-
-    textarea {
-      min-height: 110px;
-      resize: vertical;
-      line-height: 1.5;
-    }
-
-    .full { width: 100%; }
-    .row { display: flex; align-items: center; gap: 8px; }
-    .row > input { min-width: 0; flex: 1; }
-    .row > .btn { flex-shrink: 0; }
-
-    .status {
-      font-size: .8rem;
-      min-height: 19px;
-      line-height: 1.4;
-      margin: 9px 0 0;
-      color: var(--muted);
-      overflow-wrap: anywhere;
-    }
-
-    .status.error { color: var(--danger); }
-    .status.ok { color: #16a34a; }
-
-    .user-details {
-      font-size: .79rem;
-      color: var(--muted);
-      overflow-wrap: anywhere;
-      max-width: 180px;
-    }
-
-    .model-list {
-      list-style: none;
-      padding: 0;
-      margin: 12px 0 0;
-      display: grid;
-      gap: 10px;
-    }
-
-    .model-item {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-      display: grid;
-      gap: 7px;
-    }
-
-    .model-name {
-      font-weight: 750;
-      font-size: .86rem;
-      overflow-wrap: anywhere;
-    }
-
-    .model-code {
-      font-family: ui-monospace, monospace;
-      font-size: .78rem;
-      color: var(--muted);
-      overflow-wrap: anywhere;
-    }
-
-    .model-buttons {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    /* ========== JANELAS ========== */
-    dialog {
-      background: var(--card);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 25px;
-      width: min(430px, calc(100vw - 28px));
-      box-shadow: 0 24px 80px rgba(0, 0, 0, .2);
-    }
-
-    dialog::backdrop {
-      background: rgba(0, 0, 0, .64);
-      backdrop-filter: blur(3px);
-    }
-
-    dialog h2 { margin-bottom: 7px; font-size: 1.3rem; }
-    dialog p { font-size: .91rem; color: var(--muted); }
-
-    .dialog-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    /* ========== VITÓRIA ========== */
-    .win-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 30;
-      background: rgba(6, 13, 32, .68);
-      display: grid;
-      place-items: center;
-      padding: 18px;
-    }
-
-    .win-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 31px 24px;
-      border-radius: 24px;
-      max-width: 440px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 25px 90px rgba(0, 0, 0, .28);
-      animation: pop .4s ease both;
-    }
-
-    .win-icon {
-      font-size: 3.5rem;
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .win-card h2 { font-size: 1.9rem; margin: 0 0 9px; }
-    .win-card p { color: var(--muted); }
-
-    @keyframes pop {
-      from { transform: scale(.75); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    /* ========== CONFETES ========== */
-    .confetti-layer {
-      position: fixed;
-      inset: 0;
-      z-index: 31;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .confetti {
-      position: absolute;
-      top: -25px;
-      left: var(--x);
-      width: 9px;
-      height: 14px;
-      border-radius: 2px;
-      background: var(--color);
-      opacity: 0;
-      animation:
-        confetti-fall var(--duration)
-        linear var(--delay) forwards;
-    }
-
-    @keyframes confetti-fall {
-      0% {
-        transform: translate3d(0, -5vh, 0) rotate(0);
-        opacity: 1;
-      }
-
-      100% {
-        transform:
-          translate3d(var(--drift), 110vh, 0)
-          rotate(850deg);
-        opacity: 0;
-      }
-    }
-
-    footer {
-      padding: 10px 20px 30px;
-      text-align: center;
-      color: var(--muted);
-      font-size: .77rem;
-    }
-
-    /* ========== RESPONSIVIDADE ========== */
-    @media (max-width: 900px) {
-      .layout {
-        grid-template-columns: 1fr;
-        max-width: 740px;
-      }
-
-      .words {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 530px) {
-      .topbar { padding: 12px; }
-      .brand { font-size: 1rem; }
-      .brand-icon { width: 31px; height: 31px; }
-      .actions { gap: 5px; }
-      .btn { padding: 9px 10px; font-size: .8rem; }
-      .theme-label { display: none; }
-      .layout { padding: 0 9px; margin: 16px auto; gap: 14px; }
-      .card { padding: 14px; border-radius: 15px; }
-      .board { gap: 2px; }
-      .cell {
-        border-radius: 3px;
-        font-size: clamp(8px, 2.5vw, 12px);
-      }
-      .word { font-size: .78rem; padding: 8px; }
-      .dialog-actions { flex-direction: column; }
-      .dialog-actions .btn { width: 100%; }
-    }
-
-    @media (max-width: 380px) {
-      .timer-choice-grid { grid-template-columns: 1fr; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation-duration: .01ms !important;
-        transition-duration: .01ms !important;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f4f7fd">
+<title>Caça-Palavras Interativo</title>
+
+<style>
+/* ========================================
+   TEMAS E CORES
+======================================== */
+:root {
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+  color-scheme: light;
+  --page: #f4f7fd;
+  --card: #fff;
+  --text: #1c2944;
+  --muted: #65748c;
+  --border: #e2e8f3;
+  --soft: #f1f5fc;
+  --primary: #5148df;
+  --primaryText: #fff;
+  --selected: #c7d2fe;
+  --selectedText: #312e81;
+  --found: #bbf7d0;
+  --foundText: #166534;
+  --missed: #fecaca;
+  --missedText: #991b1b;
+  --danger: #dc2626;
+  --shadow: rgba(31,51,94,.08);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0c1322;
+  --card: #151f31;
+  --text: #e8eefb;
+  --muted: #a0aec4;
+  --border: #2c3a50;
+  --soft: #243148;
+  --primary: #7771f4;
+  --primaryText: #fff;
+  --selected: #655fd5;
+  --selectedText: #fff;
+  --found: #166534;
+  --foundText: #dcfce7;
+  --missed: #991b1b;
+  --missedText: #fee2e2;
+  --danger: #fb7185;
+  --shadow: rgba(0,0,0,.27);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page);
+  color: var(--text);
+  transition: background .2s, color .2s;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+button { cursor: pointer; }
+
+button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #a5b4fc;
+  outline-offset: 2px;
+}
+
+/* ========================================
+   CABEÇALHO E BOTÕES
+======================================== */
+.topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 17px max(16px,calc((100vw - 1200px)/2));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 850;
+  letter-spacing: -.03em;
+}
+
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: white;
+  background: var(--primary);
+  font-size: 1.4rem;
+}
+
+.actions {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: 0;
+  border-radius: 11px;
+  padding: 11px 14px;
+  font-weight: 730;
+  background: var(--soft);
+  color: var(--text);
+  transition: filter .15s, transform .15s;
+}
+
+.btn:hover:not(:disabled) { filter: brightness(.95); }
+.btn:active:not(:disabled) { transform: scale(.97); }
+
+html[data-theme="dark"] .btn:hover:not(:disabled) {
+  filter: brightness(1.16);
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: var(--primaryText);
+}
+
+.btn.danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn.danger-outline {
+  background: var(--soft);
+  color: var(--danger);
+}
+
+.btn.small {
+  padding: 8px 10px;
+  font-size: .79rem;
+}
+
+/* ========================================
+   LAYOUT PRINCIPAL
+======================================== */
+.layout {
+  max-width: 1200px;
+  margin: 29px auto;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 325px;
+  gap: 20px;
+  align-items: start;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 19px;
+  padding: 23px;
+  box-shadow: 0 9px 29px var(--shadow);
+}
+
+h1 {
+  margin: 0 0 7px;
+  font-size: clamp(1.45rem,3vw,2rem);
+  letter-spacing: -.045em;
+}
+
+h2 {
+  margin: 0 0 13px;
+  font-size: 1.04rem;
+}
+
+p { line-height: 1.48; }
+.muted, .helper { color: var(--muted); }
+.muted { margin: 0; font-size: .9rem; }
+
+.helper {
+  font-size: .77rem;
+  line-height: 1.45;
+  margin: 7px 0 0;
+}
+
+/* ========================================
+   PROGRESSO E CRONÔMETRO
+======================================== */
+.score {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 23px 0 9px;
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.progress {
+  height: 9px;
+  border-radius: 20px;
+  background: var(--soft);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 20px;
+  background: linear-gradient(90deg,#6660e8,#19b67b);
+  transition: width .2s;
+}
+
+.timer-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 9px 13px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--soft);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.timer-display strong {
+  font-size: 1.12rem;
+  letter-spacing: .025em;
+}
+
+/* ========================================
+   TABULEIRO
+======================================== */
+.board-wrap {
+  margin: 24px auto 0;
+  max-width: 660px;
+  overflow-x: auto;
+}
+
+.board {
+  --size: 14;
+  display: grid;
+  grid-template-columns: repeat(var(--size),minmax(0,1fr));
+  gap: 3px;
+  width: 100%;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: crosshair;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  background: var(--soft);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: clamp(8px,1.5vw,17px);
+  font-weight: 800;
+}
+
+.cell.selected {
+  background: var(--selected);
+  color: var(--selectedText);
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.cell.found {
+  background: var(--found);
+  color: var(--foundText);
+}
+
+.cell.missed {
+  background: var(--missed);
+  color: var(--missedText);
+}
+
+.cell.found.missed {
+  background: linear-gradient(
+    135deg,
+    var(--found) 50%,
+    var(--missed) 50%
+  );
+  color: var(--text);
+}
+
+.board.locked { cursor: default; }
+
+.feedback {
+  min-height: 23px;
+  margin: 18px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: .89rem;
+  font-weight: 650;
+}
+
+.feedback.success { color: #16a34a; }
+.feedback.alert { color: var(--danger); }
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: .8rem;
+  color: var(--muted);
+  margin-top: 13px;
+}
+
+.dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.dot.found { background: var(--found); }
+.dot.missed { background: var(--missed); }
+
+/* ========================================
+   LISTA DE PALAVRAS
+======================================== */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.pill {
+  display: inline-block;
+  background: var(--soft);
+  padding: 5px 9px;
+  border-radius: 20px;
+  color: var(--muted);
+  font-size: .74rem;
+  font-weight: 750;
+}
+
+.words {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.word {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--soft);
+  padding: 9px 11px;
+  border-radius: 9px;
+  font-size: .85rem;
+  font-weight: 720;
+  overflow-wrap: anywhere;
+}
+
+.mark {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: .74rem;
+}
+
+.word.found {
+  color: var(--foundText);
+  background: var(--found);
+}
+
+.word.missed {
+  color: var(--missedText);
+  background: var(--missed);
+}
+
+.word.found .mark,
+.word.missed .mark {
+  border-color: currentColor;
+}
+
+.word.found .word-label {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+/* ========================================
+   FORMULÁRIOS E MODELOS
+======================================== */
+.panel-section {
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  margin-top: 18px;
+}
+
+label {
+  display: block;
+  font-size: .86rem;
+  font-weight: 750;
+  margin-bottom: 7px;
+}
+
+input, textarea, select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--soft);
+  padding: 11px;
+  color: var(--text);
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.full { width: 100%; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row > input { min-width: 0; flex: 1; }
+.row > .btn { flex-shrink: 0; }
+
+.status {
+  font-size: .8rem;
+  min-height: 19px;
+  line-height: 1.4;
+  margin: 9px 0 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.status.error { color: var(--danger); }
+.status.ok { color: #16a34a; }
+
+.user-details {
+  font-size: .79rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  max-width: 180px;
+}
+
+.model-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  gap: 10px;
+}
+
+.model-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  display: grid;
+  gap: 7px;
+}
+
+.model-name {
+  font-weight: 750;
+  font-size: .86rem;
+  overflow-wrap: anywhere;
+}
+
+.model-code {
+  font-family: ui-monospace,monospace;
+  font-size: .78rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.model-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ========================================
+   JANELAS DE DIÁLOGO
+======================================== */
+dialog {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 25px;
+  width: min(430px,calc(100vw - 28px));
+  box-shadow: 0 24px 80px rgba(0,0,0,.2);
+}
+
+dialog::backdrop {
+  background: rgba(0,0,0,.64);
+  backdrop-filter: blur(3px);
+}
+
+dialog h2 {
+  margin-bottom: 7px;
+  font-size: 1.3rem;
+}
+
+dialog p {
+  font-size: .91rem;
+  color: var(--muted);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.login-form {
+  display: grid;
+  gap: 13px;
+  margin-top: 17px;
+}
+
+.login-form .suffix {
+  font-size: .78rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.login-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ========================================
+   ESCOLHA DO TEMA
+======================================== */
+#theme-dialog {
+  width: min(555px,calc(100vw - 28px));
+  max-height: min(90vh,820px);
+  overflow-y: auto;
+}
+
+.theme-fields {
+  display: grid;
+  gap: 11px;
+  margin-top: 18px;
+}
+
+.theme-preview {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--soft);
+  margin-top: 13px;
+}
+
+.theme-preview strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.theme-preview p {
+  margin: 0;
+  font-size: .84rem;
+  line-height: 1.55;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.current-theme {
+  display: inline-block;
+  margin: 10px 0 0;
+  color: var(--primary);
+  font-weight: 750;
+  font-size: .85rem;
+}
+
+.next-theme {
+  margin: 16px auto 0;
+  display: block;
+}
+
+.theme-choice-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.theme-choice-actions .btn {
+  min-height: 50px;
+}
+
+/* ========================================
+   VITÓRIA E CONFETES
+======================================== */
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(6,13,32,.68);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.win-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 31px 24px;
+  border-radius: 24px;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 25px 90px rgba(0,0,0,.28);
+  animation: pop .4s ease both;
+}
+
+.win-icon {
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.win-card h2 {
+  font-size: 1.9rem;
+  margin: 0 0 9px;
+}
+
+.win-card p { color: var(--muted); }
+
+.win-time {
+  font-weight: 800;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes pop {
+  from { transform: scale(.75); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 31;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  top: -25px;
+  left: var(--x);
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--color);
+  opacity: 0;
+  animation:
+    confetti-fall var(--duration)
+    linear var(--delay) forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0,-5vh,0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform:
+      translate3d(var(--drift),110vh,0)
+      rotate(850deg);
+    opacity: 0;
+  }
+}
+
+footer {
+  padding: 10px 20px 30px;
+  text-align: center;
+  color: var(--muted);
+  font-size: .77rem;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+======================================== */
+@media(max-width:900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    max-width: 740px;
+  }
+  .words {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:530px) {
+  .topbar { padding: 12px; }
+  .brand { font-size: 1rem; }
+  .brand-icon { width: 31px; height: 31px; }
+  .actions { gap: 5px; }
+  .btn { padding: 9px 10px; font-size: .8rem; }
+  .theme-label { display: none; }
+  .layout { padding: 0 9px; margin: 16px auto; gap: 14px; }
+  .card { padding: 14px; border-radius: 15px; }
+  .board { gap: 2px; }
+  .cell { border-radius: 3px; font-size: clamp(8px,2.5vw,12px); }
+  .word { font-size: .78rem; padding: 8px; }
+  .dialog-actions { flex-direction: column; }
+  .dialog-actions .btn { width: 100%; }
+}
+
+@media(max-width:440px) {
+  .theme-choice-actions { grid-template-columns: 1fr; }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <!-- ========== CABEÇALHO ========== -->
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-icon">✦</span>
-      Caça-Palavras
+<!-- ========================================
+     CABEÇALHO
+======================================== -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-icon">✦</span>
+    Caça-Palavras
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn" id="theme-toggle">
+      ☾ <span class="theme-label" id="theme-label">Escuro</span>
+    </button>
+
+    <button type="button" class="btn" id="shuffle">
+      ↻ Embaralhar
+    </button>
+
+    <button type="button" class="btn danger-outline" id="giveup">
+      ⚑ Desistir
+    </button>
+  </div>
+
+  <div class="actions">
+    <span class="user-details" id="user-details">
+      Modo visitante
+    </span>
+    <button type="button" class="btn primary" id="login" disabled>
+      Entrar
+    </button>
+    <button type="button" class="btn" id="logout" hidden>
+      Sair
+    </button>
+  </div>
+</header>
+
+<!-- ========================================
+     JOGO PRINCIPAL
+======================================== -->
+<main class="layout">
+  <section class="card" aria-labelledby="game-title">
+    <h1 id="game-title">Encontre as palavras</h1>
+
+    <p class="muted">
+      Arraste sobre as letras na horizontal,
+      vertical ou diagonal, nos dois sentidos.
+    </p>
+
+    <div class="score">
+      <span>Seu progresso</span>
+      <span id="score">0 / 0 encontradas</span>
     </div>
 
-    <div class="actions">
-      <button
-        type="button"
-        class="btn"
-        id="theme-toggle"
-        aria-label="Alternar tema"
-      >
-        ☾ <span class="theme-label" id="theme-label">Escuro</span>
-      </button>
-
-      <button type="button" class="btn" id="shuffle">
-        ↻ Embaralhar
-      </button>
-
-      <button
-        type="button"
-        class="btn danger-outline"
-        id="giveup"
-      >
-        ⚑ Desistir
-      </button>
+    <div class="progress">
+      <div class="progress-fill" id="progress-fill"></div>
     </div>
 
-    <div class="actions">
-      <span class="user-details" id="user-details">
-        Modo visitante
-      </span>
+    <p id="current-theme" class="current-theme" hidden></p>
 
-      <button
-        type="button"
-        class="btn primary"
-        id="login"
-        disabled
-      >
-        Entrar
-      </button>
-
-      <button type="button" class="btn" id="logout" hidden>
-        Sair
-      </button>
+    <div
+      id="timer-display"
+      class="timer-display"
+      role="timer"
+      hidden
+    >
+      ⏱ <strong id="timer-value">00:00</strong>
     </div>
-  </header>
 
-  <!-- ========== JOGO PRINCIPAL ========== -->
-  <main class="layout">
-    <section class="card" aria-labelledby="game-title">
-      <h1 id="game-title">Encontre as palavras</h1>
-
-      <p class="muted">
-        Arraste sobre as letras na horizontal,
-        vertical ou diagonal, nos dois sentidos.
-      </p>
-
-      <div class="score">
-        <span>Seu progresso</span>
-        <span id="score">0 / 0 encontradas</span>
-      </div>
-
-      <div class="progress">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-
+    <div class="board-wrap">
       <div
-        id="timer-display"
-        class="timer-display"
-        role="timer"
-        aria-label="Tempo decorrido"
-        hidden
-      >
-        ⏱ <strong id="timer-value">00:00</strong>
-      </div>
+        class="board"
+        id="board"
+        role="grid"
+        aria-label="Tabuleiro de caça-palavras"
+      ></div>
+    </div>
 
-      <div class="board-wrap">
-        <div
-          class="board"
-          id="board"
-          role="grid"
-          aria-label="Tabuleiro de caça-palavras"
-        ></div>
-      </div>
+    <p
+      class="feedback"
+      id="feedback"
+      role="status"
+      aria-live="polite"
+    >
+      Encontre a primeira palavra!
+    </p>
 
-      <p
-        class="feedback"
-        id="feedback"
-        role="status"
-        aria-live="polite"
-      >
-        Encontre a primeira palavra!
+    <div class="legend" id="legend" hidden>
+      <span><i class="dot found"></i> Encontrada</span>
+      <span><i class="dot missed"></i> Revelada</span>
+    </div>
+
+    <button
+      id="next-theme"
+      type="button"
+      class="btn primary next-theme"
+      hidden
+    >
+      🎲 Escolher próximo tema
+    </button>
+  </section>
+
+  <!-- PAINEL LATERAL -->
+  <aside class="card">
+    <div class="section-head">
+      <h2>Palavras para encontrar</h2>
+      <span id="badge" class="pill">0 restantes</span>
+    </div>
+
+    <ul class="words" id="word-list"></ul>
+
+    <!-- PALAVRAS PERSONALIZADAS -->
+    <section class="panel-section">
+      <h2>Personalizar o desafio</h2>
+
+      <label for="words-input">
+        Palavras (uma por linha ou separadas por vírgula)
+      </label>
+
+      <textarea id="words-input" spellcheck="false"></textarea>
+
+      <p class="helper">
+        Até 25 palavras com 2 a 20 letras cada.
+        Os acentos não aparecem no tabuleiro.
       </p>
 
-      <div class="legend" id="legend" hidden>
-        <span><i class="dot found"></i> Encontrada</span>
-        <span><i class="dot missed"></i> Revelada</span>
+      <button
+        type="button"
+        class="btn primary full"
+        id="apply"
+        style="margin-top:10px"
+      >
+        Criar novo jogo
+      </button>
+
+      <p id="local-status" class="status" role="status"></p>
+    </section>
+
+    <!-- CARREGAR MODELOS -->
+    <section class="panel-section">
+      <h2>Carregar modelo da nuvem</h2>
+
+      <label for="preset-code">
+        Código do modelo (sem login)
+      </label>
+
+      <div class="row">
+        <input
+          id="preset-code"
+          placeholder="CP-XXXX-XXXX-XXXX"
+          autocomplete="off"
+        >
+        <button
+          type="button"
+          class="btn primary"
+          id="load-preset"
+          disabled
+        >
+          Carregar
+        </button>
+      </div>
+
+      <p id="preset-status" class="status" role="status"></p>
+    </section>
+
+    <!-- SALVAR -->
+    <section class="panel-section">
+      <h2>Salvar na nuvem ☁</h2>
+
+      <label for="model-name">Nome do modelo</label>
+
+      <input
+        id="model-name"
+        maxlength="80"
+        placeholder="Ex.: Treinamento de qualidade"
+      >
+
+      <button
+        type="button"
+        class="btn primary full"
+        id="save-preset"
+        disabled
+        style="margin-top:10px"
+      >
+        Salvar modelo na nuvem
+      </button>
+
+      <p class="helper" id="save-hint">
+        Entre com seu login e senha para salvar.
+        Visitantes podem jogar e carregar códigos.
+      </p>
+
+      <p id="save-status" class="status" role="status"></p>
+
+      <div id="saved-share" hidden>
+        <label for="saved-code">Código do modelo salvo</label>
+
+        <div class="row">
+          <input id="saved-code" readonly>
+          <button type="button" class="btn" id="copy-code">
+            Copiar
+          </button>
+        </div>
+
+        <button
+          type="button"
+          class="btn full"
+          id="copy-link"
+          style="margin-top:8px"
+        >
+          Copiar link para jogar
+        </button>
       </div>
     </section>
 
-    <!-- ========== PAINEL DE PALAVRAS ========== -->
-    <aside class="card">
+    <!-- MEUS MODELOS -->
+    <section
+      class="panel-section"
+      id="my-models-section"
+      hidden
+    >
       <div class="section-head">
-        <h2>Palavras para encontrar</h2>
-        <span id="badge" class="pill">0 restantes</span>
-      </div>
-
-      <ul class="words" id="word-list"></ul>
-
-      <section class="panel-section">
-        <h2>Personalizar o desafio</h2>
-
-        <label for="words-input">
-          Palavras (uma por linha ou separadas por vírgula)
-        </label>
-
-        <textarea
-          id="words-input"
-          spellcheck="false"
-        ></textarea>
-
-        <p class="helper">
-          Até 25 palavras com 2 a 20 letras cada.
-          Os acentos não aparecem no tabuleiro.
-        </p>
-
-        <button
-          type="button"
-          class="btn primary full"
-          id="apply"
-          style="margin-top:10px"
-        >
-          Criar novo jogo
-        </button>
-
-        <p id="local-status" class="status" role="status"></p>
-      </section>
-
-      <section class="panel-section">
-        <h2>Carregar modelo da nuvem</h2>
-
-        <label for="preset-code">
-          Código do modelo (sem login)
-        </label>
-
-        <div class="row">
-          <input
-            id="preset-code"
-            placeholder="CP-XXXX-XXXX-XXXX"
-            autocomplete="off"
-          >
-
-          <button
-            type="button"
-            class="btn primary"
-            id="load-preset"
-            disabled
-          >
-            Carregar
-          </button>
-        </div>
-
-        <p id="preset-status" class="status" role="status"></p>
-      </section>
-
-      <section class="panel-section">
-        <h2>Salvar na nuvem ☁</h2>
-
-        <label for="model-name">
-          Nome do modelo
-        </label>
-
-        <input
-          id="model-name"
-          maxlength="80"
-          placeholder="Ex.: Treinamento de qualidade"
-        >
-
-        <button
-          type="button"
-          class="btn primary full"
-          id="save-preset"
-          disabled
-          style="margin-top:10px"
-        >
-          Salvar modelo na nuvem
-        </button>
-
-        <p class="helper" id="save-hint">
-          Entre com seu login e senha para salvar.
-          Visitantes podem jogar e carregar códigos.
-        </p>
-
-        <p id="save-status" class="status" role="status"></p>
-
-        <div id="saved-share" hidden>
-          <label for="saved-code">
-            Código do modelo salvo
-          </label>
-
-          <div class="row">
-            <input id="saved-code" readonly>
-
-            <button type="button" class="btn" id="copy-code">
-              Copiar
-            </button>
-          </div>
-
-          <button
-            type="button"
-            class="btn full"
-            id="copy-link"
-            style="margin-top:8px"
-          >
-            Copiar link para jogar
-          </button>
-        </div>
-      </section>
-
-      <section
-        class="panel-section"
-        id="my-models-section"
-        hidden
-      >
-        <div class="section-head">
-          <h2>Meus modelos</h2>
-
-          <button
-            type="button"
-            class="btn small"
-            id="refresh-models"
-          >
-            Atualizar
-          </button>
-        </div>
-
-        <p class="helper">
-          Você pode carregar ou excluir modelos da sua conta.
-        </p>
-
-        <ul class="model-list" id="my-models"></ul>
-
-        <p id="models-status" class="status" role="status"></p>
-      </section>
-    </aside>
-  </main>
-
-  <!-- ========== ESCOLHA DO CRONÔMETRO ========== -->
-  <dialog
-    id="timer-dialog"
-    aria-labelledby="timer-title"
-    aria-describedby="timer-explanation"
-  >
-    <h2 id="timer-title">
-      ⏱ Como deseja jogar?
-    </h2>
-
-    <p id="timer-explanation">
-      Escolha se deseja acompanhar o tempo da partida.
-      O cronômetro conta de zero e para ao vencer ou desistir.
-    </p>
-
-    <div class="timer-choice-grid">
-      <button
-        type="button"
-        class="btn primary"
-        id="timer-yes"
-      >
-        ⏱ Com cronômetro
-      </button>
-
-      <button
-        type="button"
-        class="btn"
-        id="timer-no"
-      >
-        Sem cronômetro
-      </button>
-    </div>
-
-    <div class="dialog-actions">
-      <button
-        type="button"
-        class="btn small"
-        id="timer-cancel"
-        hidden
-      >
-        Cancelar e continuar
-      </button>
-    </div>
-  </dialog>
-
-  <!-- ========== LOGIN ========== -->
-  <dialog
-    id="login-dialog"
-    aria-labelledby="login-title"
-  >
-    <h2 id="login-title">
-      Acesso à nuvem
-    </h2>
-
-    <p>
-      Entre com o login e a senha cadastrados
-      no Firebase. Não é necessário entrar para jogar.
-    </p>
-
-    <form id="login-form" class="login-form">
-      <div>
-        <label for="login-username">
-          Login
-        </label>
-
-        <input
-          id="login-username"
-          name="username"
-          type="text"
-          placeholder="felipe.valente"
-          autocomplete="username"
-          autocapitalize="none"
-          spellcheck="false"
-          required
-        >
-
-        <p class="suffix">
-          Usaremos automaticamente @painel.com.br
-        </p>
-      </div>
-
-      <div>
-        <label for="login-password">
-          Senha
-        </label>
-
-        <input
-          id="login-password"
-          type="password"
-          name="password"
-          placeholder="Digite sua senha"
-          autocomplete="current-password"
-          required
-        >
-      </div>
-
-      <p id="login-status" class="status" role="alert"></p>
-
-      <div class="login-footer">
-        <button
-          type="button"
-          class="btn"
-          id="cancel-login"
-        >
-          Cancelar
-        </button>
-
-        <button
-          type="submit"
-          class="btn primary"
-          id="submit-login"
-        >
-          Entrar
+        <h2>Meus modelos</h2>
+        <button type="button" class="btn small" id="refresh-models">
+          Atualizar
         </button>
       </div>
-    </form>
-  </dialog>
 
-  <!-- ========== CONFIRMAÇÃO DE DESISTÊNCIA ========== -->
-  <dialog
-    id="giveup-dialog"
-    aria-labelledby="giveup-title"
-  >
-    <h2 id="giveup-title">
-      ⚠ Deseja desistir?
-    </h2>
-
-    <p>
-      Se confirmar, a partida será encerrada
-      e as palavras que faltam serão reveladas
-      em vermelho.
-    </p>
-
-    <div class="dialog-actions">
-      <button
-        type="button"
-        class="btn"
-        id="keep-playing"
-      >
-        Continuar jogando
-      </button>
-
-      <button
-        type="button"
-        class="btn danger"
-        id="confirm-giveup"
-      >
-        Sim, desistir
-      </button>
-    </div>
-  </dialog>
-
-  <!-- ========== TELA DE VITÓRIA ========== -->
-  <div
-    class="win-overlay"
-    id="win-overlay"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="win-title"
-    hidden
-  >
-    <div class="win-card">
-      <span class="win-icon" aria-hidden="true">🏆🎉</span>
-
-      <h2 id="win-title">
-        Parabéns!
-      </h2>
-
-      <p id="win-message">
-        Você encontrou todas as palavras!
+      <p class="helper">
+        Você pode carregar ou excluir modelos da sua conta.
       </p>
 
-      <p
-        id="win-time"
-        class="win-time"
-        hidden
-      ></p>
+      <ul class="model-list" id="my-models"></ul>
+      <p id="models-status" class="status" role="status"></p>
+    </section>
+  </aside>
+</main>
 
-      <button
-        type="button"
-        class="btn primary"
-        id="play-again"
-      >
-        Jogar novamente ↻
-      </button>
+<!-- ========================================
+     SELEÇÃO DE TEMA E CRONÔMETRO
+======================================== -->
+<dialog
+  id="theme-dialog"
+  aria-labelledby="theme-title"
+  aria-describedby="theme-explanation"
+>
+  <h2 id="theme-title">🎲 Escolha o próximo desafio</h2>
 
-      <button
-        type="button"
-        class="btn"
-        id="close-win"
-      >
-        Ver meu tabuleiro
-      </button>
+  <p id="theme-explanation">
+    Escolha uma categoria e um subtema para gerar
+    um novo caça-palavras.
+  </p>
+
+  <div class="theme-fields">
+    <div>
+      <label for="category-select">Categoria</label>
+      <select id="category-select"></select>
+    </div>
+
+    <div id="subtheme-field">
+      <label for="subtheme-select">Subtema</label>
+      <select id="subtheme-select"></select>
     </div>
   </div>
 
-  <div
-    class="confetti-layer"
-    id="confetti-layer"
-    aria-hidden="true"
-  ></div>
-
-  <footer>
-    Um novo tabuleiro é sorteado ao recarregar
-    ou ao usar Embaralhar. Salvar na nuvem exige
-    login e senha cadastrados no Firebase.
-  </footer>
-
-  <!-- ==========================================
-       JAVASCRIPT DO CAÇA-PALAVRAS
-  ========================================== -->
-  <script>
-    (() => {
-      'use strict';
-
-      // ========== CONFIGURAÇÕES ==========
-      const DEFAULT_WORDS = [
-        'CAÇA-PALAVRAS',
-        'DESAFIO',
-        'LÓGICA',
-        'ATENÇÃO',
-        'APRENDER',
-        'DIVERSÃO',
-        'RACIOCÍNIO',
-        'MEMÓRIA'
-      ];
-
-      const WORDS_KEY = 'caca-palavras-lista-v1';
-      const THEME_KEY = 'caca-palavras-tema-v1';
-      const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-      const DIRECTIONS = [
-        [-1,-1], [-1,0], [-1,1],
-        [0,-1],          [0,1],
-        [1,-1],  [1,0],  [1,1]
-      ];
-
-      const $ = id => document.getElementById(id);
-      const board = $('board');
-
-      let words = [];
-      let grid = [];
-      let size = 0;
-      let placements = new Map();
-      let found = new Set();
-      let drag = null;
-      let gameOver = false;
-      let selectedTheme = 'light';
-
-      // ========== CRONÔMETRO ==========
-      let timerEnabled = false;
-      let elapsedMs = 0;
-      let clockStartedAt = 0;
-      let clockHandle = null;
-      let hasStarted = false;
-
-      function formatTime(milliseconds) {
-        const seconds = Math.floor(milliseconds / 1000);
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const remainder = seconds % 60;
-
-        const mm = String(minutes).padStart(2, '0');
-        const ss = String(remainder).padStart(2, '0');
-
-        return hours
-          ? `${hours}:${mm}:${ss}`
-          : `${mm}:${ss}`;
-      }
-
-      function getElapsed() {
-        return elapsedMs + (
-          clockHandle
-            ? Date.now() - clockStartedAt
-            : 0
-        );
-      }
-
-      function updateClock() {
-        $('timer-value').textContent =
-          formatTime(getElapsed());
-      }
-
-      function pauseClock() {
-        if (clockHandle !== null) {
-          elapsedMs += Date.now() - clockStartedAt;
-          clearInterval(clockHandle);
-          clockHandle = null;
-        }
-
-        updateClock();
-      }
-
-      function resumeClock() {
-        if (
-          !timerEnabled ||
-          gameOver ||
-          !hasStarted ||
-          clockHandle !== null
-        ) {
-          return;
-        }
-
-        clockStartedAt = Date.now();
-
-        clockHandle = setInterval(
-          updateClock,
-          250
-        );
-
-        updateClock();
-      }
-
-      function chooseTimer() {
-        pauseClock();
-
-        $('timer-cancel').hidden = !hasStarted;
-        $('timer-dialog').showModal();
-      }
-
-      function beginWithTimer(enabled) {
-        timerEnabled = enabled;
-        $('timer-dialog').close();
-        startGame();
-      }
-
-      $('timer-yes').addEventListener(
-        'click',
-        () => beginWithTimer(true)
-      );
-
-      $('timer-no').addEventListener(
-        'click',
-        () => beginWithTimer(false)
-      );
-
-      $('timer-cancel').addEventListener('click', () => {
-        $('timer-dialog').close();
-        resumeClock();
-      });
-
-      $('timer-dialog').addEventListener('cancel', event => {
-        if (!hasStarted) {
-          event.preventDefault();
-        } else {
-          resumeClock();
-        }
-      });
-
-      // ========== PALAVRAS ==========
-      function normalize(value) {
-        return value
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toUpperCase()
-          .replace(/[^A-Z]/g, '');
-      }
-
-      function parseWords(value) {
-        const entries = (
-          Array.isArray(value)
-            ? value
-            : String(value).split(/[,;\n]+/)
-        )
-          .map(v => String(v).trim())
-          .filter(Boolean);
-
-        if (!entries.length) {
-          throw new Error(
-            'Informe pelo menos uma palavra.'
-          );
-        }
-
-        if (entries.length > 25) {
-          throw new Error(
-            'O máximo é 25 palavras.'
-          );
-        }
-
-        const map = new Map();
-
-        for (const label of entries) {
-          const clean = normalize(label);
-
-          if (clean.length < 2 || clean.length > 20) {
-            throw new Error(
-              'Cada palavra precisa ter entre 2 e 20 letras: ' +
-              label
-            );
-          }
-
-          if (!map.has(clean)) {
-            map.set(clean, {
-              clean,
-              label: label.toUpperCase()
-            });
-          }
-        }
-
-        return [...map.values()];
-      }
-
-      // ========== GERADOR ==========
-      function random(n) {
-        return Math.floor(Math.random() * n);
-      }
-
-      function canPlace(matrix, word, r, c, dr, dc) {
-        for (let i = 0; i < word.length; i++) {
-          const y = r + i * dr;
-          const x = c + i * dc;
-
-          if (
-            y < 0 ||
-            x < 0 ||
-            y >= matrix.length ||
-            x >= matrix.length
-          ) {
-            return false;
-          }
-
-          if (
-            matrix[y][x] &&
-            matrix[y][x] !== word[i]
-          ) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-
-      function place(matrix, word) {
-        const n = matrix.length;
-
-        for (let tries = 0; tries < 900; tries++) {
-          const [dr, dc] =
-            DIRECTIONS[random(DIRECTIONS.length)];
-
-          const minR = dr < 0
-            ? word.length - 1
-            : 0;
-
-          const maxR = dr > 0
-            ? n - word.length
-            : n - 1;
-
-          const minC = dc < 0
-            ? word.length - 1
-            : 0;
-
-          const maxC = dc > 0
-            ? n - word.length
-            : n - 1;
-
-          if (minR > maxR || minC > maxC) {
-            continue;
-          }
-
-          const r = minR + random(maxR - minR + 1);
-          const c = minC + random(maxC - minC + 1);
-
-          if (!canPlace(matrix, word, r, c, dr, dc)) {
-            continue;
-          }
-
-          const path = [];
-
-          for (let i = 0; i < word.length; i++) {
-            const y = r + dr * i;
-            const x = c + dc * i;
-
-            matrix[y][x] = word[i];
-            path.push([y, x]);
-          }
-
-          return path;
-        }
-
-        return null;
-      }
-
-      function generate() {
-        const longest = Math.max(
-          ...words.map(w => w.clean.length)
-        );
-
-        const total = words.reduce(
-          (sum, w) => sum + w.clean.length,
-          0
-        );
-
-        const initial = Math.max(
-          12,
-          longest,
-          Math.min(
-            24,
-            Math.ceil(Math.sqrt(total * 2.4))
-          )
-        );
-
-        for (let n = initial; n <= 24; n++) {
-          for (let attempt = 0; attempt < 75; attempt++) {
-            const matrix = Array.from(
-              { length: n },
-              () => Array(n).fill('')
-            );
-
-            const paths = new Map();
-            let success = true;
-
-            const sorted = [...words].sort(
-              (a, b) =>
-                b.clean.length - a.clean.length
-            );
-
-            for (const word of sorted) {
-              const path = place(
-                matrix,
-                word.clean
-              );
-
-              if (!path) {
-                success = false;
-                break;
-              }
-
-              paths.set(word.clean, path);
-            }
-
-            if (!success) {
-              continue;
-            }
-
-            for (let r = 0; r < n; r++) {
-              for (let c = 0; c < n; c++) {
-                if (!matrix[r][c]) {
-                  matrix[r][c] =
-                    ALPHABET[random(ALPHABET.length)];
-                }
-              }
-            }
-
-            return {
-              matrix,
-              n,
-              paths
-            };
-          }
-        }
-
+  <div class="theme-preview" aria-live="polite">
+    <strong id="theme-preview-title">Palavras desta partida</strong>
+    <p id="theme-preview-words"></p>
+  </div>
+
+  <p style="margin:17px 0 0">
+    <strong>Deseja jogar com cronômetro?</strong>
+  </p>
+
+  <div class="theme-choice-actions">
+    <button type="button" class="btn primary" id="timer-yes">
+      ⏱ Com cronômetro
+    </button>
+
+    <button type="button" class="btn" id="timer-no">
+      Sem cronômetro
+    </button>
+  </div>
+
+  <div class="dialog-actions">
+    <button
+      type="button"
+      class="btn small"
+      id="theme-cancel"
+      hidden
+    >
+      Cancelar e continuar
+    </button>
+  </div>
+</dialog>
+
+<!-- ========================================
+     LOGIN
+======================================== -->
+<dialog id="login-dialog" aria-labelledby="login-title">
+  <h2 id="login-title">Acesso à nuvem</h2>
+
+  <p>
+    Entre com o login e a senha cadastrados no Firebase.
+    Não é necessário entrar para jogar.
+  </p>
+
+  <form id="login-form" class="login-form">
+    <div>
+      <label for="login-username">Login</label>
+
+      <input
+        id="login-username"
+        name="username"
+        type="text"
+        placeholder="felipe.valente"
+        autocomplete="username"
+        autocapitalize="none"
+        spellcheck="false"
+        required
+      >
+
+      <p class="suffix">
+        Usaremos automaticamente @painel.com.br
+      </p>
+    </div>
+
+    <div>
+      <label for="login-password">Senha</label>
+
+      <input
+        id="login-password"
+        type="password"
+        name="password"
+        placeholder="Digite sua senha"
+        autocomplete="current-password"
+        required
+      >
+    </div>
+
+    <p id="login-status" class="status" role="alert"></p>
+
+    <div class="login-footer">
+      <button type="button" class="btn" id="cancel-login">
+        Cancelar
+      </button>
+
+      <button type="submit" class="btn primary" id="submit-login">
+        Entrar
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ========================================
+     DESISTÊNCIA
+======================================== -->
+<dialog id="giveup-dialog" aria-labelledby="giveup-title">
+  <h2 id="giveup-title">⚠ Deseja desistir?</h2>
+
+  <p>
+    Se confirmar, a partida será encerrada e as
+    palavras que faltam serão reveladas em vermelho.
+  </p>
+
+  <div class="dialog-actions">
+    <button type="button" class="btn" id="keep-playing">
+      Continuar jogando
+    </button>
+
+    <button type="button" class="btn danger" id="confirm-giveup">
+      Sim, desistir
+    </button>
+  </div>
+</dialog>
+
+<!-- ========================================
+     VITÓRIA
+======================================== -->
+<div
+  class="win-overlay"
+  id="win-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="win-title"
+  hidden
+>
+  <div class="win-card">
+    <span class="win-icon" aria-hidden="true">🏆🎉</span>
+
+    <h2 id="win-title">Parabéns!</h2>
+
+    <p id="win-message">
+      Você encontrou todas as palavras!
+    </p>
+
+    <p id="win-time" class="win-time" hidden></p>
+
+    <button type="button" class="btn primary" id="play-again">
+      🎲 Escolher próximo tema
+    </button>
+
+    <button type="button" class="btn" id="close-win">
+      Ver meu tabuleiro
+    </button>
+  </div>
+</div>
+
+<div
+  class="confetti-layer"
+  id="confetti-layer"
+  aria-hidden="true"
+></div>
+
+<footer>
+  Escolha entre 12 subtemas ou utilize suas próprias palavras.
+  Salvar na nuvem exige login e senha cadastrados no Firebase.
+</footer>
+
+<!-- ========================================
+     JAVASCRIPT PRINCIPAL
+======================================== -->
+<script>
+(() => {
+  'use strict';
+
+  /* ======================================
+     CATEGORIAS, SUBTEMAS E PALAVRAS
+  ====================================== */
+
+  const THEMES = {
+    "Cultura Pop e Entretenimento": {
+      "Videogames Clássicos e RPGs": [
+        "Switch Axe",
+        "Dragon Slayer",
+        "Masmorra",
+        "Inventário",
+        "Manancial",
+        "Cavaleiro",
+        "Habilidade",
+        "Missão",
+        "Tesouro",
+        "Poção"
+      ],
+      "Universos de Fantasia e Sci-Fi": [
+        "Imperador",
+        "Galáxia",
+        "Tripulação",
+        "Fortaleza",
+        "Profecia",
+        "Tecnologia",
+        "Mutação",
+        "Dimensão",
+        "Apocalipse",
+        "Guardião"
+      ],
+      "Música e Bandas (Nu Metal e Rock Alternativo)": [
+        "Distorção",
+        "Bateria",
+        "Acorde",
+        "Melodia",
+        "Microfone",
+        "Amplificador",
+        "Harmonia",
+        "Grave",
+        "Frequência",
+        "Composição"
+      ],
+      "Animes e Mangás": [
+        "Protagonista",
+        "Espadachim",
+        "Poder",
+        "Vingança",
+        "Torneio",
+        "Dimensão",
+        "Lenda",
+        "Aliança",
+        "Segredo",
+        "Destino"
+      ]
+    },
+
+    "Ciências e Exatas": {
+      "Termos de Física e Matemática": [
+        "Termodinâmica",
+        "Aceleração",
+        "Gravidade",
+        "Velocidade",
+        "Dinâmica",
+        "Mecânica",
+        "Energia",
+        "Resistência",
+        "Trajetória",
+        "Potência"
+      ],
+      "Estatística e Análise de Dados": [
+        "Regressão",
+        "Variância",
+        "Correlação",
+        "Amostragem",
+        "Mediana",
+        "Probabilidade",
+        "Tendência",
+        "Hipótese",
+        "Distribuição",
+        "Frequência"
+      ],
+      "Astronomia e Espaço": [
+        "Constelação",
+        "Supernova",
+        "Gravidade",
+        "Atmosfera",
+        "Satélite",
+        "Eclipse",
+        "Nebulosa",
+        "Órbita",
+        "Meteorito",
+        "Infinito"
+      ]
+    },
+
+    "Cotidiano e Profissional": {
+      "Tecnologia e Programação": [
+        "Algoritmo",
+        "Variável",
+        "Função",
+        "Compilador",
+        "Interface",
+        "Estrutura",
+        "Repositório",
+        "Sistema",
+        "Servidor",
+        "Desenvolvedor"
+      ],
+      "Produtividade e Escritório": [
+        "Automação",
+        "Relatório",
+        "Processo",
+        "Planejamento",
+        "Demanda",
+        "Cronograma",
+        "Estratégia",
+        "Indicador",
+        "Eficiência",
+        "Desempenho"
+      ],
+      "Gastronomia e Cafés": [
+        "Espresso",
+        "Coador",
+        "Caramelo",
+        "Infusão",
+        "Aroma",
+        "Torrefação",
+        "Paladar",
+        "Extrato",
+        "Harmonização",
+        "Temperatura"
+      ]
+    },
+
+    "Temas Gerais e Universais": {
+      "Natureza e Geografia": [
+        "Ecossistema",
+        "Biodiversidade",
+        "Montanha",
+        "Nascente",
+        "Vegetação",
+        "Continente",
+        "Arquipélago",
+        "Atmosfera",
+        "Península",
+        "Preservação"
+      ],
+      "Viagens e Lugares": [
+        "Passaporte",
+        "Aeroporto",
+        "Hospedagem",
+        "Itinerário",
+        "Aventura",
+        "Destino",
+        "Excursão",
+        "Turismo",
+        "Bagagem",
+        "Horizonte"
+      ]
+    }
+  };
+
+  /* ======================================
+     CONFIGURAÇÕES
+  ====================================== */
+
+  const DEFAULT_WORDS =
+    THEMES["Cultura Pop e Entretenimento"]
+          ["Videogames Clássicos e RPGs"];
+
+  const WORDS_KEY = "caca-palavras-lista-v1";
+  const THEME_KEY = "caca-palavras-tema-v1";
+  const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  const DIRS = [
+    [-1,-1],[-1,0],[-1,1],
+    [0,-1],        [0,1],
+    [1,-1],[1,0],[1,1]
+  ];
+
+  const $ = id => document.getElementById(id);
+  const board = $("board");
+  const picker = $("theme-dialog");
+
+  let words = [];
+  let customWords = [];
+  let customName = "Minhas palavras";
+
+  let grid = [];
+  let size = 0;
+  let placements = new Map();
+
+  let found = new Set();
+  let drag = null;
+  let gameOver = false;
+  let hasStarted = false;
+
+  let themeName = "";
+  let selectedTheme = "light";
+
+  let timerEnabled = false;
+  let elapsedMs = 0;
+  let clockStartedAt = 0;
+  let clockHandle = null;
+
+  /* ======================================
+     TRATAMENTO DAS PALAVRAS
+  ====================================== */
+
+  function normalize(value) {
+    return String(value)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toUpperCase()
+      .replace(/[^A-Z]/g, "");
+  }
+
+  function parseWords(value) {
+    const entries = (
+      Array.isArray(value)
+        ? value
+        : String(value).split(/[,;\n]+/)
+    )
+      .map(v => String(v).trim())
+      .filter(Boolean);
+
+    if (!entries.length || entries.length > 25) {
+      throw new Error("Informe entre 1 e 25 palavras.");
+    }
+
+    const unique = new Map();
+
+    for (const label of entries) {
+      const clean = normalize(label);
+
+      if (clean.length < 2 || clean.length > 20) {
         throw new Error(
-          'Não foi possível encaixar as palavras. ' +
-          'Reduza a quantidade ou o tamanho delas.'
+          "Cada palavra precisa ter entre 2 e 20 letras: " +
+          label
         );
       }
 
-      // ========== TABULEIRO ==========
-      function cellAt(r, c) {
-        return board.children[r * size + c];
-      }
-
-      function renderBoard() {
-        board.style.setProperty('--size', size);
-
-        const frag = document.createDocumentFragment();
-
-        grid.forEach((row, r) => {
-          row.forEach((letter, c) => {
-            const el = document.createElement('div');
-
-            el.className = 'cell';
-            el.textContent = letter;
-            el.dataset.r = r;
-            el.dataset.c = c;
-
-            el.setAttribute('role', 'gridcell');
-            frag.appendChild(el);
-          });
+      if (!unique.has(clean)) {
+        unique.set(clean, {
+          clean,
+          label: label.toUpperCase()
         });
+      }
+    }
 
-        board.replaceChildren(frag);
+    return [...unique.values()];
+  }
+
+  /* ======================================
+     PREENCHER CATEGORIAS
+  ====================================== */
+
+  function fillCategories() {
+    const select = $("category-select");
+    select.replaceChildren();
+
+    const categories = [
+      ["aleatorio", "🎲 Surpreenda-me (tema aleatório)"],
+      ...Object.keys(THEMES).map(name => [name,name]),
+      ["personalizado", "📝 Minhas palavras / modelo salvo"]
+    ];
+
+    for (const [value,label] of categories) {
+      select.add(new Option(label,value));
+    }
+
+    select.value = "aleatorio";
+    updateSubthemes();
+  }
+
+  function updateSubthemes() {
+    const category = $("category-select").value;
+    const select = $("subtheme-select");
+
+    select.replaceChildren();
+
+    const isTheme = !!THEMES[category];
+
+    $("subtheme-field").hidden = !isTheme;
+
+    if (isTheme) {
+      Object.keys(THEMES[category]).forEach(title => {
+        select.add(new Option(title,title));
+      });
+    }
+
+    showThemePreview();
+  }
+
+  function showThemePreview() {
+    const category = $("category-select").value;
+    const title = $("theme-preview-title");
+    const preview = $("theme-preview-words");
+
+    if (category === "aleatorio") {
+      title.textContent = "Surpresa a cada partida";
+      preview.textContent =
+        "Será sorteado um dos 12 subtemas, " +
+        "com 10 palavras.";
+    }
+    else if (category === "personalizado") {
+      title.textContent = customName;
+      preview.textContent =
+        customWords.map(w => w.label).join(" • ");
+    }
+    else {
+      const sub = $("subtheme-select").value;
+
+      title.textContent = sub;
+      preview.textContent =
+        (THEMES[category][sub] || []).join(" • ");
+    }
+  }
+
+  $("category-select").addEventListener(
+    "change",
+    updateSubthemes
+  );
+
+  $("subtheme-select").addEventListener(
+    "change",
+    showThemePreview
+  );
+
+  /* ======================================
+     JANELA DE ESCOLHA
+  ====================================== */
+
+  function openThemePicker(preferCustom = false) {
+    pauseClock();
+    hideWin();
+
+    if (preferCustom) {
+      $("category-select").value = "personalizado";
+    }
+
+    $("theme-cancel").hidden = !hasStarted;
+
+    updateSubthemes();
+
+    if (!picker.open) {
+      picker.showModal();
+    }
+
+    $("category-select").focus();
+  }
+
+  function challengeForSelection() {
+    let category = $("category-select").value;
+
+    if (category === "personalizado") {
+      return {
+        label: customName,
+        list: customWords.map(w => w.label)
+      };
+    }
+
+    if (category === "aleatorio") {
+      const categories = Object.keys(THEMES);
+
+      category = categories[
+        Math.floor(Math.random() * categories.length)
+      ];
+
+      const subthemes = Object.keys(THEMES[category]);
+
+      const sub = subthemes[
+        Math.floor(Math.random() * subthemes.length)
+      ];
+
+      return {
+        label: category + " • " + sub,
+        list: THEMES[category][sub]
+      };
+    }
+
+    const sub = $("subtheme-select").value;
+
+    return {
+      label: category + " • " + sub,
+      list: THEMES[category][sub]
+    };
+  }
+
+  function startChosenGame(enabled) {
+    const choice = challengeForSelection();
+
+    const previousWords = words;
+    const previousTheme = themeName;
+    const previousTimer = timerEnabled;
+
+    try {
+      words = parseWords(choice.list);
+      themeName = choice.label;
+      timerEnabled = enabled;
+
+      startGame();
+
+      $("words-input").value =
+        words.map(w => w.label).join("\n");
+
+      picker.close();
+    }
+    catch (error) {
+      words = previousWords;
+      themeName = previousTheme;
+      timerEnabled = previousTimer;
+
+      $("theme-preview-title").textContent =
+        "Não foi possível iniciar";
+
+      $("theme-preview-words").textContent =
+        error.message;
+    }
+  }
+
+  $("timer-yes").addEventListener(
+    "click",
+    () => startChosenGame(true)
+  );
+
+  $("timer-no").addEventListener(
+    "click",
+    () => startChosenGame(false)
+  );
+
+  $("theme-cancel").addEventListener("click", () => {
+    picker.close();
+    resumeClock();
+  });
+
+  picker.addEventListener("cancel", event => {
+    if (!hasStarted) {
+      event.preventDefault();
+    } else {
+      resumeClock();
+    }
+  });
+
+  /* ======================================
+     CRONÔMETRO
+  ====================================== */
+
+  function formatTime(ms) {
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600);
+
+    const m = String(
+      Math.floor((s % 3600) / 60)
+    ).padStart(2,"0");
+
+    const sec = String(s % 60).padStart(2,"0");
+
+    return h
+      ? `${h}:${m}:${sec}`
+      : `${m}:${sec}`;
+  }
+
+  function getElapsed() {
+    return elapsedMs + (
+      clockHandle !== null
+        ? Date.now() - clockStartedAt
+        : 0
+    );
+  }
+
+  function updateClock() {
+    $("timer-value").textContent =
+      formatTime(getElapsed());
+  }
+
+  function pauseClock() {
+    if (clockHandle !== null) {
+      elapsedMs += Date.now() - clockStartedAt;
+
+      clearInterval(clockHandle);
+      clockHandle = null;
+    }
+
+    updateClock();
+  }
+
+  function resumeClock() {
+    if (
+      !hasStarted ||
+      !timerEnabled ||
+      gameOver ||
+      clockHandle !== null
+    ) return;
+
+    clockStartedAt = Date.now();
+
+    clockHandle = setInterval(updateClock,250);
+    updateClock();
+  }
+
+  /* ======================================
+     GERAÇÃO DO TABULEIRO
+  ====================================== */
+
+  const random = n =>
+    Math.floor(Math.random() * n);
+
+  function canPlace(matrix,word,r,c,dr,dc) {
+    for (let i = 0; i < word.length; i++) {
+      const y = r + i * dr;
+      const x = c + i * dc;
+
+      if (
+        y < 0 || x < 0 ||
+        y >= matrix.length ||
+        x >= matrix.length
+      ) return false;
+
+      if (
+        matrix[y][x] &&
+        matrix[y][x] !== word[i]
+      ) return false;
+    }
+
+    return true;
+  }
+
+  function place(matrix,word) {
+    const n = matrix.length;
+
+    for (let tries = 0; tries < 900; tries++) {
+      const [dr,dc] = DIRS[random(DIRS.length)];
+
+      const minR = dr < 0 ? word.length - 1 : 0;
+      const maxR = dr > 0 ? n - word.length : n - 1;
+      const minC = dc < 0 ? word.length - 1 : 0;
+      const maxC = dc > 0 ? n - word.length : n - 1;
+
+      if (minR > maxR || minC > maxC) continue;
+
+      const r = minR + random(maxR - minR + 1);
+      const c = minC + random(maxC - minC + 1);
+
+      if (!canPlace(matrix,word,r,c,dr,dc)) {
+        continue;
       }
 
-      function renderWords() {
-        const frag = document.createDocumentFragment();
+      const path = [];
 
-        words.forEach(word => {
-          const yes = found.has(word.clean);
-          const no = gameOver && !yes;
+      for (let i = 0; i < word.length; i++) {
+        const y = r + dr * i;
+        const x = c + dc * i;
 
-          const li = document.createElement('li');
-          li.className =
-            'word' + (yes ? ' found' : no ? ' missed' : '');
-
-          const mark = document.createElement('span');
-          mark.className = 'mark';
-          mark.textContent = yes ? '✓' : no ? '×' : '';
-
-          const title = document.createElement('span');
-          title.className = 'word-label';
-          title.textContent = word.label;
-
-          li.append(mark, title);
-          frag.appendChild(li);
-        });
-
-        $('word-list').replaceChildren(frag);
-
-        $('score').textContent =
-          `${found.size} / ${words.length} encontradas`;
-
-        $('badge').textContent = gameOver
-          ? 'Encerrado'
-          : `${words.length - found.size} restantes`;
-
-        $('progress-fill').style.width =
-          `${(found.size / words.length) * 100}%`;
+        matrix[y][x] = word[i];
+        path.push([y,x]);
       }
 
-      // ========== NOVA PARTIDA ==========
-      function hideWin() {
-        $('win-overlay').hidden = true;
-        $('confetti-layer').replaceChildren();
-      }
+      return path;
+    }
 
-      function startGame() {
-        const generated = generate();
+    return null;
+  }
 
-        pauseClock();
-        elapsedMs = 0;
+  function generate() {
+    const longest = Math.max(
+      ...words.map(w => w.clean.length)
+    );
 
-        $('timer-display').hidden = !timerEnabled;
-        updateClock();
+    const total = words.reduce(
+      (sum,w) => sum + w.clean.length,0
+    );
 
-        grid = generated.matrix;
-        size = generated.n;
-        placements = generated.paths;
+    const initial = Math.max(
+      12,
+      longest,
+      Math.min(
+        24,
+        Math.ceil(Math.sqrt(total * 2.4))
+      )
+    );
 
-        found = new Set();
-        drag = null;
-        gameOver = false;
-        hasStarted = true;
-
-        renderBoard();
-        renderWords();
-
-        board.classList.remove('locked');
-        $('legend').hidden = true;
-
-        $('giveup').disabled = false;
-        $('giveup').textContent = '⚑ Desistir';
-
-        $('feedback').className = 'feedback';
-        $('feedback').textContent =
-          'Encontre a primeira palavra!';
-
-        if ($('giveup-dialog').open) {
-          $('giveup-dialog').close();
-        }
-
-        hideWin();
-        resumeClock();
-      }
-
-      function changeWords(list, remember = true) {
-        const parsed = parseWords(list);
-        const previous = words;
-
-        words = parsed;
-
-        try {
-          startGame();
-        } catch (e) {
-          words = previous;
-          throw e;
-        }
-
-        $('words-input').value =
-          parsed.map(w => w.label).join('\n');
-
-        if (remember) {
-          try {
-            localStorage.setItem(
-              WORDS_KEY,
-              $('words-input').value
-            );
-          } catch (_) {}
-        }
-      }
-
-      // ========== SELEÇÃO DAS LETRAS ==========
-      function coords(el) {
-        return [
-          Number(el.dataset.r),
-          Number(el.dataset.c)
-        ];
-      }
-
-      function hover(event) {
-        const el = document
-          .elementFromPoint(
-            event.clientX,
-            event.clientY
-          )
-          ?.closest('.cell');
-
-        return el && board.contains(el)
-          ? el
-          : null;
-      }
-
-      function pathBetween(a, b) {
-        const dy = b[0] - a[0];
-        const dx = b[1] - a[1];
-
-        if (!dy && !dx) {
-          return [a];
-        }
-
-        let best = DIRECTIONS[0];
-        let score = -Infinity;
-
-        for (const dir of DIRECTIONS) {
-          const dot =
-            (dy * dir[0] + dx * dir[1]) /
-            Math.hypot(...dir);
-
-          if (dot > score) {
-            score = dot;
-            best = dir;
-          }
-        }
-
-        const [dr, dc] = best;
-
-        const steps = Math.max(
-          0,
-          Math.round(
-            (dy * dr + dx * dc) /
-            (dr * dr + dc * dc)
-          )
+    for (let n = initial; n <= 24; n++) {
+      for (let attempt = 0; attempt < 75; attempt++) {
+        const matrix = Array.from(
+          {length:n},
+          () => Array(n).fill("")
         );
 
-        const result = [];
+        const paths = new Map();
 
-        for (let i = 0; i <= steps; i++) {
-          const r = a[0] + i * dr;
-          const c = a[1] + i * dc;
+        const sorted = [...words].sort(
+          (a,b) => b.clean.length - a.clean.length
+        );
 
-          if (
-            r < 0 ||
-            c < 0 ||
-            r >= size ||
-            c >= size
-          ) {
+        let success = true;
+
+        for (const word of sorted) {
+          const path = place(matrix,word.clean);
+
+          if (!path) {
+            success = false;
             break;
           }
 
-          result.push([r, c]);
+          paths.set(word.clean,path);
         }
 
-        return result;
-      }
+        if (!success) continue;
 
-      function highlight() {
-        board
-          .querySelectorAll('.selected')
-          .forEach(el => {
-            el.classList.remove('selected');
-          });
-
-        if (drag && !gameOver) {
-          drag.path.forEach(([r, c]) => {
-            cellAt(r, c).classList.add('selected');
-          });
-        }
-      }
-
-      function samePath(selected, actual) {
-        if (
-          !actual ||
-          selected.length !== actual.length
-        ) {
-          return false;
-        }
-
-        const forward = selected.every(
-          ([r, c], i) =>
-            r === actual[i][0] &&
-            c === actual[i][1]
-        );
-
-        const reverse = selected.every(
-          ([r, c], i) => {
-            const p = actual[actual.length - 1 - i];
-
-            return r === p[0] && c === p[1];
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if (!matrix[r][c]) {
+              matrix[r][c] =
+                LETTERS[random(LETTERS.length)];
+            }
           }
-        );
+        }
 
-        return forward || reverse;
+        return {matrix,n,paths};
       }
+    }
 
-      // ========== INICIAR ARRASTE ==========
-      board.addEventListener('pointerdown', e => {
-        if (
-          gameOver ||
-          drag ||
-          (e.pointerType === 'mouse' && e.button !== 0)
-        ) {
-          return;
-        }
+    throw new Error(
+      "Não foi possível encaixar as palavras. " +
+      "Experimente uma lista menor."
+    );
+  }
 
-        const cell = e.target.closest('.cell');
-        if (!cell) return;
+  /* ======================================
+     DESENHO DO TABULEIRO
+  ====================================== */
 
-        e.preventDefault();
+  const cellAt = (r,c) =>
+    board.children[r * size + c];
 
-        const start = coords(cell);
+  function renderBoard() {
+    board.style.setProperty("--size",size);
 
-        drag = {
-          pointerId: e.pointerId,
-          start,
-          path: [start]
-        };
+    const fragment = document.createDocumentFragment();
 
-        board.setPointerCapture(e.pointerId);
-        highlight();
+    grid.forEach((row,r) => {
+      row.forEach((letter,c) => {
+        const el = document.createElement("div");
+
+        el.className = "cell";
+        el.textContent = letter;
+        el.dataset.r = r;
+        el.dataset.c = c;
+        el.setAttribute("role","gridcell");
+
+        fragment.appendChild(el);
       });
+    });
 
-      // ========== MOVIMENTAR ARRASTE ==========
-      board.addEventListener('pointermove', e => {
-        if (
-          !drag ||
-          e.pointerId !== drag.pointerId
-        ) {
-          return;
-        }
+    board.replaceChildren(fragment);
+  }
 
-        const cell = hover(e);
+  function renderWords() {
+    const fragment = document.createDocumentFragment();
 
-        if (cell) {
-          drag.path = pathBetween(
-            drag.start,
-            coords(cell)
-          );
+    words.forEach(word => {
+      const yes = found.has(word.clean);
+      const no = gameOver && !yes;
 
-          highlight();
-        }
-      });
+      const li = document.createElement("li");
 
-      board.addEventListener('pointercancel', e => {
-        if (
-          drag &&
-          drag.pointerId === e.pointerId
-        ) {
-          drag = null;
-          highlight();
-        }
-      });
+      li.className =
+        "word" +
+        (yes ? " found" : no ? " missed" : "");
 
-      // ========== VALIDAR PALAVRA ==========
-      board.addEventListener('pointerup', e => {
-        if (
-          !drag ||
-          e.pointerId !== drag.pointerId
-        ) {
-          return;
-        }
+      const mark = document.createElement("span");
+      mark.className = "mark";
+      mark.textContent = yes ? "✓" : no ? "×" : "";
 
-        const cell = hover(e);
+      const label = document.createElement("span");
+      label.className = "word-label";
+      label.textContent = word.label;
 
-        if (cell) {
-          drag.path = pathBetween(
-            drag.start,
-            coords(cell)
-          );
-        }
+      li.append(mark,label);
+      fragment.appendChild(li);
+    });
 
-        const path = drag.path;
-        drag = null;
-        highlight();
+    $("word-list").replaceChildren(fragment);
 
-        if (gameOver || path.length < 2) {
-          return;
-        }
+    $("score").textContent =
+      `${found.size} / ${words.length} encontradas`;
 
-        const match = words.find(
-          w =>
-            !found.has(w.clean) &&
-            samePath(
-              path,
-              placements.get(w.clean)
-            )
-        );
+    $("badge").textContent = gameOver
+      ? "Encerrado"
+      : `${words.length - found.size} restantes`;
 
-        if (!match) {
-          $('feedback').className = 'feedback';
-          $('feedback').textContent =
-            'Sequência incorreta. Tente novamente!';
-          return;
-        }
+    $("progress-fill").style.width =
+      `${words.length
+        ? 100 * found.size / words.length
+        : 0}%`;
+  }
 
-        found.add(match.clean);
+  /* ======================================
+     INICIAR PARTIDA
+  ====================================== */
 
-        placements.get(match.clean).forEach(
-          ([r, c]) => {
-            cellAt(r, c).classList.add('found');
-          }
-        );
+  function hideWin() {
+    $("win-overlay").hidden = true;
+    $("confetti-layer").replaceChildren();
+  }
 
-        if (found.size === words.length) {
-          pauseClock();
+  function startGame() {
+    const generated = generate();
 
-          gameOver = true;
-          board.classList.add('locked');
-          $('giveup').disabled = true;
+    pauseClock();
 
-          $('feedback').textContent =
-            '🎉 Você encontrou todas as palavras!';
+    elapsedMs = 0;
+    updateClock();
 
-          $('feedback').className =
-            'feedback success';
+    $("timer-display").hidden = !timerEnabled;
 
-          renderWords();
-          congratulate();
-          return;
-        }
+    grid = generated.matrix;
+    size = generated.n;
+    placements = generated.paths;
 
-        renderWords();
+    found = new Set();
+    drag = null;
+    gameOver = false;
+    hasStarted = true;
 
-        $('feedback').className =
-          'feedback success';
+    renderBoard();
+    renderWords();
 
-        $('feedback').textContent =
-          `✓ Palavra encontrada: ${match.label}`;
-      });
+    $("current-theme").textContent = themeName;
+    $("current-theme").hidden = false;
 
-      // ========== CONFETES ==========
-      function confetti() {
-        if (
-          window.matchMedia(
-            '(prefers-reduced-motion: reduce)'
-          ).matches
-        ) {
-          return;
-        }
+    $("next-theme").hidden = true;
 
-        const layer = $('confetti-layer');
-        layer.replaceChildren();
+    board.classList.remove("locked");
+    $("legend").hidden = true;
 
-        const colors = [
-          '#f472b6',
-          '#34d399',
-          '#60a5fa',
-          '#facc15',
-          '#a78bfa',
-          '#fb923c'
-        ];
+    $("giveup").disabled = false;
+    $("giveup").textContent = "⚑ Desistir";
 
-        const frag = document.createDocumentFragment();
+    $("feedback").className = "feedback";
+    $("feedback").textContent =
+      "Encontre a primeira palavra!";
 
-        for (let i = 0; i < 110; i++) {
-          const piece = document.createElement('span');
-          piece.className = 'confetti';
+    if ($("giveup-dialog").open) {
+      $("giveup-dialog").close();
+    }
 
-          piece.style.setProperty(
-            '--x',
-            `${Math.random() * 100}%`
-          );
+    hideWin();
+    resumeClock();
+  }
 
-          piece.style.setProperty(
-            '--color',
-            colors[i % colors.length]
-          );
+  function setCustomWords(
+    list,
+    label = "Minhas palavras"
+  ) {
+    const parsed = parseWords(list);
 
-          piece.style.setProperty(
-            '--duration',
-            `${2.8 + Math.random() * 2.2}s`
-          );
+    customWords = parsed;
+    customName = label;
 
-          piece.style.setProperty(
-            '--delay',
-            `${Math.random() * .8}s`
-          );
+    $("words-input").value =
+      parsed.map(w => w.label).join("\n");
 
-          piece.style.setProperty(
-            '--drift',
-            `${(Math.random() - .5) * 240}px`
-          );
-
-          frag.appendChild(piece);
-        }
-
-        layer.appendChild(frag);
-
-        setTimeout(() => {
-          if (!$('win-overlay').hidden) {
-            layer.replaceChildren();
-          }
-        }, 6500);
-      }
-
-      // ========== MENSAGEM DE VITÓRIA ==========
-      function congratulate() {
-        $('win-message').textContent =
-          `Você encontrou as ${words.length} palavras! ` +
-          'Excelente trabalho!';
-
-        $('win-time').hidden = !timerEnabled;
-
-        $('win-time').textContent = timerEnabled
-          ? `Seu tempo: ${formatTime(getElapsed())}`
-          : '';
-
-        $('win-overlay').hidden = false;
-        confetti();
-
-        $('play-again').focus();
-      }
-
-      $('play-again').addEventListener('click', () => {
-        hideWin();
-        chooseTimer();
-      });
-
-      $('close-win').addEventListener('click', hideWin);
-
-      // ========== EMBARALHAR ==========
-      $('shuffle').addEventListener('click', chooseTimer);
-
-      // ========== DESISTIR ==========
-      $('giveup').addEventListener('click', () => {
-        if (!gameOver) {
-          pauseClock();
-          $('giveup-dialog').showModal();
-        }
-      });
-
-      $('keep-playing').addEventListener('click', () => {
-        $('giveup-dialog').close();
-        resumeClock();
-      });
-
-      $('giveup-dialog').addEventListener(
-        'cancel',
-        () => resumeClock()
+    try {
+      localStorage.setItem(
+        WORDS_KEY,
+        $("words-input").value
       );
+    } catch (_) {}
 
-      $('confirm-giveup').addEventListener('click', () => {
-        $('giveup-dialog').close();
+    openThemePicker(true);
+  }
 
-        if (gameOver) return;
+  /* ======================================
+     SELEÇÃO COM MOUSE OU TOQUE
+  ====================================== */
 
-        pauseClock();
+  function coords(el) {
+    return [
+      Number(el.dataset.r),
+      Number(el.dataset.c)
+    ];
+  }
 
-        gameOver = true;
-        drag = null;
-        highlight();
+  function hover(event) {
+    const el = document.elementFromPoint(
+      event.clientX,
+      event.clientY
+    )?.closest(".cell");
 
-        board.classList.add('locked');
+    return el && board.contains(el) ? el : null;
+  }
 
-        $('giveup').disabled = true;
-        $('giveup').textContent = '⚑ Desistiu';
-        $('legend').hidden = false;
+  function pathBetween(a,b) {
+    const dy = b[0] - a[0];
+    const dx = b[1] - a[1];
 
-        for (const w of words) {
-          if (!found.has(w.clean)) {
-            placements.get(w.clean).forEach(
-              ([r, c]) => {
-                cellAt(r, c).classList.add('missed');
-              }
-            );
-          }
-        }
+    if (!dy && !dx) return [a];
 
-        renderWords();
+    let best = DIRS[0];
+    let score = -Infinity;
 
-        $('feedback').className =
-          'feedback alert';
+    for (const dir of DIRS) {
+      const dot = (
+        dy * dir[0] + dx * dir[1]
+      ) / Math.hypot(...dir);
 
-        $('feedback').textContent =
-          `Partida encerrada: ${words.length - found.size} ` +
-          'palavra(s) revelada(s) em vermelho.';
-      });
-
-      // ========== CRIAR JOGO ==========
-      $('apply').addEventListener('click', () => {
-        try {
-          changeWords($('words-input').value);
-
-          const u = new URL(location.href);
-          u.searchParams.delete('modelo');
-
-          history.replaceState(null, '', u);
-
-          $('local-status').textContent =
-            'Novo jogo criado!';
-
-          $('local-status').className =
-            'status ok';
-
-        } catch (e) {
-          $('local-status').textContent =
-            e.message;
-
-          $('local-status').className =
-            'status error';
-        }
-      });
-
-      // ========== TEMA CLARO / ESCURO ==========
-      function applyTheme(theme) {
-        selectedTheme = theme;
-
-        const dark = theme === 'dark';
-
-        document.documentElement.dataset.theme =
-          theme;
-
-        $('theme-toggle').firstChild.textContent =
-          dark ? '☀ ' : '☾ ';
-
-        $('theme-label').textContent =
-          dark ? 'Claro' : 'Escuro';
-
-        $('theme-toggle').setAttribute(
-          'aria-label',
-          dark
-            ? 'Ativar modo claro'
-            : 'Ativar modo escuro'
-        );
-
-        document.querySelector(
-          'meta[name="theme-color"]'
-        ).content =
-          dark ? '#0c1322' : '#f4f7fd';
+      if (dot > score) {
+        score = dot;
+        best = dir;
       }
+    }
 
-      $('theme-toggle').addEventListener('click', () => {
-        applyTheme(
-          selectedTheme === 'light'
-            ? 'dark'
-            : 'light'
-        );
+    const [dr,dc] = best;
 
-        try {
-          localStorage.setItem(
-            THEME_KEY,
-            selectedTheme
-          );
-        } catch (_) {}
+    const steps = Math.max(
+      0,
+      Math.round(
+        (dy * dr + dx * dc) /
+        (dr * dr + dc * dc)
+      )
+    );
+
+    const path = [];
+
+    for (let i = 0; i <= steps; i++) {
+      const r = a[0] + i * dr;
+      const c = a[1] + i * dc;
+
+      if (
+        r < 0 || c < 0 ||
+        r >= size || c >= size
+      ) break;
+
+      path.push([r,c]);
+    }
+
+    return path;
+  }
+
+  function highlight() {
+    board.querySelectorAll(".selected").forEach(el => {
+      el.classList.remove("selected");
+    });
+
+    if (drag && !gameOver) {
+      drag.path.forEach(([r,c]) => {
+        cellAt(r,c).classList.add("selected");
       });
+    }
+  }
 
-      // ========== INICIALIZAR ==========
-      let initialTheme;
+  function samePath(selected,actual) {
+    if (
+      !actual ||
+      selected.length !== actual.length
+    ) return false;
 
-      try {
-        initialTheme =
-          localStorage.getItem(THEME_KEY);
-      } catch (_) {}
+    return selected.every(([r,c],i) =>
+      r === actual[i][0] &&
+      c === actual[i][1]
+    ) || selected.every(([r,c],i) => {
+      const p = actual[actual.length - i - 1];
+      return r === p[0] && c === p[1];
+    });
+  }
 
-      applyTheme(
-        ['light', 'dark'].includes(initialTheme)
-          ? initialTheme
-          : (
-              matchMedia(
-                '(prefers-color-scheme: dark)'
-              ).matches
-                ? 'dark'
-                : 'light'
-            )
-      );
+  board.addEventListener("pointerdown",event => {
+    if (
+      !hasStarted ||
+      gameOver ||
+      drag ||
+      (
+        event.pointerType === "mouse" &&
+        event.button !== 0
+      )
+    ) return;
 
-      let saved;
+    const cell = event.target.closest(".cell");
 
-      try {
-        saved = localStorage.getItem(WORDS_KEY);
-      } catch (_) {}
+    if (!cell) return;
 
-      try {
-        words = parseWords(saved || DEFAULT_WORDS);
-      } catch (_) {
-        words = parseWords(DEFAULT_WORDS);
-      }
+    event.preventDefault();
 
-      $('words-input').value =
-        words.map(w => w.label).join('\n');
+    const start = coords(cell);
 
-      // Pergunta o modo ao abrir/recarregar
-      chooseTimer();
-
-      // API PARA INTEGRAÇÃO FIREBASE
-      window.WordGame = {
-        getWords: () =>
-          words.map(w => w.label),
-
-        loadWords: list =>
-          changeWords(list),
-
-        showLocalError: text => {
-          $('local-status').textContent = text;
-          $('local-status').className = 'status error';
-        }
-      };
-    })();
-  </script>
-
-  <!-- ==========================================
-       FIREBASE AUTHENTICATION E FIRESTORE
-  ========================================== -->
-  <script type="module">
-    import {
-      initializeApp
-    } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
-
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      signOut,
-      onAuthStateChanged
-    } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
-
-    import {
-      getFirestore,
-      collection,
-      doc,
-      getDoc,
-      getDocs,
-      query,
-      where,
-      limit,
-      deleteDoc,
-      runTransaction,
-      serverTimestamp
-    } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
-
-    // ========== CONFIGURAÇÃO FIREBASE ==========
-    const firebaseConfig = {
-      apiKey: "AIzaSyBt5PxI4qIfc23Vr2ytTd9VYFIGvSwv2fE",
-      authDomain: "cacapalavrasinterativo.firebaseapp.com",
-      projectId: "cacapalavrasinterativo",
-      storageBucket: "cacapalavrasinterativo.firebasestorage.app",
-      messagingSenderId: "167586064732",
-      appId: "1:167586064732:web:4b7450d7cbbbcf09717999"
+    drag = {
+      pointerId: event.pointerId,
+      start,
+      path: [start]
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    board.setPointerCapture(event.pointerId);
+    highlight();
+  });
 
-    const $ = id => document.getElementById(id);
+  board.addEventListener("pointermove",event => {
+    if (
+      !drag ||
+      event.pointerId !== drag.pointerId
+    ) return;
 
-    const CODE_REGEX =
-      /^CP-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
+    const cell = hover(event);
 
-    const CHARS =
-      'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-
-    let currentUser = null;
-
-    // ========== MENSAGENS ==========
-    function status(id, text, type = '') {
-      $(id).textContent = text;
-      $(id).className =
-        'status' + (type ? ' ' + type : '');
-    }
-
-    function friendlyError(error) {
-      if (error.code === 'permission-denied') {
-        return 'Permissão negada. Confira as regras do Firestore.';
-      }
-
-      if (error.code === 'auth/unauthorized-domain') {
-        return (
-          'Adicione o domínio do GitHub Pages aos ' +
-          'domínios autorizados do Authentication.'
-        );
-      }
-
-      if ([
-        'auth/invalid-credential',
-        'auth/wrong-password',
-        'auth/user-not-found',
-        'auth/invalid-email'
-      ].includes(error.code)) {
-        return 'Login ou senha incorretos, ou conta inexistente.';
-      }
-
-      if (error.code === 'unavailable') {
-        return (
-          'Firebase indisponível. ' +
-          'Verifique a conexão e tente novamente.'
-        );
-      }
-
-      return error.message ||
-        'Ocorreu um erro ao acessar o Firebase.';
-    }
-
-    // ========== CÓDIGO DO MODELO ==========
-    function canonicalCode(value) {
-      return String(value).trim().toUpperCase();
-    }
-
-    function newCode() {
-      const bytes = crypto.getRandomValues(
-        new Uint8Array(12)
+    if (cell) {
+      drag.path = pathBetween(
+        drag.start,
+        coords(cell)
       );
 
-      const raw = [...bytes]
-        .map(b => CHARS[b % CHARS.length])
-        .join('');
+      highlight();
+    }
+  });
 
-      return (
-        `CP-${raw.slice(0, 4)}` +
-        `-${raw.slice(4, 8)}` +
-        `-${raw.slice(8, 12)}`
+  board.addEventListener("pointercancel",event => {
+    if (
+      drag &&
+      event.pointerId === drag.pointerId
+    ) {
+      drag = null;
+      highlight();
+    }
+  });
+
+  board.addEventListener("pointerup",event => {
+    if (
+      !drag ||
+      event.pointerId !== drag.pointerId
+    ) return;
+
+    const cell = hover(event);
+
+    if (cell) {
+      drag.path = pathBetween(
+        drag.start,
+        coords(cell)
       );
     }
 
-    function linkFor(code) {
+    const path = drag.path;
+
+    drag = null;
+    highlight();
+
+    if (gameOver || path.length < 2) return;
+
+    const match = words.find(w =>
+      !found.has(w.clean) &&
+      samePath(
+        path,
+        placements.get(w.clean)
+      )
+    );
+
+    if (!match) {
+      $("feedback").className = "feedback";
+      $("feedback").textContent =
+        "Sequência incorreta. Tente novamente!";
+      return;
+    }
+
+    found.add(match.clean);
+
+    placements.get(match.clean).forEach(([r,c]) => {
+      cellAt(r,c).classList.add("found");
+    });
+
+    if (found.size === words.length) {
+      pauseClock();
+
+      gameOver = true;
+      board.classList.add("locked");
+
+      $("giveup").disabled = true;
+      $("next-theme").hidden = false;
+
+      $("feedback").textContent =
+        "🎉 Você encontrou todas as palavras!";
+
+      $("feedback").className = "feedback success";
+
+      renderWords();
+      congratulate();
+
+      return;
+    }
+
+    renderWords();
+
+    $("feedback").className = "feedback success";
+    $("feedback").textContent =
+      `✓ Palavra encontrada: ${match.label}`;
+  });
+
+  /* ======================================
+     EFEITO DE CONFETES
+  ====================================== */
+
+  function confetti() {
+    if (
+      matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+    ) return;
+
+    const layer = $("confetti-layer");
+    layer.replaceChildren();
+
+    const colors = [
+      "#f472b6",
+      "#34d399",
+      "#60a5fa",
+      "#facc15",
+      "#a78bfa",
+      "#fb923c"
+    ];
+
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 0; i < 110; i++) {
+      const el = document.createElement("span");
+
+      el.className = "confetti";
+
+      el.style.setProperty(
+        "--x",
+        `${Math.random() * 100}%`
+      );
+
+      el.style.setProperty(
+        "--color",
+        colors[i % colors.length]
+      );
+
+      el.style.setProperty(
+        "--duration",
+        `${2.8 + Math.random() * 2.2}s`
+      );
+
+      el.style.setProperty(
+        "--delay",
+        `${Math.random() * .8}s`
+      );
+
+      el.style.setProperty(
+        "--drift",
+        `${(Math.random() - .5) * 240}px`
+      );
+
+      fragment.appendChild(el);
+    }
+
+    layer.appendChild(fragment);
+
+    setTimeout(() => {
+      layer.replaceChildren();
+    },6500);
+  }
+
+  /* ======================================
+     VITÓRIA
+  ====================================== */
+
+  function congratulate() {
+    $("win-message").textContent =
+      `Você encontrou as ${words.length} palavras ` +
+      `de ${themeName}! Excelente trabalho!`;
+
+    $("win-time").hidden = !timerEnabled;
+
+    $("win-time").textContent = timerEnabled
+      ? `Seu tempo: ${formatTime(getElapsed())}`
+      : "";
+
+    $("win-overlay").hidden = false;
+
+    confetti();
+    $("play-again").focus();
+  }
+
+  $("play-again").addEventListener(
+    "click",
+    () => openThemePicker()
+  );
+
+  $("close-win").addEventListener(
+    "click",
+    hideWin
+  );
+
+  $("next-theme").addEventListener(
+    "click",
+    () => openThemePicker()
+  );
+
+  $("shuffle").addEventListener(
+    "click",
+    () => openThemePicker()
+  );
+
+  /* ======================================
+     DESISTÊNCIA
+  ====================================== */
+
+  $("giveup").disabled = true;
+
+  $("giveup").addEventListener("click", () => {
+    if (!gameOver && hasStarted) {
+      pauseClock();
+      $("giveup-dialog").showModal();
+    }
+  });
+
+  $("keep-playing").addEventListener("click", () => {
+    $("giveup-dialog").close();
+    resumeClock();
+  });
+
+  $("giveup-dialog").addEventListener(
+    "cancel",
+    () => resumeClock()
+  );
+
+  $("confirm-giveup").addEventListener("click", () => {
+    $("giveup-dialog").close();
+
+    if (gameOver) return;
+
+    pauseClock();
+
+    gameOver = true;
+    drag = null;
+
+    highlight();
+
+    board.classList.add("locked");
+
+    $("giveup").disabled = true;
+    $("giveup").textContent = "⚑ Desistiu";
+
+    $("legend").hidden = false;
+    $("next-theme").hidden = false;
+
+    for (const word of words) {
+      if (!found.has(word.clean)) {
+        placements.get(word.clean).forEach(([r,c]) => {
+          cellAt(r,c).classList.add("missed");
+        });
+      }
+    }
+
+    renderWords();
+
+    $("feedback").className = "feedback alert";
+
+    $("feedback").textContent =
+      `Partida encerrada: ${words.length-found.size} ` +
+      "palavra(s) revelada(s) em vermelho. " +
+      "Escolha outro tema quando quiser.";
+  });
+
+  /* ======================================
+     PALAVRAS PERSONALIZADAS
+  ====================================== */
+
+  $("apply").addEventListener("click", () => {
+    try {
+      setCustomWords($("words-input").value);
+
       const u = new URL(location.href);
 
-      u.searchParams.set('modelo', code);
+      u.searchParams.delete("modelo");
 
-      return u.href;
+      history.replaceState(null,"",u);
+
+      $("local-status").textContent =
+        "Lista preparada! Escolha o cronômetro para jogar.";
+
+      $("local-status").className = "status ok";
+    }
+    catch (error) {
+      $("local-status").textContent = error.message;
+      $("local-status").className = "status error";
+    }
+  });
+
+  /* ======================================
+     TEMA VISUAL
+  ====================================== */
+
+  function applyTheme(theme) {
+    selectedTheme = theme;
+
+    const dark = theme === "dark";
+
+    document.documentElement.dataset.theme = theme;
+
+    $("theme-toggle").firstChild.textContent =
+      dark ? "☀ " : "☾ ";
+
+    $("theme-label").textContent =
+      dark ? "Claro" : "Escuro";
+
+    $("theme-toggle").setAttribute(
+      "aria-label",
+      dark ? "Ativar modo claro" : "Ativar modo escuro"
+    );
+
+    document.querySelector(
+      'meta[name="theme-color"]'
+    ).content = dark ? "#0c1322" : "#f4f7fd";
+  }
+
+  $("theme-toggle").addEventListener("click", () => {
+    applyTheme(
+      selectedTheme === "light" ? "dark" : "light"
+    );
+
+    try {
+      localStorage.setItem(
+        THEME_KEY,
+        selectedTheme
+      );
+    } catch (_) {}
+  });
+
+  /* ======================================
+     INICIALIZAÇÃO
+  ====================================== */
+
+  let initialTheme;
+
+  try {
+    initialTheme = localStorage.getItem(THEME_KEY);
+  } catch (_) {}
+
+  applyTheme(
+    ["light","dark"].includes(initialTheme)
+      ? initialTheme
+      : (
+          matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches
+            ? "dark"
+            : "light"
+        )
+  );
+
+  let saved;
+
+  try {
+    saved = localStorage.getItem(WORDS_KEY);
+  } catch (_) {}
+
+  try {
+    customWords = parseWords(saved || DEFAULT_WORDS);
+  }
+  catch (_) {
+    customWords = parseWords(DEFAULT_WORDS);
+  }
+
+  words = customWords;
+
+  $("words-input").value =
+    customWords.map(w => w.label).join("\n");
+
+  fillCategories();
+
+  // Abre a escolha de tema no primeiro acesso
+  openThemePicker();
+
+  /* ======================================
+     API INTERNA PARA O FIREBASE
+  ====================================== */
+
+  window.WordGame = {
+    getWords: () => words.map(w => w.label),
+
+    loadWords: (
+      list,
+      name = "Modelo compartilhado"
+    ) => setCustomWords(list,name),
+
+    showLocalError: text => {
+      $("local-status").textContent = text;
+      $("local-status").className = "status error";
+    }
+  };
+
+})();
+</script>
+
+<!-- ========================================
+     FIREBASE AUTHENTICATION E FIRESTORE
+======================================== -->
+<script type="module">
+
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  limit,
+  deleteDoc,
+  runTransaction,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+/* ======================================
+   CONFIGURAÇÃO DO FIREBASE
+====================================== */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBt5PxI4qIfc23Vr2ytTd9VYFIGvSwv2fE",
+  authDomain: "cacapalavrasinterativo.firebaseapp.com",
+  projectId: "cacapalavrasinterativo",
+  storageBucket: "cacapalavrasinterativo.firebasestorage.app",
+  messagingSenderId: "167586064732",
+  appId: "1:167586064732:web:4b7450d7cbbbcf09717999"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+
+const CODE_REGEX =
+  /^CP-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
+
+const CHARS =
+  "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+const LOGIN_DOMAIN = "@painel.com.br";
+
+let currentUser = null;
+
+/* ======================================
+   FUNÇÕES AUXILIARES
+====================================== */
+
+function status(id,text,type = "") {
+  $(id).textContent = text;
+
+  $(id).className =
+    "status" + (type ? " " + type : "");
+}
+
+function friendlyError(error) {
+  if (error.code === "permission-denied") {
+    return "Permissão negada. Confira as regras do Firestore.";
+  }
+
+  if (error.code === "auth/unauthorized-domain") {
+    return (
+      "Adicione o domínio do GitHub Pages aos " +
+      "domínios autorizados do Authentication."
+    );
+  }
+
+  if ([
+    "auth/invalid-credential",
+    "auth/wrong-password",
+    "auth/user-not-found",
+    "auth/invalid-email"
+  ].includes(error.code)) {
+    return "Login ou senha incorretos, ou conta inexistente.";
+  }
+
+  if (error.code === "unavailable") {
+    return "Firebase indisponível. Verifique a conexão.";
+  }
+
+  return error.message ||
+    "Ocorreu um erro ao acessar o Firebase.";
+}
+
+function canonicalCode(value) {
+  return String(value).trim().toUpperCase();
+}
+
+function newCode() {
+  const bytes = crypto.getRandomValues(
+    new Uint8Array(12)
+  );
+
+  const raw = [...bytes]
+    .map(b => CHARS[b % CHARS.length])
+    .join("");
+
+  return (
+    `CP-${raw.slice(0,4)}` +
+    `-${raw.slice(4,8)}` +
+    `-${raw.slice(8,12)}`
+  );
+}
+
+function linkFor(code) {
+  const u = new URL(location.href);
+
+  u.searchParams.set("modelo",code);
+
+  return u.href;
+}
+
+async function copyText(text) {
+  await navigator.clipboard.writeText(text);
+}
+
+/* ======================================
+   ABRIR LOGIN
+====================================== */
+
+$("login").addEventListener("click", () => {
+  status("login-status","");
+
+  $("login-dialog").showModal();
+
+  $("login-username").focus();
+});
+
+$("cancel-login").addEventListener("click", () => {
+  $("login-dialog").close();
+  $("login-password").value = "";
+});
+
+/* ======================================
+   LOGIN COM USUÁRIO E SENHA
+====================================== */
+
+$("login-form").addEventListener(
+  "submit",
+  async event => {
+    event.preventDefault();
+
+    const username = $("login-username")
+      .value.trim().toLowerCase();
+
+    const password = $("login-password").value;
+
+    if (
+      !/^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$/.test(
+        username
+      )
+    ) {
+      status(
+        "login-status",
+        "Digite apenas o login, por exemplo: felipe.valente",
+        "error"
+      );
+      return;
     }
 
-    async function copyText(text) {
-      await navigator.clipboard.writeText(text);
+    $("submit-login").disabled = true;
+
+    status(
+      "login-status",
+      "Verificando suas credenciais..."
+    );
+
+    try {
+      await signInWithEmailAndPassword(
+        auth,
+        username + LOGIN_DOMAIN,
+        password
+      );
+
+      $("login-password").value = "";
+      $("login-dialog").close();
+
+      status(
+        "save-status",
+        "Acesso à nuvem liberado.",
+        "ok"
+      );
+    }
+    catch (error) {
+      status(
+        "login-status",
+        friendlyError(error),
+        "error"
+      );
+    }
+    finally {
+      $("submit-login").disabled = false;
+    }
+  }
+);
+
+/* ======================================
+   SAIR
+====================================== */
+
+$("logout").addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+
+    status(
+      "save-status",
+      "Você saiu da sua conta."
+    );
+  }
+  catch (error) {
+    status(
+      "save-status",
+      friendlyError(error),
+      "error"
+    );
+  }
+});
+
+/* ======================================
+   ESTADO DA AUTENTICAÇÃO
+====================================== */
+
+onAuthStateChanged(auth,user => {
+  currentUser = user;
+
+  $("login").hidden = !!user;
+  $("logout").hidden = !user;
+
+  $("user-details").textContent = user
+    ? (user.email?.split("@")[0] || "Conectado")
+    : "Modo visitante";
+
+  $("save-preset").disabled = !user;
+
+  $("save-hint").textContent = user
+    ? (
+        "Salve as palavras da partida atual; " +
+        "um código exclusivo será gerado."
+      )
+    : (
+        "Entre com seu login e senha para salvar. " +
+        "Visitantes podem jogar e carregar modelos."
+      );
+
+  $("my-models-section").hidden = !user;
+
+  if (user) {
+    refreshModels();
+  }
+  else {
+    $("my-models").replaceChildren();
+    status("models-status","");
+  }
+});
+
+/* ======================================
+   CARREGAR MODELO POR CÓDIGO
+====================================== */
+
+async function loadPreset(code) {
+  code = canonicalCode(code);
+
+  if (!CODE_REGEX.test(code)) {
+    status(
+      "preset-status",
+      "Código inválido. Use CP-XXXX-XXXX-XXXX.",
+      "error"
+    );
+    return;
+  }
+
+  $("load-preset").disabled = true;
+
+  status(
+    "preset-status",
+    "Consultando o Firebase..."
+  );
+
+  try {
+    const snapshot = await getDoc(
+      doc(db,"modelos",code)
+    );
+
+    if (!snapshot.exists()) {
+      status(
+        "preset-status",
+        "Modelo não encontrado. Verifique o código.",
+        "error"
+      );
+      return;
     }
 
-    // ========== LOGIN ABREVIADO ==========
-    // Ex.: felipe.valente -> felipe.valente@painel.com.br
-    const LOGIN_DOMAIN = '@painel.com.br';
+    const data = snapshot.data();
 
-    $('login').addEventListener('click', () => {
-      status('login-status', '');
+    if (!Array.isArray(data.palavras)) {
+      throw new Error(
+        "O modelo armazenado não possui uma lista válida."
+      );
+    }
 
-      $('login-dialog').showModal();
-      $('login-username').focus();
-    });
+    window.WordGame.loadWords(
+      data.palavras,
+      data.nome || code
+    );
 
-    $('cancel-login').addEventListener('click', () => {
-      $('login-dialog').close();
-      $('login-password').value = '';
-    });
+    $("preset-code").value = code;
 
-    $('login-form').addEventListener(
-      'submit',
-      async event => {
-        event.preventDefault();
+    $("model-name").value =
+      typeof data.nome === "string"
+        ? data.nome
+        : "";
 
-        const username = $('login-username')
-          .value.trim().toLowerCase();
+    const u = new URL(location.href);
+    u.searchParams.set("modelo",code);
 
-        const password =
-          $('login-password').value;
+    history.replaceState(null,"",u);
 
-        if (
-          !/^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$/.test(
-            username
-          )
-        ) {
-          status(
-            'login-status',
-            'Digite apenas o login, por exemplo: felipe.valente',
-            'error'
-          );
+    status(
+      "preset-status",
+      `Modelo "${data.nome || code}" carregado! ` +
+      "Escolha a modalidade para começar.",
+      "ok"
+    );
+  }
+  catch (error) {
+    status(
+      "preset-status",
+      friendlyError(error),
+      "error"
+    );
+  }
+  finally {
+    $("load-preset").disabled = false;
+  }
+}
 
-          return;
-        }
+$("load-preset").addEventListener(
+  "click",
+  () => loadPreset($("preset-code").value)
+);
 
-        $('submit-login').disabled = true;
+$("preset-code").addEventListener("keydown",event => {
+  if (event.key === "Enter") {
+    loadPreset($("preset-code").value);
+  }
+});
 
-        status(
-          'login-status',
-          'Verificando suas credenciais...'
+/* ======================================
+   SALVAR NA NUVEM
+====================================== */
+
+$("save-preset").addEventListener("click", async () => {
+  if (!currentUser) {
+    status(
+      "save-status",
+      "Faça login para salvar.",
+      "error"
+    );
+    return;
+  }
+
+  const name = $("model-name").value.trim();
+
+  if (!name || name.length > 80) {
+    status(
+      "save-status",
+      "Informe um nome de até 80 caracteres.",
+      "error"
+    );
+    return;
+  }
+
+  const creator = currentUser;
+
+  const model = {
+    ownerUid: creator.uid,
+    nome: name,
+    palavras: window.WordGame.getWords(),
+    criadoEm: serverTimestamp()
+  };
+
+  $("save-preset").disabled = true;
+
+  status(
+    "save-status",
+    "Salvando modelo na nuvem..."
+  );
+
+  try {
+    let code = null;
+
+    for (let tries = 0; tries < 4; tries++) {
+      const candidate = newCode();
+
+      const ref = doc(
+        db,"modelos",candidate
+      );
+
+      try {
+        await runTransaction(
+          db,
+          async transaction => {
+            const snapshot =
+              await transaction.get(ref);
+
+            if (snapshot.exists()) {
+              throw new Error("COLISAO");
+            }
+
+            transaction.set(ref,model);
+          }
         );
+
+        code = candidate;
+        break;
+      }
+      catch (error) {
+        if (error.message === "COLISAO") continue;
+        throw error;
+      }
+    }
+
+    if (!code) {
+      throw new Error(
+        "Não foi possível gerar um código exclusivo."
+      );
+    }
+
+    $("saved-share").hidden = false;
+    $("saved-code").value = code;
+
+    status(
+      "save-status",
+      "Modelo salvo! Compartilhe o código ou link.",
+      "ok"
+    );
+
+    if (auth.currentUser?.uid === creator.uid) {
+      await refreshModels();
+    }
+  }
+  catch (error) {
+    status(
+      "save-status",
+      friendlyError(error),
+      "error"
+    );
+  }
+  finally {
+    $("save-preset").disabled =
+      !auth.currentUser;
+  }
+});
+
+/* ======================================
+   COPIAR CÓDIGO E LINK
+====================================== */
+
+$("copy-code").addEventListener("click", async () => {
+  try {
+    await copyText($("saved-code").value);
+
+    status(
+      "save-status",
+      "Código copiado!",
+      "ok"
+    );
+  }
+  catch (_) {
+    status(
+      "save-status",
+      "Não foi possível copiar automaticamente.",
+      "error"
+    );
+  }
+});
+
+$("copy-link").addEventListener("click", async () => {
+  try {
+    await copyText(
+      linkFor($("saved-code").value)
+    );
+
+    status(
+      "save-status",
+      "Link copiado!",
+      "ok"
+    );
+  }
+  catch (_) {
+    status(
+      "save-status",
+      "Não foi possível copiar o link.",
+      "error"
+    );
+  }
+});
+
+/* ======================================
+   MEUS MODELOS
+====================================== */
+
+async function refreshModels() {
+  const user = currentUser;
+
+  if (!user) return;
+
+  status(
+    "models-status",
+    "Carregando seus modelos..."
+  );
+
+  try {
+    const q = query(
+      collection(db,"modelos"),
+      where("ownerUid","==",user.uid),
+      limit(50)
+    );
+
+    const snapshots = await getDocs(q);
+
+    if (currentUser?.uid !== user.uid) return;
+
+    const frag = document.createDocumentFragment();
+
+    const entries = snapshots.docs.sort((a,b) => {
+      const left =
+        a.data().criadoEm?.toMillis?.() || 0;
+
+      const right =
+        b.data().criadoEm?.toMillis?.() || 0;
+
+      return right - left;
+    });
+
+    for (const snapshot of entries) {
+      const data = snapshot.data();
+      const code = snapshot.id;
+
+      const li = document.createElement("li");
+      li.className = "model-item";
+
+      const name = document.createElement("div");
+      name.className = "model-name";
+      name.textContent = data.nome || "Sem nome";
+
+      const codeText = document.createElement("div");
+      codeText.className = "model-code";
+      codeText.textContent = code;
+
+      const actions = document.createElement("div");
+      actions.className = "model-buttons";
+
+      // CARREGAR
+      const open = document.createElement("button");
+      open.type = "button";
+      open.className = "btn small";
+      open.textContent = "Carregar";
+
+      open.addEventListener(
+        "click",
+        () => loadPreset(code)
+      );
+
+      // COMPARTILHAR
+      const copy = document.createElement("button");
+      copy.type = "button";
+      copy.className = "btn small";
+      copy.textContent = "Copiar link";
+
+      copy.addEventListener("click", async () => {
+        try {
+          await copyText(linkFor(code));
+
+          status(
+            "models-status",
+            "Link copiado!",
+            "ok"
+          );
+        }
+        catch (_) {
+          status(
+            "models-status",
+            "Não foi possível copiar o link.",
+            "error"
+          );
+        }
+      });
+
+      // EXCLUIR
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "btn small danger-outline";
+      remove.textContent = "Excluir";
+
+      remove.addEventListener("click", async () => {
+        if (!confirm(
+          `Excluir permanentemente o modelo ` +
+          `"${data.nome}" (${code})?`
+        )) return;
 
         try {
-          await signInWithEmailAndPassword(
-            auth,
-            username + LOGIN_DOMAIN,
-            password
+          await deleteDoc(
+            doc(db,"modelos",code)
           );
-
-          $('login-password').value = '';
-          $('login-dialog').close();
 
           status(
-            'save-status',
-            'Acesso à nuvem liberado.',
-            'ok'
+            "models-status",
+            "Modelo excluído.",
+            "ok"
           );
 
-        } catch (error) {
-          status(
-            'login-status',
-            friendlyError(error),
-            'error'
-          );
-
-        } finally {
-          $('submit-login').disabled = false;
-        }
-      }
-    );
-
-    // ========== SAIR ==========
-    $('logout').addEventListener('click', async () => {
-      try {
-        await signOut(auth);
-
-        status(
-          'save-status',
-          'Você saiu da sua conta.'
-        );
-
-      } catch (e) {
-        status(
-          'save-status',
-          friendlyError(e),
-          'error'
-        );
-      }
-    });
-
-    // ========== ESTADO DA AUTENTICAÇÃO ==========
-    onAuthStateChanged(auth, user => {
-      currentUser = user;
-
-      $('login').hidden = !!user;
-      $('logout').hidden = !user;
-
-      $('user-details').textContent = user
-        ? (user.email?.split('@')[0] || 'Conectado')
-        : 'Modo visitante';
-
-      $('save-preset').disabled = !user;
-
-      $('save-hint').textContent = user
-        ? (
-            'Salve as palavras da partida atual; ' +
-            'um código exclusivo será gerado.'
-          )
-        : (
-            'Entre com seu login e senha para salvar. ' +
-            'Visitantes podem jogar e carregar modelos.'
-          );
-
-      $('my-models-section').hidden = !user;
-
-      if (user) {
-        refreshModels();
-      } else {
-        $('my-models').replaceChildren();
-        status('models-status', '');
-      }
-    });
-
-    // ========== CARREGAR MODELO ==========
-    async function loadPreset(code) {
-      code = canonicalCode(code);
-
-      if (!CODE_REGEX.test(code)) {
-        status(
-          'preset-status',
-          'Código inválido. Use o formato CP-XXXX-XXXX-XXXX.',
-          'error'
-        );
-
-        return;
-      }
-
-      $('load-preset').disabled = true;
-
-      status(
-        'preset-status',
-        'Consultando o Firebase...'
-      );
-
-      try {
-        const snapshot = await getDoc(
-          doc(db, 'modelos', code)
-        );
-
-        if (!snapshot.exists()) {
-          status(
-            'preset-status',
-            'Modelo não encontrado. Verifique o código.',
-            'error'
-          );
-
-          return;
-        }
-
-        const data = snapshot.data();
-
-        if (!Array.isArray(data.palavras)) {
-          throw new Error(
-            'O modelo armazenado não possui uma lista válida.'
-          );
-        }
-
-        window.WordGame.loadWords(data.palavras);
-
-        $('preset-code').value = code;
-
-        $('model-name').value =
-          typeof data.nome === 'string'
-            ? data.nome
-            : '';
-
-        const u = new URL(location.href);
-        u.searchParams.set('modelo', code);
-
-        history.replaceState(null, '', u);
-
-        status(
-          'preset-status',
-          `Modelo "${data.nome || code}" carregado! ` +
-          'Novo tabuleiro gerado.',
-          'ok'
-        );
-
-      } catch (e) {
-        status(
-          'preset-status',
-          friendlyError(e),
-          'error'
-        );
-
-      } finally {
-        $('load-preset').disabled = false;
-      }
-    }
-
-    $('load-preset').addEventListener(
-      'click',
-      () => loadPreset($('preset-code').value)
-    );
-
-    $('preset-code').addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        loadPreset($('preset-code').value);
-      }
-    });
-
-    // ========== SALVAR NA NUVEM ==========
-    $('save-preset').addEventListener('click', async () => {
-      if (!currentUser) {
-        status(
-          'save-status',
-          'Faça login para salvar.',
-          'error'
-        );
-
-        return;
-      }
-
-      const name = $('model-name').value.trim();
-
-      if (!name || name.length > 80) {
-        status(
-          'save-status',
-          'Informe um nome de até 80 caracteres.',
-          'error'
-        );
-
-        return;
-      }
-
-      const creator = currentUser;
-
-      const model = {
-        ownerUid: creator.uid,
-        nome: name,
-        palavras: window.WordGame.getWords(),
-        criadoEm: serverTimestamp()
-      };
-
-      $('save-preset').disabled = true;
-
-      status(
-        'save-status',
-        'Salvando modelo na nuvem...'
-      );
-
-      try {
-        let code = null;
-
-        for (let tries = 0; tries < 4; tries++) {
-          const candidate = newCode();
-
-          const ref = doc(
-            db,
-            'modelos',
-            candidate
-          );
-
-          try {
-            await runTransaction(
-              db,
-              async transaction => {
-                const snapshot =
-                  await transaction.get(ref);
-
-                if (snapshot.exists()) {
-                  throw new Error('COLISAO');
-                }
-
-                transaction.set(ref, model);
-              }
-            );
-
-            code = candidate;
-            break;
-
-          } catch (e) {
-            if (e.message === 'COLISAO') {
-              continue;
-            }
-
-            throw e;
-          }
-        }
-
-        if (!code) {
-          throw new Error(
-            'Não foi possível gerar um código exclusivo. ' +
-            'Tente novamente.'
-          );
-        }
-
-        $('saved-share').hidden = false;
-        $('saved-code').value = code;
-
-        status(
-          'save-status',
-          'Modelo salvo! Compartilhe o código ou o link abaixo.',
-          'ok'
-        );
-
-        if (auth.currentUser?.uid === creator.uid) {
           await refreshModels();
         }
-
-      } catch (e) {
-        status(
-          'save-status',
-          friendlyError(e),
-          'error'
-        );
-
-      } finally {
-        $('save-preset').disabled =
-          !auth.currentUser;
-      }
-    });
-
-    // ========== COPIAR CÓDIGO ==========
-    $('copy-code').addEventListener('click', async () => {
-      try {
-        await copyText($('saved-code').value);
-
-        status(
-          'save-status',
-          'Código copiado!',
-          'ok'
-        );
-
-      } catch (_) {
-        status(
-          'save-status',
-          'Não foi possível copiar automaticamente. ' +
-          'Selecione o código e copie.',
-          'error'
-        );
-      }
-    });
-
-    // ========== COPIAR LINK ==========
-    $('copy-link').addEventListener('click', async () => {
-      try {
-        await copyText(
-          linkFor($('saved-code').value)
-        );
-
-        status(
-          'save-status',
-          'Link copiado!',
-          'ok'
-        );
-
-      } catch (_) {
-        status(
-          'save-status',
-          'Não foi possível copiar o link automaticamente.',
-          'error'
-        );
-      }
-    });
-
-    // ========== MEUS MODELOS ==========
-    async function refreshModels() {
-      const user = currentUser;
-
-      if (!user) return;
-
-      status(
-        'models-status',
-        'Carregando seus modelos...'
-      );
-
-      try {
-        const q = query(
-          collection(db, 'modelos'),
-          where('ownerUid', '==', user.uid),
-          limit(50)
-        );
-
-        const snapshots = await getDocs(q);
-
-        if (currentUser?.uid !== user.uid) {
-          return;
-        }
-
-        const frag = document.createDocumentFragment();
-
-        const entries = snapshots.docs.sort((a, b) => {
-          const left =
-            a.data().criadoEm?.toMillis?.() || 0;
-
-          const right =
-            b.data().criadoEm?.toMillis?.() || 0;
-
-          return right - left;
-        });
-
-        for (const snapshot of entries) {
-          const data = snapshot.data();
-          const code = snapshot.id;
-
-          const li = document.createElement('li');
-          li.className = 'model-item';
-
-          const name = document.createElement('div');
-          name.className = 'model-name';
-          name.textContent = data.nome || 'Sem nome';
-
-          const codeText = document.createElement('div');
-          codeText.className = 'model-code';
-          codeText.textContent = code;
-
-          const actions = document.createElement('div');
-          actions.className = 'model-buttons';
-
-          // CARREGAR
-          const open = document.createElement('button');
-          open.type = 'button';
-          open.className = 'btn small';
-          open.textContent = 'Carregar';
-
-          open.addEventListener(
-            'click',
-            () => loadPreset(code)
+        catch (error) {
+          status(
+            "models-status",
+            friendlyError(error),
+            "error"
           );
-
-          // COMPARTILHAR
-          const copy = document.createElement('button');
-          copy.type = 'button';
-          copy.className = 'btn small';
-          copy.textContent = 'Copiar link';
-
-          copy.addEventListener('click', async () => {
-            try {
-              await copyText(linkFor(code));
-
-              status(
-                'models-status',
-                'Link copiado!',
-                'ok'
-              );
-
-            } catch (e) {
-              status(
-                'models-status',
-                'Não foi possível copiar o link.',
-                'error'
-              );
-            }
-          });
-
-          // EXCLUIR
-          const remove = document.createElement('button');
-          remove.type = 'button';
-          remove.className = 'btn small danger-outline';
-          remove.textContent = 'Excluir';
-
-          remove.addEventListener('click', async () => {
-            const confirmed = confirm(
-              `Excluir permanentemente o modelo ` +
-              `"${data.nome}" (${code})?`
-            );
-
-            if (!confirmed) return;
-
-            try {
-              await deleteDoc(
-                doc(db, 'modelos', code)
-              );
-
-              status(
-                'models-status',
-                'Modelo excluído.',
-                'ok'
-              );
-
-              await refreshModels();
-
-            } catch (e) {
-              status(
-                'models-status',
-                friendlyError(e),
-                'error'
-              );
-            }
-          });
-
-          actions.append(open, copy, remove);
-          li.append(name, codeText, actions);
-          frag.appendChild(li);
         }
+      });
 
-        $('my-models').replaceChildren(frag);
-
-        status(
-          'models-status',
-          entries.length
-            ? `${entries.length} modelo(s) exibido(s).`
-            : 'Você ainda não salvou nenhum modelo.'
-        );
-
-      } catch (e) {
-        status(
-          'models-status',
-          friendlyError(e),
-          'error'
-        );
-      }
+      actions.append(open,copy,remove);
+      li.append(name,codeText,actions);
+      frag.appendChild(li);
     }
 
-    $('refresh-models').addEventListener(
-      'click',
-      refreshModels
+    $("my-models").replaceChildren(frag);
+
+    status(
+      "models-status",
+      entries.length
+        ? `${entries.length} modelo(s) exibido(s).`
+        : "Você ainda não salvou nenhum modelo."
     );
+  }
+  catch (error) {
+    status(
+      "models-status",
+      friendlyError(error),
+      "error"
+    );
+  }
+}
 
-    // ========== ATIVAR INTERFACE ==========
-    $('login').disabled = false;
-    $('load-preset').disabled = false;
+$("refresh-models").addEventListener(
+  "click",
+  refreshModels
+);
 
-    // ========== ABRIR MODELO PELO LINK ==========
-    const initialCode = new URLSearchParams(
-      location.search
-    ).get('modelo');
+/* ======================================
+   HABILITAR SERVIÇOS DA NUVEM
+====================================== */
 
-    if (initialCode) {
-      $('preset-code').value = initialCode;
-      loadPreset(initialCode);
-    }
-  </script>
+$("login").disabled = false;
+$("load-preset").disabled = false;
 
+/* ======================================
+   CARREGAR MODELO PELO LINK
+====================================== */
+
+const initialCode = new URLSearchParams(
+  location.search
+).get("modelo");
+
+if (initialCode) {
+  $("preset-code").value = initialCode;
+  loadPreset(initialCode);
+}
+
+</script>
 </body>
 </html>

@@ -8,10 +8,7 @@
   <title>Caça-Palavras Interativo</title>
 
   <style>
-    /* ==========================================
-       TEMAS
-    ========================================== */
-
+    /* ========== TEMA CLARO ========== */
     :root {
       font-family: system-ui, -apple-system, Segoe UI, sans-serif;
       color-scheme: light;
@@ -30,9 +27,10 @@
       --missed: #fecaca;
       --missedText: #991b1b;
       --danger: #dc2626;
-      --shadow: rgba(31,51,94,.08);
+      --shadow: rgba(31, 51, 94, .08);
     }
 
+    /* ========== TEMA ESCURO ========== */
     html[data-theme="dark"] {
       color-scheme: dark;
       --page: #0c1322;
@@ -50,16 +48,11 @@
       --missed: #991b1b;
       --missedText: #fee2e2;
       --danger: #fb7185;
-      --shadow: rgba(0,0,0,.27);
+      --shadow: rgba(0, 0, 0, .27);
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    [hidden] {
-      display: none !important;
-    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
 
     body {
       margin: 0;
@@ -69,18 +62,9 @@
       transition: background .2s, color .2s;
     }
 
-    button, input, textarea {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: .55;
-      cursor: not-allowed;
-    }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
 
     button:focus-visible,
     input:focus-visible,
@@ -89,18 +73,11 @@
       outline-offset: 2px;
     }
 
-    /* ==========================================
-       CABEÇALHO
-    ========================================== */
-
+    /* ========== CABEÇALHO ========== */
     .topbar {
       background: var(--card);
       border-bottom: 1px solid var(--border);
-      padding: 17px max(
-        16px,
-        calc((100vw - 1200px)/2)
-      );
-
+      padding: 17px max(16px, calc((100vw - 1200px) / 2));
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -135,10 +112,7 @@
       flex-wrap: wrap;
     }
 
-    /* ==========================================
-       BOTÕES
-    ========================================== */
-
+    /* ========== BOTÕES ========== */
     .btn {
       border: 0;
       border-radius: 11px;
@@ -146,22 +120,13 @@
       font-weight: 730;
       background: var(--soft);
       color: var(--text);
-
-      transition:
-        filter .15s,
-        transform .15s;
+      transition: filter .15s, transform .15s;
     }
 
-    .btn:hover:not(:disabled) {
-      filter: brightness(.95);
-    }
+    .btn:hover:not(:disabled) { filter: brightness(.95); }
+    .btn:active:not(:disabled) { transform: scale(.97); }
 
-    .btn:active:not(:disabled) {
-      transform: scale(.97);
-    }
-
-    html[data-theme="dark"]
-    .btn:hover:not(:disabled) {
+    html[data-theme="dark"] .btn:hover:not(:disabled) {
       filter: brightness(1.16);
     }
 
@@ -170,34 +135,17 @@
       color: var(--primaryText);
     }
 
-    .btn.danger {
-      background: var(--danger);
-      color: #fff;
-    }
+    .btn.danger { background: var(--danger); color: #fff; }
+    .btn.danger-outline { background: var(--soft); color: var(--danger); }
+    .btn.small { padding: 8px 10px; font-size: .79rem; }
 
-    .btn.danger-outline {
-      background: var(--soft);
-      color: var(--danger);
-    }
-
-    .btn.small {
-      padding: 8px 10px;
-      font-size: .79rem;
-    }
-
-    /* ==========================================
-       LAYOUT PRINCIPAL
-    ========================================== */
-
+    /* ========== LAYOUT ========== */
     .layout {
       max-width: 1200px;
       margin: 29px auto;
       padding: 0 16px;
-
       display: grid;
-      grid-template-columns:
-        minmax(0,1fr) 325px;
-
+      grid-template-columns: minmax(0, 1fr) 325px;
       gap: 20px;
       align-items: start;
     }
@@ -207,46 +155,22 @@
       border: 1px solid var(--border);
       border-radius: 19px;
       padding: 23px;
-
-      box-shadow:
-        0 9px 29px var(--shadow);
+      box-shadow: 0 9px 29px var(--shadow);
     }
 
     h1 {
       margin: 0 0 7px;
-      font-size: clamp(1.45rem,3vw,2rem);
+      font-size: clamp(1.45rem, 3vw, 2rem);
       letter-spacing: -.045em;
     }
 
-    h2 {
-      margin: 0 0 13px;
-      font-size: 1.04rem;
-    }
+    h2 { margin: 0 0 13px; font-size: 1.04rem; }
+    p { line-height: 1.48; }
+    .muted, .helper { color: var(--muted); }
+    .muted { margin: 0; font-size: .9rem; }
+    .helper { font-size: .77rem; line-height: 1.45; margin: 7px 0 0; }
 
-    p {
-      line-height: 1.48;
-    }
-
-    .muted,
-    .helper {
-      color: var(--muted);
-    }
-
-    .muted {
-      margin: 0;
-      font-size: .9rem;
-    }
-
-    .helper {
-      font-size: .77rem;
-      line-height: 1.45;
-      margin: 7px 0 0;
-    }
-
-    /* ==========================================
-       PROGRESSO DO JOGO
-    ========================================== */
-
+    /* ========== PROGRESSO ========== */
     .score {
       display: flex;
       justify-content: space-between;
@@ -267,21 +191,46 @@
       height: 100%;
       width: 0;
       border-radius: 20px;
-
-      background:
-        linear-gradient(
-          90deg,
-          #6660e8,
-          #19b67b
-        );
-
+      background: linear-gradient(90deg, #6660e8, #19b67b);
       transition: width .2s;
     }
 
-    /* ==========================================
-       TABULEIRO
-    ========================================== */
+    /* ========== CRONÔMETRO ========== */
+    .timer-display {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 9px 13px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--soft);
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+    }
 
+    .timer-display strong {
+      font-size: 1.12rem;
+      letter-spacing: .025em;
+    }
+
+    .timer-choice-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .timer-choice-grid .btn { min-height: 56px; }
+
+    /* ========== LOGIN ========== */
+    .login-form { display: grid; gap: 13px; margin-top: 17px; }
+    .login-form label { margin-bottom: 5px; }
+    .login-form .suffix { font-size: .78rem; color: var(--muted); margin-top: 4px; }
+    .login-footer { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+    .win-time { font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
+
+    /* ========== TABULEIRO ========== */
     .board-wrap {
       margin: 24px auto 0;
       max-width: 660px;
@@ -290,14 +239,8 @@
 
     .board {
       --size: 14;
-
       display: grid;
-      grid-template-columns:
-        repeat(
-          var(--size),
-          minmax(0,1fr)
-        );
-
+      grid-template-columns: repeat(var(--size), minmax(0, 1fr));
       gap: 3px;
       width: 100%;
       touch-action: none;
@@ -312,54 +255,35 @@
       justify-content: center;
       aspect-ratio: 1;
       min-width: 0;
-
       background: var(--soft);
       border-radius: 5px;
       color: var(--text);
-
-      font-size: clamp(8px,1.5vw,17px);
+      font-size: clamp(8px, 1.5vw, 17px);
       font-weight: 800;
     }
 
     .cell.selected {
       background: var(--selected);
       color: var(--selectedText);
-    }
-
-    .cell.found {
-      background: var(--found);
-      color: var(--foundText);
-    }
-
-    .cell.missed {
-      background: var(--missed);
-      color: var(--missedText);
-    }
-
-    .cell.found.missed {
-      background:
-        linear-gradient(
-          135deg,
-          var(--found) 50%,
-          var(--missed) 50%
-        );
-
-      color: var(--text);
-    }
-
-    .cell.selected {
       outline: 2px solid var(--primary);
       outline-offset: -2px;
     }
 
-    .board.locked {
-      cursor: default;
+    .cell.found { background: var(--found); color: var(--foundText); }
+    .cell.missed { background: var(--missed); color: var(--missedText); }
+
+    .cell.found.missed {
+      background: linear-gradient(
+        135deg,
+        var(--found) 50%,
+        var(--missed) 50%
+      );
+      color: var(--text);
     }
 
-    /* ==========================================
-       MENSAGENS E LEGENDA
-    ========================================== */
+    .board.locked { cursor: default; }
 
+    /* ========== FEEDBACK ========== */
     .feedback {
       min-height: 23px;
       margin: 18px 0 0;
@@ -369,13 +293,8 @@
       font-weight: 650;
     }
 
-    .feedback.success {
-      color: #16a34a;
-    }
-
-    .feedback.alert {
-      color: var(--danger);
-    }
+    .feedback.success { color: #16a34a; }
+    .feedback.alert { color: var(--danger); }
 
     .legend {
       display: flex;
@@ -395,18 +314,10 @@
       margin-right: 4px;
     }
 
-    .dot.found {
-      background: var(--found);
-    }
+    .dot.found { background: var(--found); }
+    .dot.missed { background: var(--missed); }
 
-    .dot.missed {
-      background: var(--missed);
-    }
-
-    /* ==========================================
-       LISTA DE PALAVRAS
-    ========================================== */
-
+    /* ========== LISTA DE PALAVRAS ========== */
     .section-head {
       display: flex;
       justify-content: space-between;
@@ -428,7 +339,6 @@
       list-style: none;
       padding: 0;
       margin: 12px 0 20px;
-
       display: grid;
       gap: 8px;
     }
@@ -451,7 +361,6 @@
       flex: 0 0 18px;
       border: 2px solid var(--muted);
       border-radius: 50%;
-
       display: grid;
       place-items: center;
       font-size: .74rem;
@@ -477,10 +386,7 @@
       text-decoration-thickness: 2px;
     }
 
-    /* ==========================================
-       FORMULÁRIOS E MODELOS
-    ========================================== */
-
+    /* ========== PAINÉIS ========== */
     .panel-section {
       border-top: 1px solid var(--border);
       padding-top: 18px;
@@ -494,8 +400,7 @@
       margin-bottom: 7px;
     }
 
-    input,
-    textarea {
+    input, textarea {
       width: 100%;
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -510,24 +415,10 @@
       line-height: 1.5;
     }
 
-    .full {
-      width: 100%;
-    }
-
-    .row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .row > input {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .row > .btn {
-      flex-shrink: 0;
-    }
+    .full { width: 100%; }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .row > input { min-width: 0; flex: 1; }
+    .row > .btn { flex-shrink: 0; }
 
     .status {
       font-size: .8rem;
@@ -538,13 +429,8 @@
       overflow-wrap: anywhere;
     }
 
-    .status.error {
-      color: var(--danger);
-    }
-
-    .status.ok {
-      color: #16a34a;
-    }
+    .status.error { color: var(--danger); }
+    .status.ok { color: #16a34a; }
 
     .user-details {
       font-size: .79rem;
@@ -557,7 +443,6 @@
       list-style: none;
       padding: 0;
       margin: 12px 0 0;
-
       display: grid;
       gap: 10px;
     }
@@ -566,7 +451,6 @@
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 10px;
-
       display: grid;
       gap: 7px;
     }
@@ -590,40 +474,24 @@
       flex-wrap: wrap;
     }
 
-    /* ==========================================
-       JANELA DE DESISTÊNCIA
-    ========================================== */
-
+    /* ========== JANELAS ========== */
     dialog {
       background: var(--card);
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 18px;
       padding: 25px;
-
-      width: min(
-        430px,
-        calc(100vw - 28px)
-      );
-
-      box-shadow:
-        0 24px 80px rgba(0,0,0,.2);
+      width: min(430px, calc(100vw - 28px));
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .2);
     }
 
     dialog::backdrop {
-      background: rgba(0,0,0,.64);
+      background: rgba(0, 0, 0, .64);
       backdrop-filter: blur(3px);
     }
 
-    dialog h2 {
-      margin-bottom: 7px;
-      font-size: 1.3rem;
-    }
-
-    dialog p {
-      font-size: .91rem;
-      color: var(--muted);
-    }
+    dialog h2 { margin-bottom: 7px; font-size: 1.3rem; }
+    dialog p { font-size: .91rem; color: var(--muted); }
 
     .dialog-actions {
       display: flex;
@@ -633,17 +501,12 @@
       flex-wrap: wrap;
     }
 
-    /* ==========================================
-       TELA DE VITÓRIA
-    ========================================== */
-
+    /* ========== VITÓRIA ========== */
     .win-overlay {
       position: fixed;
       inset: 0;
       z-index: 30;
-
-      background: rgba(6,13,32,.68);
-
+      background: rgba(6, 13, 32, .68);
       display: grid;
       place-items: center;
       padding: 18px;
@@ -654,14 +517,10 @@
       border: 1px solid var(--border);
       padding: 31px 24px;
       border-radius: 24px;
-
       max-width: 440px;
       width: 100%;
       text-align: center;
-
-      box-shadow:
-        0 25px 90px rgba(0,0,0,.28);
-
+      box-shadow: 0 25px 90px rgba(0, 0, 0, .28);
       animation: pop .4s ease both;
     }
 
@@ -671,31 +530,15 @@
       margin-bottom: 5px;
     }
 
-    .win-card h2 {
-      font-size: 1.9rem;
-      margin: 0 0 9px;
-    }
-
-    .win-card p {
-      color: var(--muted);
-    }
+    .win-card h2 { font-size: 1.9rem; margin: 0 0 9px; }
+    .win-card p { color: var(--muted); }
 
     @keyframes pop {
-      from {
-        transform: scale(.75);
-        opacity: 0;
-      }
-
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
+      from { transform: scale(.75); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
-    /* ==========================================
-       EFEITO DE CONFETES
-    ========================================== */
-
+    /* ========== CONFETES ========== */
     .confetti-layer {
       position: fixed;
       inset: 0;
@@ -708,36 +551,26 @@
       position: absolute;
       top: -25px;
       left: var(--x);
-
       width: 9px;
       height: 14px;
       border-radius: 2px;
-
       background: var(--color);
       opacity: 0;
-
       animation:
-        confetti-fall
-        var(--duration)
-        linear
-        var(--delay)
-        forwards;
+        confetti-fall var(--duration)
+        linear var(--delay) forwards;
     }
 
     @keyframes confetti-fall {
       0% {
-        transform:
-          translate3d(0,-5vh,0)
-          rotate(0);
-
+        transform: translate3d(0, -5vh, 0) rotate(0);
         opacity: 1;
       }
 
       100% {
         transform:
-          translate3d(var(--drift),110vh,0)
+          translate3d(var(--drift), 110vh, 0)
           rotate(850deg);
-
         opacity: 0;
       }
     }
@@ -749,84 +582,42 @@
       font-size: .77rem;
     }
 
-    /* ==========================================
-       RESPONSIVIDADE
-    ========================================== */
-
-    @media(max-width:900px) {
+    /* ========== RESPONSIVIDADE ========== */
+    @media (max-width: 900px) {
       .layout {
         grid-template-columns: 1fr;
         max-width: 740px;
       }
 
       .words {
-        grid-template-columns:
-          repeat(2,minmax(0,1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    @media(max-width:530px) {
-      .topbar {
-        padding: 12px;
-      }
-
-      .brand {
-        font-size: 1rem;
-      }
-
-      .brand-icon {
-        width: 31px;
-        height: 31px;
-      }
-
-      .actions {
-        gap: 5px;
-      }
-
-      .btn {
-        padding: 9px 10px;
-        font-size: .8rem;
-      }
-
-      .theme-label {
-        display: none;
-      }
-
-      .layout {
-        padding: 0 9px;
-        margin: 16px auto;
-        gap: 14px;
-      }
-
-      .card {
-        padding: 14px;
-        border-radius: 15px;
-      }
-
-      .board {
-        gap: 2px;
-      }
-
+    @media (max-width: 530px) {
+      .topbar { padding: 12px; }
+      .brand { font-size: 1rem; }
+      .brand-icon { width: 31px; height: 31px; }
+      .actions { gap: 5px; }
+      .btn { padding: 9px 10px; font-size: .8rem; }
+      .theme-label { display: none; }
+      .layout { padding: 0 9px; margin: 16px auto; gap: 14px; }
+      .card { padding: 14px; border-radius: 15px; }
+      .board { gap: 2px; }
       .cell {
         border-radius: 3px;
-        font-size: clamp(8px,2.5vw,12px);
+        font-size: clamp(8px, 2.5vw, 12px);
       }
-
-      .word {
-        font-size: .78rem;
-        padding: 8px;
-      }
-
-      .dialog-actions {
-        flex-direction: column;
-      }
-
-      .dialog-actions .btn {
-        width: 100%;
-      }
+      .word { font-size: .78rem; padding: 8px; }
+      .dialog-actions { flex-direction: column; }
+      .dialog-actions .btn { width: 100%; }
     }
 
-    @media(prefers-reduced-motion:reduce) {
+    @media (max-width: 380px) {
+      .timer-choice-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
       *,
       *::before,
       *::after {
@@ -839,29 +630,21 @@
 
 <body>
 
-  <!-- =========================================
-       CABEÇALHO
-  ========================================= -->
-
+  <!-- ========== CABEÇALHO ========== -->
   <header class="topbar">
-
     <div class="brand">
       <span class="brand-icon">✦</span>
       Caça-Palavras
     </div>
 
     <div class="actions">
-
       <button
         type="button"
         class="btn"
         id="theme-toggle"
         aria-label="Alternar tema"
       >
-        ☾
-        <span class="theme-label" id="theme-label">
-          Escuro
-        </span>
+        ☾ <span class="theme-label" id="theme-label">Escuro</span>
       </button>
 
       <button type="button" class="btn" id="shuffle">
@@ -875,11 +658,9 @@
       >
         ⚑ Desistir
       </button>
-
     </div>
 
     <div class="actions">
-
       <span class="user-details" id="user-details">
         Modo visitante
       </span>
@@ -890,33 +671,19 @@
         id="login"
         disabled
       >
-        Entrar com Google
+        Entrar
       </button>
 
-      <button
-        type="button"
-        class="btn"
-        id="logout"
-        hidden
-      >
+      <button type="button" class="btn" id="logout" hidden>
         Sair
       </button>
-
     </div>
-
   </header>
 
-  <!-- =========================================
-       CONTEÚDO DO JOGO
-  ========================================= -->
-
+  <!-- ========== JOGO PRINCIPAL ========== -->
   <main class="layout">
-
     <section class="card" aria-labelledby="game-title">
-
-      <h1 id="game-title">
-        Encontre as palavras
-      </h1>
+      <h1 id="game-title">Encontre as palavras</h1>
 
       <p class="muted">
         Arraste sobre as letras na horizontal,
@@ -929,10 +696,17 @@
       </div>
 
       <div class="progress">
-        <div
-          class="progress-fill"
-          id="progress-fill"
-        ></div>
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div
+        id="timer-display"
+        class="timer-display"
+        role="timer"
+        aria-label="Tempo decorrido"
+        hidden
+      >
+        ⏱ <strong id="timer-value">00:00</strong>
       </div>
 
       <div class="board-wrap">
@@ -954,25 +728,13 @@
       </p>
 
       <div class="legend" id="legend" hidden>
-        <span>
-          <i class="dot found"></i>
-          Encontrada
-        </span>
-
-        <span>
-          <i class="dot missed"></i>
-          Revelada
-        </span>
+        <span><i class="dot found"></i> Encontrada</span>
+        <span><i class="dot missed"></i> Revelada</span>
       </div>
-
     </section>
 
-    <!-- =========================================
-         PAINEL LATERAL
-    ========================================= -->
-
+    <!-- ========== PAINEL DE PALAVRAS ========== -->
     <aside class="card">
-
       <div class="section-head">
         <h2>Palavras para encontrar</h2>
         <span id="badge" class="pill">0 restantes</span>
@@ -980,10 +742,7 @@
 
       <ul class="words" id="word-list"></ul>
 
-      <!-- EDITOR -->
-
       <section class="panel-section">
-
         <h2>Personalizar o desafio</h2>
 
         <label for="words-input">
@@ -1009,18 +768,10 @@
           Criar novo jogo
         </button>
 
-        <p
-          id="local-status"
-          class="status"
-          role="status"
-        ></p>
-
+        <p id="local-status" class="status" role="status"></p>
       </section>
 
-      <!-- CARREGAR MODELO -->
-
       <section class="panel-section">
-
         <h2>Carregar modelo da nuvem</h2>
 
         <label for="preset-code">
@@ -1028,7 +779,6 @@
         </label>
 
         <div class="row">
-
           <input
             id="preset-code"
             placeholder="CP-XXXX-XXXX-XXXX"
@@ -1043,21 +793,12 @@
           >
             Carregar
           </button>
-
         </div>
 
-        <p
-          id="preset-status"
-          class="status"
-          role="status"
-        ></p>
-
+        <p id="preset-status" class="status" role="status"></p>
       </section>
 
-      <!-- SALVAR NA NUVEM -->
-
       <section class="panel-section">
-
         <h2>Salvar na nuvem ☁</h2>
 
         <label for="model-name">
@@ -1081,37 +822,23 @@
         </button>
 
         <p class="helper" id="save-hint">
-          Entre com sua conta Google para salvar.
+          Entre com seu login e senha para salvar.
           Visitantes podem jogar e carregar códigos.
         </p>
 
-        <p
-          id="save-status"
-          class="status"
-          role="status"
-        ></p>
+        <p id="save-status" class="status" role="status"></p>
 
         <div id="saved-share" hidden>
-
           <label for="saved-code">
             Código do modelo salvo
           </label>
 
           <div class="row">
+            <input id="saved-code" readonly>
 
-            <input
-              id="saved-code"
-              readonly
-            >
-
-            <button
-              type="button"
-              class="btn"
-              id="copy-code"
-            >
+            <button type="button" class="btn" id="copy-code">
               Copiar
             </button>
-
           </div>
 
           <button
@@ -1122,21 +849,15 @@
           >
             Copiar link para jogar
           </button>
-
         </div>
-
       </section>
-
-      <!-- MEUS MODELOS -->
 
       <section
         class="panel-section"
         id="my-models-section"
         hidden
       >
-
         <div class="section-head">
-
           <h2>Meus modelos</h2>
 
           <button
@@ -1146,39 +867,142 @@
           >
             Atualizar
           </button>
-
         </div>
 
         <p class="helper">
           Você pode carregar ou excluir modelos da sua conta.
         </p>
 
-        <ul
-          class="model-list"
-          id="my-models"
-        ></ul>
+        <ul class="model-list" id="my-models"></ul>
 
-        <p
-          id="models-status"
-          class="status"
-          role="status"
-        ></p>
-
+        <p id="models-status" class="status" role="status"></p>
       </section>
-
     </aside>
-
   </main>
 
-  <!-- =========================================
-       CONFIRMAÇÃO DE DESISTÊNCIA
-  ========================================= -->
+  <!-- ========== ESCOLHA DO CRONÔMETRO ========== -->
+  <dialog
+    id="timer-dialog"
+    aria-labelledby="timer-title"
+    aria-describedby="timer-explanation"
+  >
+    <h2 id="timer-title">
+      ⏱ Como deseja jogar?
+    </h2>
 
+    <p id="timer-explanation">
+      Escolha se deseja acompanhar o tempo da partida.
+      O cronômetro conta de zero e para ao vencer ou desistir.
+    </p>
+
+    <div class="timer-choice-grid">
+      <button
+        type="button"
+        class="btn primary"
+        id="timer-yes"
+      >
+        ⏱ Com cronômetro
+      </button>
+
+      <button
+        type="button"
+        class="btn"
+        id="timer-no"
+      >
+        Sem cronômetro
+      </button>
+    </div>
+
+    <div class="dialog-actions">
+      <button
+        type="button"
+        class="btn small"
+        id="timer-cancel"
+        hidden
+      >
+        Cancelar e continuar
+      </button>
+    </div>
+  </dialog>
+
+  <!-- ========== LOGIN ========== -->
+  <dialog
+    id="login-dialog"
+    aria-labelledby="login-title"
+  >
+    <h2 id="login-title">
+      Acesso à nuvem
+    </h2>
+
+    <p>
+      Entre com o login e a senha cadastrados
+      no Firebase. Não é necessário entrar para jogar.
+    </p>
+
+    <form id="login-form" class="login-form">
+      <div>
+        <label for="login-username">
+          Login
+        </label>
+
+        <input
+          id="login-username"
+          name="username"
+          type="text"
+          placeholder="felipe.valente"
+          autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
+          required
+        >
+
+        <p class="suffix">
+          Usaremos automaticamente @painel.com.br
+        </p>
+      </div>
+
+      <div>
+        <label for="login-password">
+          Senha
+        </label>
+
+        <input
+          id="login-password"
+          type="password"
+          name="password"
+          placeholder="Digite sua senha"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <p id="login-status" class="status" role="alert"></p>
+
+      <div class="login-footer">
+        <button
+          type="button"
+          class="btn"
+          id="cancel-login"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          class="btn primary"
+          id="submit-login"
+        >
+          Entrar
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ========== CONFIRMAÇÃO DE DESISTÊNCIA ========== -->
   <dialog
     id="giveup-dialog"
     aria-labelledby="giveup-title"
   >
-
     <h2 id="giveup-title">
       ⚠ Deseja desistir?
     </h2>
@@ -1190,7 +1014,6 @@
     </p>
 
     <div class="dialog-actions">
-
       <button
         type="button"
         class="btn"
@@ -1206,15 +1029,10 @@
       >
         Sim, desistir
       </button>
-
     </div>
-
   </dialog>
 
-  <!-- =========================================
-       MENSAGEM DE PARABÉNS
-  ========================================= -->
-
+  <!-- ========== TELA DE VITÓRIA ========== -->
   <div
     class="win-overlay"
     id="win-overlay"
@@ -1223,12 +1041,8 @@
     aria-labelledby="win-title"
     hidden
   >
-
     <div class="win-card">
-
-      <span class="win-icon" aria-hidden="true">
-        🏆🎉
-      </span>
+      <span class="win-icon" aria-hidden="true">🏆🎉</span>
 
       <h2 id="win-title">
         Parabéns!
@@ -1237,6 +1051,12 @@
       <p id="win-message">
         Você encontrou todas as palavras!
       </p>
+
+      <p
+        id="win-time"
+        class="win-time"
+        hidden
+      ></p>
 
       <button
         type="button"
@@ -1253,9 +1073,7 @@
       >
         Ver meu tabuleiro
       </button>
-
     </div>
-
   </div>
 
   <div
@@ -1266,19 +1084,18 @@
 
   <footer>
     Um novo tabuleiro é sorteado ao recarregar
-    ou ao usar Embaralhar.
-    Salvar na nuvem exige login Google.
+    ou ao usar Embaralhar. Salvar na nuvem exige
+    login e senha cadastrados no Firebase.
   </footer>
 
-  <!-- =========================================
-       LÓGICA DO JOGO (FUNCIONA SEM FIREBASE)
-  ========================================= -->
-
+  <!-- ==========================================
+       JAVASCRIPT DO CAÇA-PALAVRAS
+  ========================================== -->
   <script>
     (() => {
       'use strict';
 
-      // PALAVRAS INICIAIS
+      // ========== CONFIGURAÇÕES ==========
       const DEFAULT_WORDS = [
         'CAÇA-PALAVRAS',
         'DESAFIO',
@@ -1294,11 +1111,10 @@
       const THEME_KEY = 'caca-palavras-tema-v1';
       const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-      // OITO DIREÇÕES
       const DIRECTIONS = [
         [-1,-1], [-1,0], [-1,1],
-        [0,-1],           [0,1],
-        [1,-1],  [1,0],   [1,1]
+        [0,-1],          [0,1],
+        [1,-1],  [1,0],  [1,1]
       ];
 
       const $ = id => document.getElementById(id);
@@ -1313,10 +1129,107 @@
       let gameOver = false;
       let selectedTheme = 'light';
 
-      // =========================================
-      // NORMALIZAÇÃO
-      // =========================================
+      // ========== CRONÔMETRO ==========
+      let timerEnabled = false;
+      let elapsedMs = 0;
+      let clockStartedAt = 0;
+      let clockHandle = null;
+      let hasStarted = false;
 
+      function formatTime(milliseconds) {
+        const seconds = Math.floor(milliseconds / 1000);
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainder = seconds % 60;
+
+        const mm = String(minutes).padStart(2, '0');
+        const ss = String(remainder).padStart(2, '0');
+
+        return hours
+          ? `${hours}:${mm}:${ss}`
+          : `${mm}:${ss}`;
+      }
+
+      function getElapsed() {
+        return elapsedMs + (
+          clockHandle
+            ? Date.now() - clockStartedAt
+            : 0
+        );
+      }
+
+      function updateClock() {
+        $('timer-value').textContent =
+          formatTime(getElapsed());
+      }
+
+      function pauseClock() {
+        if (clockHandle !== null) {
+          elapsedMs += Date.now() - clockStartedAt;
+          clearInterval(clockHandle);
+          clockHandle = null;
+        }
+
+        updateClock();
+      }
+
+      function resumeClock() {
+        if (
+          !timerEnabled ||
+          gameOver ||
+          !hasStarted ||
+          clockHandle !== null
+        ) {
+          return;
+        }
+
+        clockStartedAt = Date.now();
+
+        clockHandle = setInterval(
+          updateClock,
+          250
+        );
+
+        updateClock();
+      }
+
+      function chooseTimer() {
+        pauseClock();
+
+        $('timer-cancel').hidden = !hasStarted;
+        $('timer-dialog').showModal();
+      }
+
+      function beginWithTimer(enabled) {
+        timerEnabled = enabled;
+        $('timer-dialog').close();
+        startGame();
+      }
+
+      $('timer-yes').addEventListener(
+        'click',
+        () => beginWithTimer(true)
+      );
+
+      $('timer-no').addEventListener(
+        'click',
+        () => beginWithTimer(false)
+      );
+
+      $('timer-cancel').addEventListener('click', () => {
+        $('timer-dialog').close();
+        resumeClock();
+      });
+
+      $('timer-dialog').addEventListener('cancel', event => {
+        if (!hasStarted) {
+          event.preventDefault();
+        } else {
+          resumeClock();
+        }
+      });
+
+      // ========== PALAVRAS ==========
       function normalize(value) {
         return value
           .normalize('NFD')
@@ -1335,11 +1248,15 @@
           .filter(Boolean);
 
         if (!entries.length) {
-          throw new Error('Informe pelo menos uma palavra.');
+          throw new Error(
+            'Informe pelo menos uma palavra.'
+          );
         }
 
         if (entries.length > 25) {
-          throw new Error('O máximo é 25 palavras.');
+          throw new Error(
+            'O máximo é 25 palavras.'
+          );
         }
 
         const map = new Map();
@@ -1365,10 +1282,7 @@
         return [...map.values()];
       }
 
-      // =========================================
-      // GERADOR ALEATÓRIO
-      // =========================================
-
+      // ========== GERADOR ==========
       function random(n) {
         return Math.floor(Math.random() * n);
       }
@@ -1387,7 +1301,10 @@
             return false;
           }
 
-          if (matrix[y][x] && matrix[y][x] !== word[i]) {
+          if (
+            matrix[y][x] &&
+            matrix[y][x] !== word[i]
+          ) {
             return false;
           }
         }
@@ -1402,10 +1319,21 @@
           const [dr, dc] =
             DIRECTIONS[random(DIRECTIONS.length)];
 
-          const minR = dr < 0 ? word.length - 1 : 0;
-          const maxR = dr > 0 ? n - word.length : n - 1;
-          const minC = dc < 0 ? word.length - 1 : 0;
-          const maxC = dc > 0 ? n - word.length : n - 1;
+          const minR = dr < 0
+            ? word.length - 1
+            : 0;
+
+          const maxR = dr > 0
+            ? n - word.length
+            : n - 1;
+
+          const minC = dc < 0
+            ? word.length - 1
+            : 0;
+
+          const maxC = dc > 0
+            ? n - word.length
+            : n - 1;
 
           if (minR > maxR || minC > maxC) {
             continue;
@@ -1464,11 +1392,15 @@
             let success = true;
 
             const sorted = [...words].sort(
-              (a,b) => b.clean.length - a.clean.length
+              (a, b) =>
+                b.clean.length - a.clean.length
             );
 
             for (const word of sorted) {
-              const path = place(matrix, word.clean);
+              const path = place(
+                matrix,
+                word.clean
+              );
 
               if (!path) {
                 success = false;
@@ -1482,7 +1414,6 @@
               continue;
             }
 
-            // Preenche as células restantes
             for (let r = 0; r < n; r++) {
               for (let c = 0; c < n; c++) {
                 if (!matrix[r][c]) {
@@ -1506,11 +1437,8 @@
         );
       }
 
-      // =========================================
-      // RENDERIZAÇÃO
-      // =========================================
-
-      function cellAt(r,c) {
+      // ========== TABULEIRO ==========
+      function cellAt(r, c) {
         return board.children[r * size + c];
       }
 
@@ -1520,7 +1448,7 @@
         const frag = document.createDocumentFragment();
 
         grid.forEach((row, r) => {
-          row.forEach((letter,c) => {
+          row.forEach((letter, c) => {
             const el = document.createElement('div');
 
             el.className = 'cell';
@@ -1528,7 +1456,7 @@
             el.dataset.r = r;
             el.dataset.c = c;
 
-            el.setAttribute('role','gridcell');
+            el.setAttribute('role', 'gridcell');
             frag.appendChild(el);
           });
         });
@@ -1544,10 +1472,8 @@
           const no = gameOver && !yes;
 
           const li = document.createElement('li');
-
           li.className =
-            'word' +
-            (yes ? ' found' : no ? ' missed' : '');
+            'word' + (yes ? ' found' : no ? ' missed' : '');
 
           const mark = document.createElement('span');
           mark.className = 'mark';
@@ -1557,7 +1483,7 @@
           title.className = 'word-label';
           title.textContent = word.label;
 
-          li.append(mark,title);
+          li.append(mark, title);
           frag.appendChild(li);
         });
 
@@ -1568,16 +1494,13 @@
 
         $('badge').textContent = gameOver
           ? 'Encerrado'
-          : `${words.length-found.size} restantes`;
+          : `${words.length - found.size} restantes`;
 
         $('progress-fill').style.width =
           `${(found.size / words.length) * 100}%`;
       }
 
-      // =========================================
-      // INICIAR NOVO JOGO
-      // =========================================
-
+      // ========== NOVA PARTIDA ==========
       function hideWin() {
         $('win-overlay').hidden = true;
         $('confetti-layer').replaceChildren();
@@ -1586,6 +1509,12 @@
       function startGame() {
         const generated = generate();
 
+        pauseClock();
+        elapsedMs = 0;
+
+        $('timer-display').hidden = !timerEnabled;
+        updateClock();
+
         grid = generated.matrix;
         size = generated.n;
         placements = generated.paths;
@@ -1593,6 +1522,7 @@
         found = new Set();
         drag = null;
         gameOver = false;
+        hasStarted = true;
 
         renderBoard();
         renderWords();
@@ -1612,6 +1542,7 @@
         }
 
         hideWin();
+        resumeClock();
       }
 
       function changeWords(list, remember = true) {
@@ -1622,7 +1553,7 @@
 
         try {
           startGame();
-        } catch(e) {
+        } catch (e) {
           words = previous;
           throw e;
         }
@@ -1636,14 +1567,11 @@
               WORDS_KEY,
               $('words-input').value
             );
-          } catch(_) {}
+          } catch (_) {}
         }
       }
 
-      // =========================================
-      // SELEÇÃO POR ARRASTE
-      // =========================================
-
+      // ========== SELEÇÃO DAS LETRAS ==========
       function coords(el) {
         return [
           Number(el.dataset.r),
@@ -1653,15 +1581,20 @@
 
       function hover(event) {
         const el = document
-          .elementFromPoint(event.clientX,event.clientY)
+          .elementFromPoint(
+            event.clientX,
+            event.clientY
+          )
           ?.closest('.cell');
 
-        return el && board.contains(el) ? el : null;
+        return el && board.contains(el)
+          ? el
+          : null;
       }
 
-      function pathBetween(a,b) {
-        const dy = b[0]-a[0];
-        const dx = b[1]-a[1];
+      function pathBetween(a, b) {
+        const dy = b[0] - a[0];
+        const dx = b[1] - a[1];
 
         if (!dy && !dx) {
           return [a];
@@ -1672,7 +1605,7 @@
 
         for (const dir of DIRECTIONS) {
           const dot =
-            (dy*dir[0] + dx*dir[1]) /
+            (dy * dir[0] + dx * dir[1]) /
             Math.hypot(...dir);
 
           if (dot > score) {
@@ -1681,30 +1614,32 @@
           }
         }
 
-        const [dr,dc] = best;
+        const [dr, dc] = best;
 
         const steps = Math.max(
           0,
           Math.round(
-            (dy*dr + dx*dc) /
-            (dr*dr+dc*dc)
+            (dy * dr + dx * dc) /
+            (dr * dr + dc * dc)
           )
         );
 
         const result = [];
 
         for (let i = 0; i <= steps; i++) {
-          const r = a[0]+i*dr;
-          const c = a[1]+i*dc;
+          const r = a[0] + i * dr;
+          const c = a[1] + i * dc;
 
           if (
-            r < 0 || c < 0 ||
-            r >= size || c >= size
+            r < 0 ||
+            c < 0 ||
+            r >= size ||
+            c >= size
           ) {
             break;
           }
 
-          result.push([r,c]);
+          result.push([r, c]);
         }
 
         return result;
@@ -1718,13 +1653,12 @@
           });
 
         if (drag && !gameOver) {
-          drag.path.forEach(([r,c]) => {
-            cellAt(r,c).classList.add('selected');
+          drag.path.forEach(([r, c]) => {
+            cellAt(r, c).classList.add('selected');
           });
         }
       }
 
-      // Confirma o caminho verdadeiro da palavra
       function samePath(selected, actual) {
         if (
           !actual ||
@@ -1733,16 +1667,24 @@
           return false;
         }
 
-        return selected.every(([r,c],i) =>
-          r === actual[i][0] &&
-          c === actual[i][1]
-        ) || selected.every(([r,c],i) => {
-          const p = actual[actual.length-1-i];
+        const forward = selected.every(
+          ([r, c], i) =>
+            r === actual[i][0] &&
+            c === actual[i][1]
+        );
 
-          return r === p[0] && c === p[1];
-        });
+        const reverse = selected.every(
+          ([r, c], i) => {
+            const p = actual[actual.length - 1 - i];
+
+            return r === p[0] && c === p[1];
+          }
+        );
+
+        return forward || reverse;
       }
 
+      // ========== INICIAR ARRASTE ==========
       board.addEventListener('pointerdown', e => {
         if (
           gameOver ||
@@ -1769,6 +1711,7 @@
         highlight();
       });
 
+      // ========== MOVIMENTAR ARRASTE ==========
       board.addEventListener('pointermove', e => {
         if (
           !drag ||
@@ -1799,6 +1742,7 @@
         }
       });
 
+      // ========== VALIDAR PALAVRA ==========
       board.addEventListener('pointerup', e => {
         if (
           !drag ||
@@ -1817,7 +1761,6 @@
         }
 
         const path = drag.path;
-
         drag = null;
         highlight();
 
@@ -1825,12 +1768,13 @@
           return;
         }
 
-        const match = words.find(w =>
-          !found.has(w.clean) &&
-          samePath(
-            path,
-            placements.get(w.clean)
-          )
+        const match = words.find(
+          w =>
+            !found.has(w.clean) &&
+            samePath(
+              path,
+              placements.get(w.clean)
+            )
         );
 
         if (!match) {
@@ -1840,18 +1784,18 @@
           return;
         }
 
-        // Registra a palavra
         found.add(match.clean);
 
-        // Pinta a palavra de verde
-        placements.get(match.clean).forEach(([r,c]) => {
-          cellAt(r,c).classList.add('found');
-        });
+        placements.get(match.clean).forEach(
+          ([r, c]) => {
+            cellAt(r, c).classList.add('found');
+          }
+        );
 
-        // Vitória
         if (found.size === words.length) {
-          gameOver = true;
+          pauseClock();
 
+          gameOver = true;
           board.classList.add('locked');
           $('giveup').disabled = true;
 
@@ -1875,10 +1819,7 @@
           `✓ Palavra encontrada: ${match.label}`;
       });
 
-      // =========================================
-      // EFEITO DE CONFETES
-      // =========================================
-
+      // ========== CONFETES ==========
       function confetti() {
         if (
           window.matchMedia(
@@ -1904,32 +1845,31 @@
 
         for (let i = 0; i < 110; i++) {
           const piece = document.createElement('span');
-
           piece.className = 'confetti';
 
           piece.style.setProperty(
             '--x',
-            `${Math.random()*100}%`
+            `${Math.random() * 100}%`
           );
 
           piece.style.setProperty(
             '--color',
-            colors[i%colors.length]
+            colors[i % colors.length]
           );
 
           piece.style.setProperty(
             '--duration',
-            `${2.8+Math.random()*2.2}s`
+            `${2.8 + Math.random() * 2.2}s`
           );
 
           piece.style.setProperty(
             '--delay',
-            `${Math.random()*.8}s`
+            `${Math.random() * .8}s`
           );
 
           piece.style.setProperty(
             '--drift',
-            `${(Math.random()-.5)*240}px`
+            `${(Math.random() - .5) * 240}px`
           );
 
           frag.appendChild(piece);
@@ -1944,78 +1884,76 @@
         }, 6500);
       }
 
-      // =========================================
-      // MENSAGEM DE PARABÉNS
-      // =========================================
-
+      // ========== MENSAGEM DE VITÓRIA ==========
       function congratulate() {
         $('win-message').textContent =
           `Você encontrou as ${words.length} palavras! ` +
           'Excelente trabalho!';
 
-        $('win-overlay').hidden = false;
+        $('win-time').hidden = !timerEnabled;
 
+        $('win-time').textContent = timerEnabled
+          ? `Seu tempo: ${formatTime(getElapsed())}`
+          : '';
+
+        $('win-overlay').hidden = false;
         confetti();
 
         $('play-again').focus();
       }
 
-      $('play-again').addEventListener(
-        'click',
-        startGame
-      );
+      $('play-again').addEventListener('click', () => {
+        hideWin();
+        chooseTimer();
+      });
 
-      $('close-win').addEventListener(
-        'click',
-        hideWin
-      );
+      $('close-win').addEventListener('click', hideWin);
 
-      // =========================================
-      // EMBARALHAR
-      // =========================================
+      // ========== EMBARALHAR ==========
+      $('shuffle').addEventListener('click', chooseTimer);
 
-      $('shuffle').addEventListener(
-        'click',
-        startGame
-      );
-
-      // =========================================
-      // DESISTÊNCIA
-      // =========================================
-
+      // ========== DESISTIR ==========
       $('giveup').addEventListener('click', () => {
         if (!gameOver) {
+          pauseClock();
           $('giveup-dialog').showModal();
         }
       });
 
       $('keep-playing').addEventListener('click', () => {
         $('giveup-dialog').close();
+        resumeClock();
       });
+
+      $('giveup-dialog').addEventListener(
+        'cancel',
+        () => resumeClock()
+      );
 
       $('confirm-giveup').addEventListener('click', () => {
         $('giveup-dialog').close();
 
         if (gameOver) return;
 
+        pauseClock();
+
         gameOver = true;
         drag = null;
-
         highlight();
 
         board.classList.add('locked');
 
         $('giveup').disabled = true;
         $('giveup').textContent = '⚑ Desistiu';
-
         $('legend').hidden = false;
 
-        // Revela somente as palavras restantes
         for (const w of words) {
           if (!found.has(w.clean)) {
-            placements.get(w.clean).forEach(([r,c]) => {
-              cellAt(r,c).classList.add('missed');
-            });
+            placements.get(w.clean).forEach(
+              ([r, c]) => {
+                cellAt(r, c).classList.add('missed');
+              }
+            );
           }
         }
 
@@ -2025,15 +1963,11 @@
           'feedback alert';
 
         $('feedback').textContent =
-          'Partida encerrada: ' +
-          `${words.length-found.size} palavra(s) ` +
-          'revelada(s) em vermelho.';
+          `Partida encerrada: ${words.length - found.size} ` +
+          'palavra(s) revelada(s) em vermelho.';
       });
 
-      // =========================================
-      // CRIAR JOGO PERSONALIZADO
-      // =========================================
-
+      // ========== CRIAR JOGO ==========
       $('apply').addEventListener('click', () => {
         try {
           changeWords($('words-input').value);
@@ -2041,7 +1975,7 @@
           const u = new URL(location.href);
           u.searchParams.delete('modelo');
 
-          history.replaceState(null,'',u);
+          history.replaceState(null, '', u);
 
           $('local-status').textContent =
             'Novo jogo criado!';
@@ -2049,24 +1983,23 @@
           $('local-status').className =
             'status ok';
 
-        } catch(e) {
-          $('local-status').textContent = e.message;
+        } catch (e) {
+          $('local-status').textContent =
+            e.message;
 
           $('local-status').className =
             'status error';
         }
       });
 
-      // =========================================
-      // MODO CLARO / ESCURO
-      // =========================================
-
+      // ========== TEMA CLARO / ESCURO ==========
       function applyTheme(theme) {
         selectedTheme = theme;
 
         const dark = theme === 'dark';
 
-        document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.theme =
+          theme;
 
         $('theme-toggle').firstChild.textContent =
           dark ? '☀ ' : '☾ ';
@@ -2083,7 +2016,8 @@
 
         document.querySelector(
           'meta[name="theme-color"]'
-        ).content = dark ? '#0c1322' : '#f4f7fd';
+        ).content =
+          dark ? '#0c1322' : '#f4f7fd';
       }
 
       $('theme-toggle').addEventListener('click', () => {
@@ -2098,22 +2032,19 @@
             THEME_KEY,
             selectedTheme
           );
-        } catch(_) {}
+        } catch (_) {}
       });
 
-      // =========================================
-      // INICIALIZAÇÃO
-      // =========================================
-
+      // ========== INICIALIZAR ==========
       let initialTheme;
 
       try {
         initialTheme =
           localStorage.getItem(THEME_KEY);
-      } catch(_) {}
+      } catch (_) {}
 
       applyTheme(
-        ['light','dark'].includes(initialTheme)
+        ['light', 'dark'].includes(initialTheme)
           ? initialTheme
           : (
               matchMedia(
@@ -2128,59 +2059,47 @@
 
       try {
         saved = localStorage.getItem(WORDS_KEY);
-      } catch(_) {}
+      } catch (_) {}
 
       try {
         words = parseWords(saved || DEFAULT_WORDS);
-      } catch(_) {
+      } catch (_) {
         words = parseWords(DEFAULT_WORDS);
       }
 
       $('words-input').value =
         words.map(w => w.label).join('\n');
 
-      startGame();
+      // Pergunta o modo ao abrir/recarregar
+      chooseTimer();
 
-      // =========================================
-      // INTEGRAÇÃO COM FIREBASE
-      // =========================================
-
-      /*
-        Essas funções permitem que o módulo
-        do Firebase carregue ou consulte as
-        palavras sem alterar o jogo principal.
-      */
-
+      // API PARA INTEGRAÇÃO FIREBASE
       window.WordGame = {
-        getWords: () => words.map(w => w.label),
+        getWords: () =>
+          words.map(w => w.label),
 
-        loadWords: list => changeWords(list),
+        loadWords: list =>
+          changeWords(list),
 
         showLocalError: text => {
           $('local-status').textContent = text;
-          $('local-status').className =
-            'status error';
+          $('local-status').className = 'status error';
         }
       };
-
     })();
   </script>
 
-  <!-- =========================================
-       FIREBASE AUTHENTICATION + FIRESTORE
-  ========================================= -->
-
+  <!-- ==========================================
+       FIREBASE AUTHENTICATION E FIRESTORE
+  ========================================== -->
   <script type="module">
-
-    // SDK DO FIREBASE
     import {
       initializeApp
     } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
 
     import {
       getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
+      signInWithEmailAndPassword,
       signOut,
       onAuthStateChanged
     } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
@@ -2199,10 +2118,7 @@
       serverTimestamp
     } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
-    // =========================================
-    // CONFIGURAÇÃO DO SEU PROJETO
-    // =========================================
-
+    // ========== CONFIGURAÇÃO FIREBASE ==========
     const firebaseConfig = {
       apiKey: "AIzaSyBt5PxI4qIfc23Vr2ytTd9VYFIGvSwv2fE",
       authDomain: "cacapalavrasinterativo.firebaseapp.com",
@@ -2212,14 +2128,12 @@
       appId: "1:167586064732:web:4b7450d7cbbbcf09717999"
     };
 
-    // INICIALIZAÇÃO
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     const $ = id => document.getElementById(id);
 
-    // Formato de código de compartilhamento
     const CODE_REGEX =
       /^CP-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
 
@@ -2228,44 +2142,32 @@
 
     let currentUser = null;
 
-    // =========================================
-    // MENSAGENS DA NUVEM
-    // =========================================
-
-    function status(id,text,type='') {
+    // ========== MENSAGENS ==========
+    function status(id, text, type = '') {
       $(id).textContent = text;
-
       $(id).className =
-        'status' + (type ? ' '+type : '');
+        'status' + (type ? ' ' + type : '');
     }
 
     function friendlyError(error) {
       if (error.code === 'permission-denied') {
-        return (
-          'Permissão negada. ' +
-          'Confira as regras do Firestore.'
-        );
+        return 'Permissão negada. Confira as regras do Firestore.';
       }
 
       if (error.code === 'auth/unauthorized-domain') {
         return (
-          'Adicione o domínio do GitHub Pages ' +
-          'aos domínios autorizados do Authentication.'
+          'Adicione o domínio do GitHub Pages aos ' +
+          'domínios autorizados do Authentication.'
         );
       }
 
-      if (error.code === 'auth/popup-blocked') {
-        return (
-          'O navegador bloqueou a janela de login. ' +
-          'Libere pop-ups e tente novamente.'
-        );
-      }
-
-      if (
-        error.code === 'auth/popup-closed-by-user' ||
-        error.code === 'auth/cancelled-popup-request'
-      ) {
-        return 'Login cancelado.';
+      if ([
+        'auth/invalid-credential',
+        'auth/wrong-password',
+        'auth/user-not-found',
+        'auth/invalid-email'
+      ].includes(error.code)) {
+        return 'Login ou senha incorretos, ou conta inexistente.';
       }
 
       if (error.code === 'unavailable') {
@@ -2279,10 +2181,7 @@
         'Ocorreu um erro ao acessar o Firebase.';
     }
 
-    // =========================================
-    // CÓDIGOS DE COMPARTILHAMENTO
-    // =========================================
-
+    // ========== CÓDIGO DO MODELO ==========
     function canonicalCode(value) {
       return String(value).trim().toUpperCase();
     }
@@ -2297,16 +2196,16 @@
         .join('');
 
       return (
-        `CP-${raw.slice(0,4)}` +
-        `-${raw.slice(4,8)}` +
-        `-${raw.slice(8,12)}`
+        `CP-${raw.slice(0, 4)}` +
+        `-${raw.slice(4, 8)}` +
+        `-${raw.slice(8, 12)}`
       );
     }
 
     function linkFor(code) {
       const u = new URL(location.href);
 
-      u.searchParams.set('modelo',code);
+      u.searchParams.set('modelo', code);
 
       return u.href;
     }
@@ -2315,36 +2214,85 @@
       await navigator.clipboard.writeText(text);
     }
 
-    // =========================================
-    // LOGIN COM GOOGLE
-    // =========================================
+    // ========== LOGIN ABREVIADO ==========
+    // Ex.: felipe.valente -> felipe.valente@painel.com.br
+    const LOGIN_DOMAIN = '@painel.com.br';
 
-    $('login').addEventListener('click',async () => {
-      $('login').disabled = true;
+    $('login').addEventListener('click', () => {
+      status('login-status', '');
 
-      try {
-        await signInWithPopup(
-          auth,
-          new GoogleAuthProvider()
-        );
-
-      } catch(e) {
-        status(
-          'save-status',
-          friendlyError(e),
-          'error'
-        );
-
-      } finally {
-        $('login').disabled = false;
-      }
+      $('login-dialog').showModal();
+      $('login-username').focus();
     });
 
-    // =========================================
-    // SAIR DA CONTA
-    // =========================================
+    $('cancel-login').addEventListener('click', () => {
+      $('login-dialog').close();
+      $('login-password').value = '';
+    });
 
-    $('logout').addEventListener('click',async () => {
+    $('login-form').addEventListener(
+      'submit',
+      async event => {
+        event.preventDefault();
+
+        const username = $('login-username')
+          .value.trim().toLowerCase();
+
+        const password =
+          $('login-password').value;
+
+        if (
+          !/^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$/.test(
+            username
+          )
+        ) {
+          status(
+            'login-status',
+            'Digite apenas o login, por exemplo: felipe.valente',
+            'error'
+          );
+
+          return;
+        }
+
+        $('submit-login').disabled = true;
+
+        status(
+          'login-status',
+          'Verificando suas credenciais...'
+        );
+
+        try {
+          await signInWithEmailAndPassword(
+            auth,
+            username + LOGIN_DOMAIN,
+            password
+          );
+
+          $('login-password').value = '';
+          $('login-dialog').close();
+
+          status(
+            'save-status',
+            'Acesso à nuvem liberado.',
+            'ok'
+          );
+
+        } catch (error) {
+          status(
+            'login-status',
+            friendlyError(error),
+            'error'
+          );
+
+        } finally {
+          $('submit-login').disabled = false;
+        }
+      }
+    );
+
+    // ========== SAIR ==========
+    $('logout').addEventListener('click', async () => {
       try {
         await signOut(auth);
 
@@ -2353,7 +2301,7 @@
           'Você saiu da sua conta.'
         );
 
-      } catch(e) {
+      } catch (e) {
         status(
           'save-status',
           friendlyError(e),
@@ -2362,10 +2310,7 @@
       }
     });
 
-    // =========================================
-    // MONITORAR AUTENTICAÇÃO
-    // =========================================
-
+    // ========== ESTADO DA AUTENTICAÇÃO ==========
     onAuthStateChanged(auth, user => {
       currentUser = user;
 
@@ -2373,14 +2318,9 @@
       $('logout').hidden = !user;
 
       $('user-details').textContent = user
-        ? (
-            user.displayName ||
-            user.email ||
-            'Conectado'
-          )
+        ? (user.email?.split('@')[0] || 'Conectado')
         : 'Modo visitante';
 
-      // Salvamento disponível somente com login
       $('save-preset').disabled = !user;
 
       $('save-hint').textContent = user
@@ -2389,33 +2329,28 @@
             'um código exclusivo será gerado.'
           )
         : (
-            'Entre com Google para salvar. ' +
+            'Entre com seu login e senha para salvar. ' +
             'Visitantes podem jogar e carregar modelos.'
           );
 
-      // Lista privada dos modelos do usuário
       $('my-models-section').hidden = !user;
 
       if (user) {
         refreshModels();
       } else {
         $('my-models').replaceChildren();
-        status('models-status','');
+        status('models-status', '');
       }
     });
 
-    // =========================================
-    // CARREGAR MODELO POR CÓDIGO
-    // =========================================
-
+    // ========== CARREGAR MODELO ==========
     async function loadPreset(code) {
       code = canonicalCode(code);
 
       if (!CODE_REGEX.test(code)) {
         status(
           'preset-status',
-          'Código inválido. Use o formato ' +
-          'CP-XXXX-XXXX-XXXX.',
+          'Código inválido. Use o formato CP-XXXX-XXXX-XXXX.',
           'error'
         );
 
@@ -2431,14 +2366,13 @@
 
       try {
         const snapshot = await getDoc(
-          doc(db,'modelos',code)
+          doc(db, 'modelos', code)
         );
 
         if (!snapshot.exists()) {
           status(
             'preset-status',
-            'Modelo não encontrado. ' +
-            'Verifique o código.',
+            'Modelo não encontrado. Verifique o código.',
             'error'
           );
 
@@ -2449,12 +2383,10 @@
 
         if (!Array.isArray(data.palavras)) {
           throw new Error(
-            'O modelo armazenado não possui ' +
-            'uma lista válida.'
+            'O modelo armazenado não possui uma lista válida.'
           );
         }
 
-        // Aplica as palavras e cria o tabuleiro
         window.WordGame.loadWords(data.palavras);
 
         $('preset-code').value = code;
@@ -2464,21 +2396,19 @@
             ? data.nome
             : '';
 
-        // Atualiza o endereço da página
         const u = new URL(location.href);
+        u.searchParams.set('modelo', code);
 
-        u.searchParams.set('modelo',code);
-
-        history.replaceState(null,'',u);
+        history.replaceState(null, '', u);
 
         status(
           'preset-status',
-          `Modelo "${data.nome||code}" carregado! ` +
+          `Modelo "${data.nome || code}" carregado! ` +
           'Novo tabuleiro gerado.',
           'ok'
         );
 
-      } catch(e) {
+      } catch (e) {
         status(
           'preset-status',
           friendlyError(e),
@@ -2490,25 +2420,23 @@
       }
     }
 
-    $('load-preset').addEventListener('click',() => {
-      loadPreset($('preset-code').value);
-    });
+    $('load-preset').addEventListener(
+      'click',
+      () => loadPreset($('preset-code').value)
+    );
 
-    $('preset-code').addEventListener('keydown',e => {
+    $('preset-code').addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         loadPreset($('preset-code').value);
       }
     });
 
-    // =========================================
-    // SALVAR MODELO NA NUVEM
-    // =========================================
-
-    $('save-preset').addEventListener('click',async () => {
+    // ========== SALVAR NA NUVEM ==========
+    $('save-preset').addEventListener('click', async () => {
       if (!currentUser) {
         status(
           'save-status',
-          'Faça login com Google para salvar.',
+          'Faça login para salvar.',
           'error'
         );
 
@@ -2529,7 +2457,6 @@
 
       const creator = currentUser;
 
-      // Dados armazenados no Firestore
       const model = {
         ownerUid: creator.uid,
         nome: name,
@@ -2547,7 +2474,6 @@
       try {
         let code = null;
 
-        // Tenta gerar um código exclusivo
         for (let tries = 0; tries < 4; tries++) {
           const candidate = newCode();
 
@@ -2568,14 +2494,14 @@
                   throw new Error('COLISAO');
                 }
 
-                transaction.set(ref,model);
+                transaction.set(ref, model);
               }
             );
 
             code = candidate;
             break;
 
-          } catch(e) {
+          } catch (e) {
             if (e.message === 'COLISAO') {
               continue;
             }
@@ -2591,23 +2517,20 @@
           );
         }
 
-        // Mostra o código gerado
         $('saved-share').hidden = false;
         $('saved-code').value = code;
 
         status(
           'save-status',
-          'Modelo salvo! Compartilhe o código ' +
-          'ou o link abaixo.',
+          'Modelo salvo! Compartilhe o código ou o link abaixo.',
           'ok'
         );
 
-        // Atualiza a lista pessoal
         if (auth.currentUser?.uid === creator.uid) {
           await refreshModels();
         }
 
-      } catch(e) {
+      } catch (e) {
         status(
           'save-status',
           friendlyError(e),
@@ -2620,11 +2543,8 @@
       }
     });
 
-    // =========================================
-    // COPIAR CÓDIGO
-    // =========================================
-
-    $('copy-code').addEventListener('click',async () => {
+    // ========== COPIAR CÓDIGO ==========
+    $('copy-code').addEventListener('click', async () => {
       try {
         await copyText($('saved-code').value);
 
@@ -2634,7 +2554,7 @@
           'ok'
         );
 
-      } catch(_) {
+      } catch (_) {
         status(
           'save-status',
           'Não foi possível copiar automaticamente. ' +
@@ -2644,11 +2564,8 @@
       }
     });
 
-    // =========================================
-    // COPIAR LINK
-    // =========================================
-
-    $('copy-link').addEventListener('click',async () => {
+    // ========== COPIAR LINK ==========
+    $('copy-link').addEventListener('click', async () => {
       try {
         await copyText(
           linkFor($('saved-code').value)
@@ -2660,7 +2577,7 @@
           'ok'
         );
 
-      } catch(_) {
+      } catch (_) {
         status(
           'save-status',
           'Não foi possível copiar o link automaticamente.',
@@ -2669,16 +2586,11 @@
       }
     });
 
-    // =========================================
-    // LISTAR MODELOS DO USUÁRIO
-    // =========================================
-
+    // ========== MEUS MODELOS ==========
     async function refreshModels() {
       const user = currentUser;
 
-      if (!user) {
-        return;
-      }
+      if (!user) return;
 
       status(
         'models-status',
@@ -2686,10 +2598,9 @@
       );
 
       try {
-        // Consulta compatível com as regras
         const q = query(
-          collection(db,'modelos'),
-          where('ownerUid','==',user.uid),
+          collection(db, 'modelos'),
+          where('ownerUid', '==', user.uid),
           limit(50)
         );
 
@@ -2701,14 +2612,14 @@
 
         const frag = document.createDocumentFragment();
 
-        const entries = snapshots.docs.sort((a,b) => {
+        const entries = snapshots.docs.sort((a, b) => {
           const left =
             a.data().criadoEm?.toMillis?.() || 0;
 
           const right =
             b.data().criadoEm?.toMillis?.() || 0;
 
-          return right-left;
+          return right - left;
         });
 
         for (const snapshot of entries) {
@@ -2719,12 +2630,10 @@
           li.className = 'model-item';
 
           const name = document.createElement('div');
-
           name.className = 'model-name';
           name.textContent = data.nome || 'Sem nome';
 
           const codeText = document.createElement('div');
-
           codeText.className = 'model-code';
           codeText.textContent = code;
 
@@ -2733,23 +2642,22 @@
 
           // CARREGAR
           const open = document.createElement('button');
-
           open.type = 'button';
           open.className = 'btn small';
           open.textContent = 'Carregar';
 
-          open.addEventListener('click',() => {
-            loadPreset(code);
-          });
+          open.addEventListener(
+            'click',
+            () => loadPreset(code)
+          );
 
           // COMPARTILHAR
           const copy = document.createElement('button');
-
           copy.type = 'button';
           copy.className = 'btn small';
           copy.textContent = 'Copiar link';
 
-          copy.addEventListener('click',async () => {
+          copy.addEventListener('click', async () => {
             try {
               await copyText(linkFor(code));
 
@@ -2759,7 +2667,7 @@
                 'ok'
               );
 
-            } catch(e) {
+            } catch (e) {
               status(
                 'models-status',
                 'Não foi possível copiar o link.',
@@ -2770,24 +2678,21 @@
 
           // EXCLUIR
           const remove = document.createElement('button');
-
           remove.type = 'button';
           remove.className = 'btn small danger-outline';
           remove.textContent = 'Excluir';
 
-          remove.addEventListener('click',async () => {
-            if (
-              !confirm(
-                `Excluir permanentemente o modelo ` +
-                `"${data.nome}" (${code})?`
-              )
-            ) {
-              return;
-            }
+          remove.addEventListener('click', async () => {
+            const confirmed = confirm(
+              `Excluir permanentemente o modelo ` +
+              `"${data.nome}" (${code})?`
+            );
+
+            if (!confirmed) return;
 
             try {
               await deleteDoc(
-                doc(db,'modelos',code)
+                doc(db, 'modelos', code)
               );
 
               status(
@@ -2798,7 +2703,7 @@
 
               await refreshModels();
 
-            } catch(e) {
+            } catch (e) {
               status(
                 'models-status',
                 friendlyError(e),
@@ -2807,18 +2712,8 @@
             }
           });
 
-          actions.append(
-            open,
-            copy,
-            remove
-          );
-
-          li.append(
-            name,
-            codeText,
-            actions
-          );
-
+          actions.append(open, copy, remove);
+          li.append(name, codeText, actions);
           frag.appendChild(li);
         }
 
@@ -2831,7 +2726,7 @@
             : 'Você ainda não salvou nenhum modelo.'
         );
 
-      } catch(e) {
+      } catch (e) {
         status(
           'models-status',
           friendlyError(e),
@@ -2845,25 +2740,19 @@
       refreshModels
     );
 
-    // =========================================
-    // ATIVAR RECURSOS DA NUVEM
-    // =========================================
-
+    // ========== ATIVAR INTERFACE ==========
     $('login').disabled = false;
     $('load-preset').disabled = false;
 
-    // Carrega automaticamente pelo link
-    // Exemplo: ?modelo=CP-ABCD-EFGH-2345
-
-    const initialCode =
-      new URLSearchParams(location.search)
-        .get('modelo');
+    // ========== ABRIR MODELO PELO LINK ==========
+    const initialCode = new URLSearchParams(
+      location.search
+    ).get('modelo');
 
     if (initialCode) {
       $('preset-code').value = initialCode;
       loadPreset(initialCode);
     }
-
   </script>
 
 </body>

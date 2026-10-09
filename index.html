@@ -2,4304 +2,2894 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f4f7fd">
-  <title>Caça-Palavras Interativo</title>
-
-  <style>
-    /* ==========================================
-       1. TEMA CLARO
-    ========================================== */
-
-    :root {
-      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-      color-scheme: light;
-
-      --page: #f4f7fd;
-      --card: #ffffff;
-      --text: #1c2944;
-      --muted: #65748c;
-      --border: #e2e8f3;
-      --soft: #f1f5fc;
-      --primary: #5148df;
-      --primary-text: #ffffff;
-      --selected: #c7d2fe;
-      --selected-text: #312e81;
-      --found: #bbf7d0;
-      --found-text: #166534;
-      --missed: #fecaca;
-      --missed-text: #991b1b;
-      --danger: #dc2626;
-      --shadow: rgba(31, 51, 94, .08);
-    }
-
-    /* ==========================================
-       2. TEMA ESCURO
-    ========================================== */
-
-    html[data-theme="dark"] {
-      color-scheme: dark;
-
-      --page: #0c1322;
-      --card: #151f31;
-      --text: #e8eefb;
-      --muted: #a0aec4;
-      --border: #2c3a50;
-      --soft: #243148;
-      --primary: #7771f4;
-      --primary-text: #ffffff;
-      --selected: #655fd5;
-      --selected-text: #ffffff;
-      --found: #166534;
-      --found-text: #dcfce7;
-      --missed: #991b1b;
-      --missed-text: #fee2e2;
-      --danger: #fb7185;
-      --shadow: rgba(0, 0, 0, .27);
-    }
-
-    /* ==========================================
-       3. ESTILOS GERAIS
-    ========================================== */
-
-    * {
-      box-sizing: border-box;
-    }
-
-    [hidden] {
-      display: none !important;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--page);
-      color: var(--text);
-      transition: background .2s, color .2s;
-    }
-
-    button, input, textarea, select {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: .55;
-      cursor: not-allowed;
-    }
-
-    button:focus-visible,
-    input:focus-visible,
-    textarea:focus-visible,
-    select:focus-visible {
-      outline: 3px solid #a5b4fc;
-      outline-offset: 2px;
-    }
-
-    h1 {
-      margin: 0 0 7px;
-      font-size: clamp(1.45rem, 3vw, 2rem);
-      letter-spacing: -.045em;
-    }
-
-    h2 {
-      margin: 0 0 13px;
-      font-size: 1.04rem;
-    }
-
-    p {
-      line-height: 1.48;
-    }
-
-    .muted,
-    .helper {
-      color: var(--muted);
-    }
-
-    .muted {
-      margin: 0;
-      font-size: .9rem;
-    }
-
-    .helper {
-      font-size: .77rem;
-      line-height: 1.45;
-      margin: 7px 0 0;
-    }
-
-    /* ==========================================
-       4. CABEÇALHO
-    ========================================== */
-
-    .topbar {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-
-      padding: 17px max(
-        16px,
-        calc((100vw - 1200px) / 2)
-      );
-
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.15rem;
-      font-weight: 850;
-      letter-spacing: -.03em;
-    }
-
-    .brand-icon {
-      width: 38px;
-      height: 38px;
-      display: grid;
-      place-items: center;
-      border-radius: 12px;
-      color: white;
-      background: var(--primary);
-      font-size: 1.4rem;
-    }
-
-    .actions {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      flex-wrap: wrap;
-    }
-
-    /* ==========================================
-       5. BOTÕES
-    ========================================== */
-
-    .btn {
-      border: 0;
-      border-radius: 11px;
-      padding: 11px 14px;
-      font-weight: 730;
-      background: var(--soft);
-      color: var(--text);
-      transition: filter .15s, transform .15s;
-    }
-
-    .btn:hover:not(:disabled) {
-      filter: brightness(.95);
-    }
-
-    .btn:active:not(:disabled) {
-      transform: scale(.97);
-    }
-
-    html[data-theme="dark"]
-    .btn:hover:not(:disabled) {
-      filter: brightness(1.16);
-    }
-
-    .btn.primary {
-      background: var(--primary);
-      color: var(--primary-text);
-    }
-
-    .btn.danger {
-      background: var(--danger);
-      color: #ffffff;
-    }
-
-    .btn.danger-outline {
-      background: var(--soft);
-      color: var(--danger);
-    }
-
-    .btn.small {
-      padding: 8px 10px;
-      font-size: .79rem;
-    }
-
-    /* ==========================================
-       6. LAYOUT
-    ========================================== */
-
-    .layout {
-      max-width: 1200px;
-      margin: 29px auto;
-      padding: 0 16px;
-
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 325px;
-      gap: 20px;
-      align-items: start;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 19px;
-      padding: 23px;
-      box-shadow: 0 9px 29px var(--shadow);
-    }
-
-    /* ==========================================
-       7. PROGRESSO
-    ========================================== */
-
-    .score {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin: 23px 0 9px;
-      font-size: .9rem;
-      font-weight: 700;
-    }
-
-    .progress {
-      height: 9px;
-      border-radius: 20px;
-      background: var(--soft);
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0;
-      border-radius: 20px;
-
-      background: linear-gradient(
-        90deg,
-        #6660e8,
-        #19b67b
-      );
-
-      transition: width .2s;
-    }
-
-    /* ==========================================
-       8. CRONÔMETRO
-    ========================================== */
-
-    .timer-display {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-
-      margin-top: 14px;
-      padding: 9px 13px;
-
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--soft);
-
-      font-variant-numeric: tabular-nums;
-      font-weight: 800;
-    }
-
-    .timer-display strong {
-      font-size: 1.12rem;
-      letter-spacing: .025em;
-    }
-
-    /* ==========================================
-       9. TABULEIRO
-    ========================================== */
-
-    .board-wrap {
-      margin: 24px auto 0;
-      max-width: 660px;
-      overflow-x: auto;
-    }
-
-    .board {
-      --size: 14;
-
-      display: grid;
-      grid-template-columns:
-        repeat(var(--size), minmax(0, 1fr));
-
-      gap: 3px;
-      width: 100%;
-
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-      cursor: crosshair;
-    }
-
-    .cell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      aspect-ratio: 1;
-      min-width: 0;
-
-      background: var(--soft);
-      border-radius: 5px;
-      color: var(--text);
-
-      font-size: clamp(8px, 1.5vw, 17px);
-      font-weight: 800;
-    }
-
-    .cell.selected {
-      background: var(--selected);
-      color: var(--selected-text);
-
-      outline: 2px solid var(--primary);
-      outline-offset: -2px;
-    }
-
-    .cell.found {
-      background: var(--found);
-      color: var(--found-text);
-    }
-
-    .cell.missed {
-      background: var(--missed);
-      color: var(--missed-text);
-    }
-
-    .cell.found.missed {
-      background: linear-gradient(
-        135deg,
-        var(--found) 50%,
-        var(--missed) 50%
-      );
-
-      color: var(--text);
-    }
-
-    .board.locked {
-      cursor: default;
-    }
-
-    /* ==========================================
-       10. FEEDBACK E LEGENDA
-    ========================================== */
-
-    .feedback {
-      min-height: 23px;
-      margin: 18px 0 0;
-      text-align: center;
-      color: var(--muted);
-      font-size: .89rem;
-      font-weight: 650;
-    }
-
-    .feedback.success {
-      color: #16a34a;
-    }
-
-    .feedback.alert {
-      color: var(--danger);
-    }
-
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      font-size: .8rem;
-      color: var(--muted);
-      margin-top: 13px;
-    }
-
-    .dot {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
-      vertical-align: middle;
-      margin-right: 4px;
-    }
-
-    .dot.found {
-      background: var(--found);
-    }
-
-    .dot.missed {
-      background: var(--missed);
-    }
-
-    /* ==========================================
-       11. PALAVRAS
-    ========================================== */
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .pill {
-      display: inline-block;
-      background: var(--soft);
-      padding: 5px 9px;
-      border-radius: 20px;
-      color: var(--muted);
-      font-size: .74rem;
-      font-weight: 750;
-    }
-
-    .words {
-      list-style: none;
-      padding: 0;
-      margin: 12px 0 20px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .word {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      background: var(--soft);
-      padding: 9px 11px;
-      border-radius: 9px;
-
-      font-size: .85rem;
-      font-weight: 720;
-      overflow-wrap: anywhere;
-    }
-
-    .mark {
-      width: 18px;
-      height: 18px;
-      flex: 0 0 18px;
-
-      border: 2px solid var(--muted);
-      border-radius: 50%;
-
-      display: grid;
-      place-items: center;
-      font-size: .74rem;
-    }
-
-    .word.found {
-      color: var(--found-text);
-      background: var(--found);
-    }
-
-    .word.missed {
-      color: var(--missed-text);
-      background: var(--missed);
-    }
-
-    .word.found .mark,
-    .word.missed .mark {
-      border-color: currentColor;
-    }
-
-    .word.found .word-label {
-      text-decoration: line-through;
-      text-decoration-thickness: 2px;
-    }
-
-    /* ==========================================
-       12. FORMULÁRIOS
-    ========================================== */
-
-    .panel-section {
-      border-top: 1px solid var(--border);
-      padding-top: 18px;
-      margin-top: 18px;
-    }
-
-    label {
-      display: block;
-      font-size: .86rem;
-      font-weight: 750;
-      margin-bottom: 7px;
-    }
-
-    input,
-    textarea,
-    select {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--soft);
-      padding: 11px;
-      color: var(--text);
-    }
-
-    textarea {
-      min-height: 110px;
-      resize: vertical;
-      line-height: 1.5;
-    }
-
-    .full {
-      width: 100%;
-    }
-
-    .row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .row > input {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .row > .btn {
-      flex-shrink: 0;
-    }
-
-    .status {
-      font-size: .8rem;
-      min-height: 19px;
-      line-height: 1.4;
-      margin: 9px 0 0;
-      color: var(--muted);
-      overflow-wrap: anywhere;
-    }
-
-    .status.error {
-      color: var(--danger);
-    }
-
-    .status.ok {
-      color: #16a34a;
-    }
-
-    .user-details {
-      font-size: .79rem;
-      color: var(--muted);
-      overflow-wrap: anywhere;
-      max-width: 180px;
-    }
-
-    /* ==========================================
-       13. MODELOS DA NUVEM
-    ========================================== */
-
-    .model-list {
-      list-style: none;
-      padding: 0;
-      margin: 12px 0 0;
-      display: grid;
-      gap: 10px;
-    }
-
-    .model-item {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-      display: grid;
-      gap: 7px;
-    }
-
-    .model-name {
-      font-weight: 750;
-      font-size: .86rem;
-      overflow-wrap: anywhere;
-    }
-
-    .model-code {
-      font-family: ui-monospace, monospace;
-      font-size: .78rem;
-      color: var(--muted);
-      overflow-wrap: anywhere;
-    }
-
-    .model-buttons {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    /* ==========================================
-       14. JANELAS
-    ========================================== */
-
-    dialog {
-      background: var(--card);
-      color: var(--text);
-
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 25px;
-
-      width: min(430px, calc(100vw - 28px));
-
-      box-shadow:
-        0 24px 80px rgba(0, 0, 0, .2);
-    }
-
-    dialog::backdrop {
-      background: rgba(0, 0, 0, .64);
-      backdrop-filter: blur(3px);
-    }
-
-    dialog h2 {
-      margin-bottom: 7px;
-      font-size: 1.3rem;
-    }
-
-    dialog p {
-      font-size: .91rem;
-      color: var(--muted);
-    }
-
-    .dialog-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    .login-form {
-      display: grid;
-      gap: 13px;
-      margin-top: 17px;
-    }
-
-    .login-form .suffix {
-      font-size: .78rem;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .login-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    /* ==========================================
-       15. ESCOLHA DE TEMA
-    ========================================== */
-
-    #theme-dialog {
-      width: min(555px, calc(100vw - 28px));
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .theme-fields {
-      display: grid;
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    .theme-choice-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 9px;
-      margin-top: 16px;
-    }
-
-    .theme-choice-actions .btn {
-      min-height: 50px;
-    }
-
-    .current-theme {
-      display: inline-block;
-      margin: 10px 0 0;
-      color: var(--primary);
-      font-weight: 750;
-      font-size: .85rem;
-    }
-
-    .next-theme {
-      margin: 16px auto 0;
-      display: block;
-    }
-
-    /* ==========================================
-       16. VITÓRIA
-    ========================================== */
-
-    .win-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 30;
-
-      background: rgba(6, 13, 32, .68);
-      display: grid;
-      place-items: center;
-      padding: 18px;
-    }
-
-    .win-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 31px 24px;
-      border-radius: 24px;
-
-      max-width: 440px;
-      width: 100%;
-      text-align: center;
-
-      box-shadow:
-        0 25px 90px rgba(0, 0, 0, .28);
-
-      animation: pop .4s ease both;
-    }
-
-    .win-icon {
-      font-size: 3.5rem;
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .win-card h2 {
-      font-size: 1.9rem;
-      margin: 0 0 9px;
-    }
-
-    .win-card p {
-      color: var(--muted);
-    }
-
-    .win-time {
-      font-weight: 800;
-      color: var(--primary);
-      font-variant-numeric: tabular-nums;
-    }
-
-    @keyframes pop {
-      from {
-        transform: scale(.75);
-        opacity: 0;
-      }
-
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    /* ==========================================
-       17. CONFETES
-    ========================================== */
-
-    .confetti-layer {
-      position: fixed;
-      inset: 0;
-      z-index: 31;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .confetti {
-      position: absolute;
-      top: -25px;
-      left: var(--x);
-
-      width: 9px;
-      height: 14px;
-      border-radius: 2px;
-      background: var(--color);
-      opacity: 0;
-
-      animation:
-        confetti-fall var(--duration)
-        linear var(--delay) forwards;
-    }
-
-    @keyframes confetti-fall {
-      0% {
-        transform:
-          translate3d(0, -5vh, 0)
-          rotate(0);
-
-        opacity: 1;
-      }
-
-      100% {
-        transform:
-          translate3d(var(--drift), 110vh, 0)
-          rotate(850deg);
-
-        opacity: 0;
-      }
-    }
-
-    footer {
-      padding: 10px 20px 30px;
-      text-align: center;
-      color: var(--muted);
-      font-size: .77rem;
-    }
-
-    /* ==========================================
-       18. RESPONSIVIDADE
-    ========================================== */
-
-    @media (max-width: 900px) {
-      .layout {
-        grid-template-columns: 1fr;
-        max-width: 740px;
-      }
-
-      .words {
-        grid-template-columns:
-          repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 530px) {
-      .topbar {
-        padding: 12px;
-      }
-
-      .brand {
-        font-size: 1rem;
-      }
-
-      .brand-icon {
-        width: 31px;
-        height: 31px;
-      }
-
-      .actions {
-        gap: 5px;
-      }
-
-      .btn {
-        padding: 9px 10px;
-        font-size: .8rem;
-      }
-
-      .theme-label {
-        display: none;
-      }
-
-      .layout {
-        padding: 0 9px;
-        margin: 16px auto;
-        gap: 14px;
-      }
-
-      .card {
-        padding: 14px;
-        border-radius: 15px;
-      }
-
-      .board {
-        gap: 2px;
-      }
-
-      .cell {
-        border-radius: 3px;
-        font-size: clamp(8px, 2.5vw, 12px);
-      }
-
-      .word {
-        font-size: .78rem;
-        padding: 8px;
-      }
-
-      .dialog-actions {
-        flex-direction: column;
-      }
-
-      .dialog-actions .btn {
-        width: 100%;
-      }
-    }
-
-    @media (max-width: 440px) {
-      .theme-choice-actions {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation-duration: .01ms !important;
-        transition-duration: .01ms !important;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f7fd">
+<title>Caça-Palavras Interativo</title>
+
+<style>
+/* ========================================
+   CORES E TEMAS
+======================================== */
+:root {
+  font-family: system-ui,-apple-system,Segoe UI,sans-serif;
+  color-scheme: light;
+  --page:#f4f7fd;
+  --card:#fff;
+  --text:#1c2944;
+  --muted:#65748c;
+  --border:#e2e8f3;
+  --soft:#f1f5fc;
+  --primary:#5148df;
+  --primaryText:#fff;
+  --selected:#c7d2fe;
+  --selectedText:#312e81;
+  --found:#bbf7d0;
+  --foundText:#166534;
+  --missed:#fecaca;
+  --missedText:#991b1b;
+  --danger:#dc2626;
+  --shadow:rgba(31,51,94,.08);
+}
+html[data-theme="dark"] {
+  color-scheme:dark;
+  --page:#0c1322;
+  --card:#151f31;
+  --text:#e8eefb;
+  --muted:#a0aec4;
+  --border:#2c3a50;
+  --soft:#243148;
+  --primary:#7771f4;
+  --primaryText:#fff;
+  --selected:#655fd5;
+  --selectedText:#fff;
+  --found:#166534;
+  --foundText:#dcfce7;
+  --missed:#991b1b;
+  --missedText:#fee2e2;
+  --danger:#fb7185;
+  --shadow:rgba(0,0,0,.27);
+}
+
+* { box-sizing:border-box; }
+[hidden] { display:none!important; }
+
+body {
+  margin:0;
+  min-height:100vh;
+  background:var(--page);
+  color:var(--text);
+  transition:background .2s,color .2s;
+}
+button,input,textarea,select { font:inherit; }
+button { cursor:pointer; }
+button:disabled { opacity:.55;cursor:not-allowed; }
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline:3px solid #a5b4fc;
+  outline-offset:2px;
+}
+
+/* ========================================
+   CABEÇALHO
+======================================== */
+.topbar {
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  padding:17px max(16px,calc((100vw - 1200px)/2));
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:1.15rem;
+  font-weight:850;
+}
+.brand-icon {
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:var(--primary);
+  color:#fff;
+  font-size:1.4rem;
+}
+.actions {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+}
+.btn {
+  border:0;
+  border-radius:11px;
+  padding:11px 14px;
+  font-weight:730;
+  background:var(--soft);
+  color:var(--text);
+  transition:filter .15s,transform .15s;
+}
+.btn:hover:not(:disabled) { filter:brightness(.95); }
+.btn:active:not(:disabled) { transform:scale(.97); }
+.btn.primary { background:var(--primary);color:var(--primaryText); }
+.btn.danger { background:var(--danger);color:#fff; }
+.btn.danger-outline { color:var(--danger); }
+.btn.small { padding:8px 10px;font-size:.79rem; }
+
+/* ========================================
+   LAYOUT
+======================================== */
+.layout {
+  max-width:1200px;
+  margin:29px auto;
+  padding:0 16px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 325px;
+  gap:20px;
+  align-items:start;
+}
+.card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:19px;
+  padding:23px;
+  box-shadow:0 9px 29px var(--shadow);
+}
+h1 {
+  margin:0 0 7px;
+  font-size:clamp(1.45rem,3vw,2rem);
+}
+h2 { margin:0 0 13px;font-size:1.04rem; }
+p { line-height:1.48; }
+.muted,.helper { color:var(--muted); }
+.muted { margin:0;font-size:.9rem; }
+.helper { font-size:.77rem;line-height:1.45;margin:7px 0 0; }
+
+/* ========================================
+   PROGRESSO E CRONÔMETRO
+======================================== */
+.score {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin:23px 0 9px;
+  font-size:.9rem;
+  font-weight:700;
+}
+.progress {
+  height:9px;
+  border-radius:20px;
+  background:var(--soft);
+  overflow:hidden;
+}
+.progress-fill {
+  height:100%;
+  width:0;
+  background:linear-gradient(90deg,#6660e8,#19b67b);
+  transition:width .2s;
+}
+.timer-display {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:14px;
+  padding:9px 13px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--soft);
+  font-variant-numeric:tabular-nums;
+  font-weight:800;
+}
+
+/* ========================================
+   TABULEIRO
+======================================== */
+.board-wrap {
+  margin:24px auto 0;
+  max-width:660px;
+  overflow-x:auto;
+}
+.board {
+  --size:14;
+  display:grid;
+  grid-template-columns:repeat(var(--size),minmax(0,1fr));
+  gap:3px;
+  width:100%;
+  touch-action:none;
+  user-select:none;
+  cursor:crosshair;
+}
+.cell {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  aspect-ratio:1;
+  min-width:0;
+  background:var(--soft);
+  border-radius:5px;
+  font-size:clamp(8px,1.5vw,17px);
+  font-weight:800;
+}
+.cell.selected {
+  background:var(--selected);
+  color:var(--selectedText);
+  outline:2px solid var(--primary);
+  outline-offset:-2px;
+}
+.cell.found {
+  background:var(--found);
+  color:var(--foundText);
+}
+.cell.missed {
+  background:var(--missed);
+  color:var(--missedText);
+}
+.cell.found.missed {
+  background:linear-gradient(
+    135deg,
+    var(--found) 50%,
+    var(--missed) 50%
+  );
+}
+.board.locked { cursor:default; }
+.feedback {
+  min-height:23px;
+  margin:18px 0 0;
+  text-align:center;
+  color:var(--muted);
+  font-size:.89rem;
+  font-weight:650;
+}
+.feedback.success { color:#16a34a; }
+.feedback.alert { color:var(--danger); }
+.legend {
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  font-size:.8rem;
+  color:var(--muted);
+  margin-top:13px;
+}
+.dot {
+  display:inline-block;
+  width:12px;
+  height:12px;
+  border-radius:3px;
+  margin-right:4px;
+}
+.dot.found { background:var(--found); }
+.dot.missed { background:var(--missed); }
+.current-theme {
+  display:block;
+  margin:10px 0 0;
+  color:var(--primary);
+  font-weight:750;
+  font-size:.85rem;
+}
+.next-theme {
+  display:block;
+  margin:16px auto 0;
+}
+
+/* ========================================
+   LISTA DE PALAVRAS
+======================================== */
+.section-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+.pill {
+  background:var(--soft);
+  padding:5px 9px;
+  border-radius:20px;
+  color:var(--muted);
+  font-size:.74rem;
+  font-weight:750;
+}
+.words {
+  list-style:none;
+  padding:0;
+  margin:12px 0 20px;
+  display:grid;
+  gap:8px;
+}
+.word {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 11px;
+  background:var(--soft);
+  border-radius:9px;
+  font-size:.85rem;
+  font-weight:720;
+  overflow-wrap:anywhere;
+}
+.mark {
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  border:2px solid var(--muted);
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-size:.74rem;
+}
+.word.found {
+  background:var(--found);
+  color:var(--foundText);
+}
+.word.missed {
+  background:var(--missed);
+  color:var(--missedText);
+}
+.word.found .mark,
+.word.missed .mark {
+  border-color:currentColor;
+}
+.word.found .word-label {
+  text-decoration:line-through;
+}
+
+/* ========================================
+   FORMULÁRIOS
+======================================== */
+.panel-section {
+  border-top:1px solid var(--border);
+  padding-top:18px;
+  margin-top:18px;
+}
+label {
+  display:block;
+  font-size:.86rem;
+  font-weight:750;
+  margin-bottom:7px;
+}
+input,textarea,select {
+  width:100%;
+  padding:11px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--soft);
+  color:var(--text);
+}
+textarea {
+  min-height:110px;
+  resize:vertical;
+}
+.full { width:100%; }
+.row { display:flex;align-items:center;gap:8px; }
+.row > input { min-width:0;flex:1; }
+.status {
+  font-size:.8rem;
+  min-height:19px;
+  margin:9px 0 0;
+  line-height:1.4;
+  color:var(--muted);
+  overflow-wrap:anywhere;
+}
+.status.error { color:var(--danger); }
+.status.ok { color:#16a34a; }
+.user-details {
+  font-size:.79rem;
+  color:var(--muted);
+}
+.model-list {
+  list-style:none;
+  padding:0;
+  display:grid;
+  gap:10px;
+}
+.model-item {
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+  display:grid;
+  gap:7px;
+}
+.model-name { font-weight:750; }
+.model-code {
+  font-family:monospace;
+  color:var(--muted);
+  font-size:.78rem;
+}
+.model-buttons {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+/* ========================================
+   JANELAS
+======================================== */
+dialog {
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:25px;
+  width:min(430px,calc(100vw - 28px));
+  box-shadow:0 24px 80px rgba(0,0,0,.2);
+}
+dialog::backdrop {
+  background:rgba(0,0,0,.64);
+  backdrop-filter:blur(3px);
+}
+dialog p {
+  color:var(--muted);
+  font-size:.91rem;
+}
+.dialog-actions {
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:20px;
+  flex-wrap:wrap;
+}
+.login-form {
+  display:grid;
+  gap:13px;
+  margin-top:17px;
+}
+.login-footer {
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+.suffix {
+  font-size:.78rem;
+  color:var(--muted);
+}
+
+/* ========================================
+   SELEÇÃO DE TEMA E DIFICULDADE
+======================================== */
+#theme-dialog {
+  width:min(555px,calc(100vw - 28px));
+  max-height:90vh;
+  overflow-y:auto;
+}
+.theme-fields {
+  display:grid;
+  gap:12px;
+  margin-top:18px;
+}
+.difficulty-fieldset {
+  border:0;
+  margin:17px 0 0;
+  padding:0;
+  min-width:0;
+}
+.difficulty-fieldset legend {
+  font-size:.91rem;
+  font-weight:750;
+  margin-bottom:10px;
+}
+.difficulty-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.difficulty-card {
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin:0;
+  padding:12px;
+  border:2px solid var(--border);
+  border-radius:12px;
+  background:var(--soft);
+  cursor:pointer;
+}
+.difficulty-card input {
+  position:absolute;
+  opacity:0;
+  width:1px;
+  height:1px;
+  padding:0;
+}
+.difficulty-card:has(input:checked) {
+  border-color:var(--primary);
+  background:var(--card);
+}
+.difficulty-card:has(input:focus-visible) {
+  outline:3px solid #a5b4fc;
+  outline-offset:2px;
+}
+.difficulty-name {
+  font-weight:800;
+  font-size:.9rem;
+}
+.difficulty-subtitle {
+  font-size:.75rem;
+  color:var(--muted);
+  font-weight:500;
+}
+.difficulty-info {
+  font-size:.79rem;
+  color:var(--muted);
+  margin:9px 0 0;
+  line-height:1.45;
+}
+.theme-choice-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:16px;
+}
+.theme-choice-actions .btn {
+  min-height:50px;
+}
+
+/* ========================================
+   VITÓRIA E CONFETES
+======================================== */
+.win-overlay {
+  position:fixed;
+  inset:0;
+  z-index:30;
+  background:rgba(6,13,32,.68);
+  display:grid;
+  place-items:center;
+  padding:18px;
+}
+.win-card {
+  background:var(--card);
+  padding:31px 24px;
+  border-radius:24px;
+  max-width:440px;
+  width:100%;
+  text-align:center;
+  animation:pop .4s ease both;
+}
+.win-icon {
+  display:block;
+  font-size:3.5rem;
+}
+.win-card h2 {
+  font-size:1.9rem;
+}
+.win-time {
+  font-weight:800;
+  color:var(--primary);
+}
+@keyframes pop {
+  from { transform:scale(.75);opacity:0; }
+  to { transform:scale(1);opacity:1; }
+}
+.confetti-layer {
+  position:fixed;
+  inset:0;
+  z-index:31;
+  pointer-events:none;
+  overflow:hidden;
+}
+.confetti {
+  position:absolute;
+  top:-25px;
+  left:var(--x);
+  width:9px;
+  height:14px;
+  background:var(--color);
+  animation:
+    confetti-fall var(--duration)
+    linear var(--delay) forwards;
+}
+@keyframes confetti-fall {
+  from {
+    transform:translate3d(0,-5vh,0) rotate(0);
+    opacity:1;
+  }
+  to {
+    transform:
+      translate3d(var(--drift),110vh,0)
+      rotate(850deg);
+    opacity:0;
+  }
+}
+footer {
+  padding:20px;
+  text-align:center;
+  color:var(--muted);
+  font-size:.77rem;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+======================================== */
+@media(max-width:900px) {
+  .layout {
+    grid-template-columns:1fr;
+    max-width:740px;
+  }
+  .words {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:530px) {
+  .topbar { padding:12px; }
+  .brand { font-size:1rem; }
+  .actions { gap:5px; }
+  .btn { padding:9px 10px;font-size:.8rem; }
+  .theme-label { display:none; }
+  .layout {
+    margin:16px auto;
+    padding:0 9px;
+    gap:14px;
+  }
+  .card { padding:14px; }
+  .board { gap:2px; }
+  .cell { font-size:clamp(8px,2.5vw,12px); }
+  .dialog-actions { flex-direction:column; }
+  .dialog-actions .btn { width:100%; }
+}
+@media(max-width:440px) {
+  .theme-choice-actions { grid-template-columns:1fr; }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <!-- ==========================================
-       19. CABEÇALHO
-  ========================================== -->
-
-  <header class="topbar">
-
-    <div class="brand">
-      <span class="brand-icon">✦</span>
-      Caça-Palavras
-    </div>
-
-    <div class="actions">
-
-      <button
-        type="button"
-        class="btn"
-        id="theme-toggle"
-        aria-label="Alternar tema"
-      >
-        ☾
-        <span class="theme-label" id="theme-label">
-          Escuro
-        </span>
-      </button>
-
-      <button
-        type="button"
-        class="btn"
-        id="shuffle"
-      >
-        ↻ Embaralhar
-      </button>
-
-      <button
-        type="button"
-        class="btn danger-outline"
-        id="giveup"
-      >
-        ⚑ Desistir
-      </button>
-
-    </div>
-
-    <div class="actions">
-
-      <span class="user-details" id="user-details">
-        Modo visitante
-      </span>
-
-      <button
-        type="button"
-        class="btn primary"
-        id="login"
-        disabled
-      >
-        Entrar
-      </button>
-
-      <button
-        type="button"
-        class="btn"
-        id="logout"
-        hidden
-      >
-        Sair
-      </button>
-
-    </div>
-
-  </header>
-
-  <!-- ==========================================
-       20. ÁREA PRINCIPAL
-  ========================================== -->
-
-  <main class="layout">
-
-    <section
-      class="card"
-      aria-labelledby="game-title"
-    >
-
-      <h1 id="game-title">
-        Encontre as palavras
-      </h1>
-
-      <p class="muted">
-        Arraste sobre as letras na horizontal,
-        vertical ou diagonal, nos dois sentidos.
-      </p>
-
-      <div class="score">
-
-        <span>Seu progresso</span>
-
-        <span id="score">
-          0 / 0 encontradas
-        </span>
-
-      </div>
-
-      <div class="progress">
-        <div
-          class="progress-fill"
-          id="progress-fill"
-        ></div>
-      </div>
-
-      <p
-        id="current-theme"
-        class="current-theme"
-        hidden
-      ></p>
-
-      <div
-        id="timer-display"
-        class="timer-display"
-        role="timer"
-        hidden
-      >
-        ⏱
-        <strong id="timer-value">00:00</strong>
-      </div>
-
-      <div class="board-wrap">
-
-        <div
-          class="board"
-          id="board"
-          role="grid"
-          aria-label="Tabuleiro de caça-palavras"
-        ></div>
-
-      </div>
-
-      <p
-        class="feedback"
-        id="feedback"
-        role="status"
-        aria-live="polite"
-      >
-        Encontre a primeira palavra!
-      </p>
-
-      <div class="legend" id="legend" hidden>
-
-        <span>
-          <i class="dot found"></i>
-          Encontrada
-        </span>
-
-        <span>
-          <i class="dot missed"></i>
-          Revelada
-        </span>
-
-      </div>
-
-      <button
-        id="next-theme"
-        type="button"
-        class="btn primary next-theme"
-        hidden
-      >
-        🎲 Escolher próximo tema
-      </button>
-
-    </section>
-
-    <!-- ==========================================
-         21. PAINEL DE PALAVRAS
-    ========================================== -->
-
-    <aside class="card">
-
-      <div class="section-head">
-
-        <h2>Palavras para encontrar</h2>
-
-        <span id="badge" class="pill">
-          0 restantes
-        </span>
-
-      </div>
-
-      <ul
-        class="words"
-        id="word-list"
-      ></ul>
-
-      <!-- PERSONALIZAR -->
-
-      <section class="panel-section">
-
-        <h2>Personalizar o desafio</h2>
-
-        <label for="words-input">
-          Palavras (uma por linha ou separadas por vírgula)
-        </label>
-
-        <textarea
-          id="words-input"
-          spellcheck="false"
-        ></textarea>
-
-        <p class="helper">
-          Até 25 palavras com 2 a 20 letras cada.
-          Os acentos não aparecem no tabuleiro.
-        </p>
-
-        <button
-          type="button"
-          class="btn primary full"
-          id="apply"
-          style="margin-top:10px"
-        >
-          Criar novo jogo
-        </button>
-
-        <p
-          id="local-status"
-          class="status"
-          role="status"
-        ></p>
-
-      </section>
-
-      <!-- CARREGAR MODELO: VISÍVEL A TODOS -->
-
-      <section class="panel-section">
-
-        <h2>Carregar modelo da nuvem</h2>
-
-        <label for="preset-code">
-          Código do modelo (sem login)
-        </label>
-
-        <div class="row">
-
-          <input
-            id="preset-code"
-            placeholder="CP-XXXX-XXXX-XXXX"
-            autocomplete="off"
-          >
-
-          <button
-            type="button"
-            class="btn primary"
-            id="load-preset"
-            disabled
-          >
-            Carregar
-          </button>
-
-        </div>
-
-        <p
-          id="preset-status"
-          class="status"
-          role="status"
-        ></p>
-
-      </section>
-
-      <!-- ======================================
-           22. SALVAR NA NUVEM
-           OCULTO SEM LOGIN
-      ====================================== -->
-
-      <section
-        class="panel-section"
-        id="cloud-save-section"
-        hidden
-      >
-
-        <h2>Salvar na nuvem ☁</h2>
-
-        <label for="model-name">
-          Nome do modelo
-        </label>
-
-        <input
-          id="model-name"
-          maxlength="80"
-          placeholder="Ex.: Treinamento de qualidade"
-        >
-
-        <button
-          type="button"
-          class="btn primary full"
-          id="save-preset"
-          disabled
-          style="margin-top:10px"
-        >
-          Salvar modelo na nuvem
-        </button>
-
-        <p class="helper" id="save-hint">
-          Salve seu modelo e receba um código
-          para compartilhar.
-        </p>
-
-        <p
-          id="save-status"
-          class="status"
-          role="status"
-        ></p>
-
-        <div id="saved-share" hidden>
-
-          <label for="saved-code">
-            Código do modelo salvo
-          </label>
-
-          <div class="row">
-
-            <input
-              id="saved-code"
-              readonly
-            >
-
-            <button
-              type="button"
-              class="btn"
-              id="copy-code"
-            >
-              Copiar
-            </button>
-
-          </div>
-
-          <button
-            type="button"
-            class="btn full"
-            id="copy-link"
-            style="margin-top:8px"
-          >
-            Copiar link para jogar
-          </button>
-
-        </div>
-
-      </section>
-
-      <!-- ======================================
-           23. MEUS MODELOS
-           OCULTO SEM LOGIN
-      ====================================== -->
-
-      <section
-        class="panel-section"
-        id="my-models-section"
-        hidden
-      >
-
-        <div class="section-head">
-
-          <h2>Meus modelos</h2>
-
-          <button
-            type="button"
-            class="btn small"
-            id="refresh-models"
-          >
-            Atualizar
-          </button>
-
-        </div>
-
-        <p class="helper">
-          Você pode carregar ou excluir
-          modelos da sua conta.
-        </p>
-
-        <ul
-          class="model-list"
-          id="my-models"
-        ></ul>
-
-        <p
-          id="models-status"
-          class="status"
-          role="status"
-        ></p>
-
-      </section>
-
-    </aside>
-
-  </main>
-
-  <!-- ==========================================
-       24. ESCOLHA DO TEMA E CRONÔMETRO
-       SEM EXIBIR PALAVRAS
-  ========================================== -->
-
-  <dialog
-    id="theme-dialog"
-    aria-labelledby="theme-title"
-  >
-
-    <h2 id="theme-title">
-      🎲 Escolha o próximo desafio
-    </h2>
-
-    <p>
-      Escolha a categoria, o subtema e se deseja
-      jogar com cronômetro.
+<!-- ========================================
+     CABEÇALHO
+======================================== -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-icon">✦</span>
+    Caça-Palavras
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="theme-toggle">
+      ☾ <span class="theme-label" id="theme-label">Escuro</span>
+    </button>
+    <button class="btn" id="shuffle">↻ Embaralhar</button>
+    <button class="btn danger-outline" id="giveup">
+      ⚑ Desistir
+    </button>
+  </div>
+
+  <div class="actions">
+    <span class="user-details" id="user-details">
+      Modo visitante
+    </span>
+    <button class="btn primary" id="login" disabled>Entrar</button>
+    <button class="btn" id="logout" hidden>Sair</button>
+  </div>
+</header>
+
+<!-- ========================================
+     JOGO
+======================================== -->
+<main class="layout">
+  <section class="card">
+    <h1>Encontre as palavras</h1>
+    <p class="muted">
+      Arraste pelas letras na horizontal,
+      vertical ou diagonal. As direções
+      dependem da dificuldade.
     </p>
 
-    <div class="theme-fields">
+    <div class="score">
+      <span>Seu progresso</span>
+      <span id="score">0 / 0 encontradas</span>
+    </div>
+    <div class="progress">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
 
-      <div>
+    <p id="current-theme" class="current-theme" hidden></p>
 
-        <label for="category-select">
-          Categoria
-        </label>
+    <div id="timer-display" class="timer-display" hidden>
+      ⏱ <strong id="timer-value">00:00</strong>
+    </div>
 
-        <select id="category-select"></select>
+    <div class="board-wrap">
+      <div class="board" id="board" role="grid"></div>
+    </div>
 
+    <p class="feedback" id="feedback" role="status">
+      Encontre a primeira palavra!
+    </p>
+
+    <div class="legend" id="legend" hidden>
+      <span><i class="dot found"></i> Encontrada</span>
+      <span><i class="dot missed"></i> Revelada</span>
+    </div>
+
+    <button
+      class="btn primary next-theme"
+      id="next-theme"
+      hidden
+    >
+      🎲 Escolher próximo tema
+    </button>
+  </section>
+
+  <!-- ======================================
+       PAINEL LATERAL
+  ====================================== -->
+  <aside class="card">
+    <div class="section-head">
+      <h2>Palavras para encontrar</h2>
+      <span id="badge" class="pill">0 restantes</span>
+    </div>
+
+    <ul class="words" id="word-list"></ul>
+
+    <section class="panel-section">
+      <h2>Personalizar o desafio</h2>
+      <label for="words-input">
+        Palavras (uma por linha ou separadas por vírgula)
+      </label>
+      <textarea id="words-input"></textarea>
+
+      <p class="helper">
+        Cadastre até 25 palavras com 2 a 20 letras.
+        O nível determina quantas entram na partida.
+      </p>
+
+      <button class="btn primary full" id="apply">
+        Criar novo jogo
+      </button>
+      <p id="local-status" class="status"></p>
+    </section>
+
+    <section class="panel-section">
+      <h2>Carregar modelo da nuvem</h2>
+      <label for="preset-code">
+        Código do modelo (sem login)
+      </label>
+      <div class="row">
+        <input
+          id="preset-code"
+          placeholder="CP-XXXX-XXXX-XXXX"
+        >
+        <button
+          class="btn primary"
+          id="load-preset"
+          disabled
+        >
+          Carregar
+        </button>
       </div>
+      <p id="preset-status" class="status"></p>
+    </section>
 
-      <div id="subtheme-field">
+    <!-- VISÍVEL APENAS COM LOGIN -->
+    <section
+      class="panel-section"
+      id="cloud-save-section"
+      hidden
+    >
+      <h2>Salvar na nuvem ☁</h2>
 
-        <label for="subtheme-select">
-          Subtema
+      <label for="model-name">Nome do modelo</label>
+      <input
+        id="model-name"
+        maxlength="80"
+        placeholder="Ex.: Meu desafio"
+      >
+
+      <button
+        class="btn primary full"
+        id="save-preset"
+        disabled
+      >
+        Salvar modelo na nuvem
+      </button>
+
+      <p class="helper" id="save-hint">
+        Serão salvas as palavras desta partida.
+      </p>
+
+      <p id="save-status" class="status"></p>
+
+      <div id="saved-share" hidden>
+        <label for="saved-code">
+          Código do modelo salvo
         </label>
-
-        <select id="subtheme-select"></select>
-
+        <div class="row">
+          <input id="saved-code" readonly>
+          <button class="btn" id="copy-code">Copiar</button>
+        </div>
+        <button class="btn full" id="copy-link">
+          Copiar link para jogar
+        </button>
       </div>
+    </section>
 
+    <!-- VISÍVEL APENAS COM LOGIN -->
+    <section
+      class="panel-section"
+      id="my-models-section"
+      hidden
+    >
+      <div class="section-head">
+        <h2>Meus modelos</h2>
+        <button class="btn small" id="refresh-models">
+          Atualizar
+        </button>
+      </div>
+      <ul class="model-list" id="my-models"></ul>
+      <p id="models-status" class="status"></p>
+    </section>
+  </aside>
+</main>
+
+<!-- ========================================
+     ESCOLHA DO DESAFIO
+======================================== -->
+<dialog id="theme-dialog">
+  <h2>🎲 Escolha o próximo desafio</h2>
+  <p>
+    Escolha o tema, a dificuldade e se deseja
+    usar cronômetro.
+  </p>
+
+  <div class="theme-fields">
+    <div>
+      <label for="category-select">Categoria</label>
+      <select id="category-select"></select>
+    </div>
+    <div id="subtheme-field">
+      <label for="subtheme-select">Subtema</label>
+      <select id="subtheme-select"></select>
+    </div>
+  </div>
+
+  <!-- QUATRO NÍVEIS -->
+  <fieldset class="difficulty-fieldset">
+    <legend>Dificuldade</legend>
+
+    <div class="difficulty-grid">
+      <label class="difficulty-card">
+        <input
+          type="radio"
+          name="difficulty"
+          value="facil"
+        >
+        <span class="difficulty-name">🌱 Fácil</span>
+        <span class="difficulty-subtitle">
+          5 palavras · 2 direções
+        </span>
+      </label>
+
+      <label class="difficulty-card">
+        <input
+          type="radio"
+          name="difficulty"
+          value="medio"
+          checked
+        >
+        <span class="difficulty-name">🧩 Médio</span>
+        <span class="difficulty-subtitle">
+          7 palavras · 4 direções
+        </span>
+      </label>
+
+      <label class="difficulty-card">
+        <input
+          type="radio"
+          name="difficulty"
+          value="dificil"
+        >
+        <span class="difficulty-name">🔥 Difícil</span>
+        <span class="difficulty-subtitle">
+          9 palavras · 6 direções
+        </span>
+      </label>
+
+      <label class="difficulty-card">
+        <input
+          type="radio"
+          name="difficulty"
+          value="extremo"
+        >
+        <span class="difficulty-name">👑 Extremo</span>
+        <span class="difficulty-subtitle">
+          10 palavras · 8 direções
+        </span>
+      </label>
     </div>
 
     <p
-      id="theme-error"
-      class="status error"
-      role="alert"
-      hidden
+      class="difficulty-info"
+      id="difficulty-info"
+      aria-live="polite"
     ></p>
+  </fieldset>
 
-    <p style="margin:17px 0 0">
-      <strong>Deseja jogar com cronômetro?</strong>
-    </p>
-
-    <div class="theme-choice-actions">
-
-      <button
-        type="button"
-        class="btn primary"
-        id="timer-yes"
-      >
-        ⏱ Com cronômetro
-      </button>
-
-      <button
-        type="button"
-        class="btn"
-        id="timer-no"
-      >
-        Sem cronômetro
-      </button>
-
-    </div>
-
-    <div class="dialog-actions">
-
-      <button
-        type="button"
-        class="btn small"
-        id="theme-cancel"
-        hidden
-      >
-        Cancelar e continuar
-      </button>
-
-    </div>
-
-  </dialog>
-
-  <!-- ==========================================
-       25. LOGIN
-  ========================================== -->
-
-  <dialog
-    id="login-dialog"
-    aria-labelledby="login-title"
-  >
-
-    <h2 id="login-title">
-      Acesso à nuvem
-    </h2>
-
-    <p>
-      Entre com seu login e senha cadastrados
-      no Firebase. Não é necessário entrar para jogar.
-    </p>
-
-    <form
-      id="login-form"
-      class="login-form"
-    >
-
-      <div>
-
-        <label for="login-username">
-          Login
-        </label>
-
-        <input
-          id="login-username"
-          type="text"
-          name="username"
-          placeholder="felipe.valente"
-          autocomplete="username"
-          autocapitalize="none"
-          spellcheck="false"
-          required
-        >
-
-        <p class="suffix">
-          O domínio @painel.com.br é
-          adicionado automaticamente.
-        </p>
-
-      </div>
-
-      <div>
-
-        <label for="login-password">
-          Senha
-        </label>
-
-        <input
-          id="login-password"
-          type="password"
-          name="password"
-          placeholder="Digite sua senha"
-          autocomplete="current-password"
-          required
-        >
-
-      </div>
-
-      <p
-        id="login-status"
-        class="status"
-        role="alert"
-      ></p>
-
-      <div class="login-footer">
-
-        <button
-          type="button"
-          class="btn"
-          id="cancel-login"
-        >
-          Cancelar
-        </button>
-
-        <button
-          type="submit"
-          class="btn primary"
-          id="submit-login"
-        >
-          Entrar
-        </button>
-
-      </div>
-
-    </form>
-
-  </dialog>
-
-  <!-- ==========================================
-       26. DESISTÊNCIA
-  ========================================== -->
-
-  <dialog
-    id="giveup-dialog"
-    aria-labelledby="giveup-title"
-  >
-
-    <h2 id="giveup-title">
-      ⚠ Deseja desistir?
-    </h2>
-
-    <p>
-      Se confirmar, a partida será encerrada
-      e as palavras não encontradas serão
-      reveladas em vermelho.
-    </p>
-
-    <div class="dialog-actions">
-
-      <button
-        type="button"
-        class="btn"
-        id="keep-playing"
-      >
-        Continuar jogando
-      </button>
-
-      <button
-        type="button"
-        class="btn danger"
-        id="confirm-giveup"
-      >
-        Sim, desistir
-      </button>
-
-    </div>
-
-  </dialog>
-
-  <!-- ==========================================
-       27. VITÓRIA
-  ========================================== -->
-
-  <div
-    class="win-overlay"
-    id="win-overlay"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="win-title"
+  <!-- NÃO EXIBE AS PALAVRAS ANTES DO JOGO -->
+  <p
+    id="theme-error"
+    class="status error"
     hidden
-  >
+  ></p>
 
-    <div class="win-card">
+  <p><strong>Deseja jogar com cronômetro?</strong></p>
 
-      <span class="win-icon">
-        🏆🎉
-      </span>
-
-      <h2 id="win-title">
-        Parabéns!
-      </h2>
-
-      <p id="win-message">
-        Você encontrou todas as palavras!
-      </p>
-
-      <p
-        id="win-time"
-        class="win-time"
-        hidden
-      ></p>
-
-      <button
-        type="button"
-        class="btn primary"
-        id="play-again"
-      >
-        🎲 Escolher próximo tema
-      </button>
-
-      <button
-        type="button"
-        class="btn"
-        id="close-win"
-      >
-        Ver meu tabuleiro
-      </button>
-
-    </div>
-
+  <div class="theme-choice-actions">
+    <button class="btn primary" id="timer-yes">
+      ⏱ Com cronômetro
+    </button>
+    <button class="btn" id="timer-no">
+      Sem cronômetro
+    </button>
   </div>
 
-  <div
-    class="confetti-layer"
-    id="confetti-layer"
-    aria-hidden="true"
-  ></div>
-
-  <footer>
-    Escolha entre 12 subtemas ou utilize suas
-    próprias palavras. O salvamento na nuvem
-    exige autenticação.
-  </footer>
-
-  <!-- ==========================================
-       28. JAVASCRIPT PRINCIPAL
-  ========================================== -->
-
-  <script>
-    (() => {
-      "use strict";
-
-      /* ======================================
-         TEMAS E PALAVRAS
-      ====================================== */
-
-      const THEMES = {
-        "Cultura Pop e Entretenimento": {
-          "Videogames Clássicos e RPGs": [
-            "Switch Axe",
-            "Dragon Slayer",
-            "Masmorra",
-            "Inventário",
-            "Manancial",
-            "Cavaleiro",
-            "Habilidade",
-            "Missão",
-            "Tesouro",
-            "Poção"
-          ],
-
-          "Universos de Fantasia e Sci-Fi": [
-            "Imperador",
-            "Galáxia",
-            "Tripulação",
-            "Fortaleza",
-            "Profecia",
-            "Tecnologia",
-            "Mutação",
-            "Dimensão",
-            "Apocalipse",
-            "Guardião"
-          ],
-
-          "Música e Bandas (Nu Metal e Rock Alternativo)": [
-            "Distorção",
-            "Bateria",
-            "Acorde",
-            "Melodia",
-            "Microfone",
-            "Amplificador",
-            "Harmonia",
-            "Grave",
-            "Frequência",
-            "Composição"
-          ],
-
-          "Animes e Mangás": [
-            "Protagonista",
-            "Espadachim",
-            "Poder",
-            "Vingança",
-            "Torneio",
-            "Dimensão",
-            "Lenda",
-            "Aliança",
-            "Segredo",
-            "Destino"
-          ]
-        },
-
-        "Ciências e Exatas": {
-          "Termos de Física e Matemática": [
-            "Termodinâmica",
-            "Aceleração",
-            "Gravidade",
-            "Velocidade",
-            "Dinâmica",
-            "Mecânica",
-            "Energia",
-            "Resistência",
-            "Trajetória",
-            "Potência"
-          ],
-
-          "Estatística e Análise de Dados": [
-            "Regressão",
-            "Variância",
-            "Correlação",
-            "Amostragem",
-            "Mediana",
-            "Probabilidade",
-            "Tendência",
-            "Hipótese",
-            "Distribuição",
-            "Frequência"
-          ],
-
-          "Astronomia e Espaço": [
-            "Constelação",
-            "Supernova",
-            "Gravidade",
-            "Atmosfera",
-            "Satélite",
-            "Eclipse",
-            "Nebulosa",
-            "Órbita",
-            "Meteorito",
-            "Infinito"
-          ]
-        },
-
-        "Cotidiano e Profissional": {
-          "Tecnologia e Programação": [
-            "Algoritmo",
-            "Variável",
-            "Função",
-            "Compilador",
-            "Interface",
-            "Estrutura",
-            "Repositório",
-            "Sistema",
-            "Servidor",
-            "Desenvolvedor"
-          ],
-
-          "Produtividade e Escritório": [
-            "Automação",
-            "Relatório",
-            "Processo",
-            "Planejamento",
-            "Demanda",
-            "Cronograma",
-            "Estratégia",
-            "Indicador",
-            "Eficiência",
-            "Desempenho"
-          ],
-
-          "Gastronomia e Cafés": [
-            "Espresso",
-            "Coador",
-            "Caramelo",
-            "Infusão",
-            "Aroma",
-            "Torrefação",
-            "Paladar",
-            "Extrato",
-            "Harmonização",
-            "Temperatura"
-          ]
-        },
-
-        "Temas Gerais e Universais": {
-          "Natureza e Geografia": [
-            "Ecossistema",
-            "Biodiversidade",
-            "Montanha",
-            "Nascente",
-            "Vegetação",
-            "Continente",
-            "Arquipélago",
-            "Atmosfera",
-            "Península",
-            "Preservação"
-          ],
-
-          "Viagens e Lugares": [
-            "Passaporte",
-            "Aeroporto",
-            "Hospedagem",
-            "Itinerário",
-            "Aventura",
-            "Destino",
-            "Excursão",
-            "Turismo",
-            "Bagagem",
-            "Horizonte"
-          ]
-        }
-      };
-
-      /* ======================================
-         CONFIGURAÇÕES
-      ====================================== */
-
-      const DEFAULT_WORDS =
-        THEMES["Cultura Pop e Entretenimento"]
-              ["Videogames Clássicos e RPGs"];
-
-      const WORDS_KEY = "caca-palavras-lista-v1";
-
-      const THEME_KEY = "caca-palavras-tema-v1";
-
-      const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-      const DIRS = [
-        [-1, -1],
-        [-1,  0],
-        [-1,  1],
-        [ 0, -1],
-        [ 0,  1],
-        [ 1, -1],
-        [ 1,  0],
-        [ 1,  1]
-      ];
-
-      const $ = id =>
-        document.getElementById(id);
-
-      const board = $("board");
-
-      const picker = $("theme-dialog");
-
-      let words = [];
-
-      let customWords = [];
-
-      let customName = "Minhas palavras";
-
-      let grid = [];
-
-      let size = 0;
-
-      let placements = new Map();
-
-      let found = new Set();
-
-      let drag = null;
-
-      let gameOver = false;
-
-      let hasStarted = false;
-
-      let themeName = "";
-
-      let selectedTheme = "light";
-
-      let timerEnabled = false;
-
-      let elapsedMs = 0;
-
-      let clockStartedAt = 0;
-
-      let clockHandle = null;
-
-      /* ======================================
-         NORMALIZAÇÃO DAS PALAVRAS
-      ====================================== */
-
-      function normalize(value) {
-        return String(value)
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toUpperCase()
-          .replace(/[^A-Z]/g, "");
-      }
-
-      function parseWords(value) {
-        const entries = (
-          Array.isArray(value)
-            ? value
-            : String(value).split(/[,;\n]+/)
-        )
-          .map(v => String(v).trim())
-          .filter(Boolean);
-
-        if (
-          !entries.length ||
-          entries.length > 25
-        ) {
-          throw new Error(
-            "Informe entre 1 e 25 palavras."
-          );
-        }
-
-        const unique = new Map();
-
-        for (const label of entries) {
-          const clean = normalize(label);
-
-          if (
-            clean.length < 2 ||
-            clean.length > 20
-          ) {
-            throw new Error(
-              "Cada palavra precisa ter entre " +
-              "2 e 20 letras: " + label
-            );
-          }
-
-          if (!unique.has(clean)) {
-            unique.set(clean, {
-              clean,
-              label: label.toUpperCase()
-            });
-          }
-        }
-
-        return [...unique.values()];
-      }
-
-      /* ======================================
-         CATEGORIAS E SUBTEMAS
-      ====================================== */
-
-      function fillCategories() {
-        const select = $("category-select");
-
-        select.replaceChildren();
-
-        const categories = [
-          [
-            "aleatorio",
-            "🎲 Surpreenda-me (tema aleatório)"
-          ],
-
-          ...Object.keys(THEMES).map(
-            name => [name, name]
-          ),
-
-          [
-            "personalizado",
-            "📝 Minhas palavras / modelo salvo"
-          ]
-        ];
-
-        for (const [value, label] of categories) {
-          select.add(
-            new Option(label, value)
-          );
-        }
-
-        select.value = "aleatorio";
-
-        updateSubthemes();
-      }
-
-      function updateSubthemes() {
-        const category =
-          $("category-select").value;
-
-        const select =
-          $("subtheme-select");
-
-        select.replaceChildren();
-
-        const isTheme =
-          !!THEMES[category];
-
-        $("subtheme-field").hidden =
-          !isTheme;
-
-        if (isTheme) {
-          Object.keys(
-            THEMES[category]
-          ).forEach(title => {
-            select.add(
-              new Option(title, title)
-            );
-          });
-        }
-      }
-
-      $("category-select").addEventListener(
-        "change",
-        updateSubthemes
-      );
-
-      /* ======================================
-         JANELA DE ESCOLHA
-      ====================================== */
-
-      function openThemePicker(
-        preferCustom = false
-      ) {
-        pauseClock();
-
-        hideWin();
-
-        if (preferCustom) {
-          $("category-select").value =
-            "personalizado";
-        }
-
-        $("theme-cancel").hidden =
-          !hasStarted;
-
-        $("theme-error").hidden = true;
-
-        updateSubthemes();
-
-        if (!picker.open) {
-          picker.showModal();
-        }
-
-        $("category-select").focus();
-      }
-
-      function challengeForSelection() {
-        let category =
-          $("category-select").value;
-
-        if (category === "personalizado") {
-          return {
-            label: customName,
-
-            list: customWords.map(
-              w => w.label
-            )
-          };
-        }
-
-        if (category === "aleatorio") {
-          const categories =
-            Object.keys(THEMES);
-
-          category = categories[
-            Math.floor(
-              Math.random() * categories.length
-            )
-          ];
-
-          const subthemes =
-            Object.keys(THEMES[category]);
-
-          const sub = subthemes[
-            Math.floor(
-              Math.random() * subthemes.length
-            )
-          ];
-
-          return {
-            label: category + " • " + sub,
-            list: THEMES[category][sub]
-          };
-        }
-
-        const sub =
-          $("subtheme-select").value;
-
-        return {
-          label: category + " • " + sub,
-          list: THEMES[category][sub]
-        };
-      }
-
-      /* ======================================
-         INICIAR TEMA ESCOLHIDO
-      ====================================== */
-
-      function startChosenGame(enabled) {
-        const choice =
-          challengeForSelection();
-
-        const previousWords = words;
-
-        const previousTheme = themeName;
-
-        const previousTimer = timerEnabled;
-
-        try {
-          words = parseWords(choice.list);
-
-          themeName = choice.label;
-
-          timerEnabled = enabled;
-
-          startGame();
-
-          $("words-input").value =
-            words.map(w => w.label)
-              .join("\n");
-
-          picker.close();
-
-        } catch (error) {
-          words = previousWords;
-
-          themeName = previousTheme;
-
-          timerEnabled = previousTimer;
-
-          $("theme-error").textContent =
-            error.message;
-
-          $("theme-error").hidden = false;
-        }
-      }
-
-      $("timer-yes").addEventListener(
-        "click",
-        () => startChosenGame(true)
-      );
-
-      $("timer-no").addEventListener(
-        "click",
-        () => startChosenGame(false)
-      );
-
-      $("theme-cancel").addEventListener(
-        "click",
-        () => {
-          picker.close();
-          resumeClock();
-        }
-      );
-
-      picker.addEventListener(
-        "cancel",
-        event => {
-          if (!hasStarted) {
-            event.preventDefault();
-          } else {
-            resumeClock();
-          }
-        }
-      );
-
-      /* ======================================
-         CRONÔMETRO
-      ====================================== */
-
-      function formatTime(ms) {
-        const seconds =
-          Math.floor(ms / 1000);
-
-        const hours =
-          Math.floor(seconds / 3600);
-
-        const minutes = String(
-          Math.floor(
-            (seconds % 3600) / 60
-          )
-        ).padStart(2, "0");
-
-        const remaining = String(
-          seconds % 60
-        ).padStart(2, "0");
-
-        return hours
-          ? `${hours}:${minutes}:${remaining}`
-          : `${minutes}:${remaining}`;
-      }
-
-      function getElapsed() {
-        return elapsedMs + (
-          clockHandle !== null
-            ? Date.now() - clockStartedAt
-            : 0
-        );
-      }
-
-      function updateClock() {
-        $("timer-value").textContent =
-          formatTime(getElapsed());
-      }
-
-      function pauseClock() {
-        if (clockHandle !== null) {
-          elapsedMs +=
-            Date.now() - clockStartedAt;
-
-          clearInterval(clockHandle);
-
-          clockHandle = null;
-        }
-
-        updateClock();
-      }
-
-      function resumeClock() {
-        if (
-          !hasStarted ||
-          !timerEnabled ||
-          gameOver ||
-          clockHandle !== null
-        ) {
-          return;
-        }
-
-        clockStartedAt = Date.now();
-
-        clockHandle = setInterval(
-          updateClock,
-          250
-        );
-
-        updateClock();
-      }
-
-      /* ======================================
-         GERADOR ALEATÓRIO
-      ====================================== */
-
-      const random = n =>
-        Math.floor(Math.random() * n);
-
-      function canPlace(
-        matrix,
-        word,
-        r,
-        c,
-        dr,
-        dc
-      ) {
-        for (
-          let i = 0;
-          i < word.length;
-          i++
-        ) {
-          const y = r + i * dr;
-
-          const x = c + i * dc;
-
-          if (
-            y < 0 ||
-            x < 0 ||
-            y >= matrix.length ||
-            x >= matrix.length
-          ) {
-            return false;
-          }
-
-          if (
-            matrix[y][x] &&
-            matrix[y][x] !== word[i]
-          ) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-
-      function place(matrix, word) {
-        const n = matrix.length;
-
-        for (
-          let tries = 0;
-          tries < 900;
-          tries++
-        ) {
-          const [dr, dc] =
-            DIRS[random(DIRS.length)];
-
-          const minR =
-            dr < 0 ? word.length - 1 : 0;
-
-          const maxR =
-            dr > 0 ? n - word.length : n - 1;
-
-          const minC =
-            dc < 0 ? word.length - 1 : 0;
-
-          const maxC =
-            dc > 0 ? n - word.length : n - 1;
-
-          if (
-            minR > maxR ||
-            minC > maxC
-          ) {
-            continue;
-          }
-
-          const r =
-            minR + random(maxR - minR + 1);
-
-          const c =
-            minC + random(maxC - minC + 1);
-
-          if (
-            !canPlace(
-              matrix,
-              word,
-              r,
-              c,
-              dr,
-              dc
-            )
-          ) {
-            continue;
-          }
-
-          const path = [];
-
-          for (
-            let i = 0;
-            i < word.length;
-            i++
-          ) {
-            const y = r + dr * i;
-
-            const x = c + dc * i;
-
-            matrix[y][x] = word[i];
-
-            path.push([y, x]);
-          }
-
-          return path;
-        }
-
-        return null;
-      }
-
-      /* ======================================
-         GERAR TABULEIRO
-      ====================================== */
-
-      function generate() {
-        const longest = Math.max(
-          ...words.map(
-            w => w.clean.length
-          )
-        );
-
-        const total = words.reduce(
-          (sum, w) =>
-            sum + w.clean.length,
-          0
-        );
-
-        const initial = Math.max(
-          12,
-          longest,
-          Math.min(
-            24,
-            Math.ceil(
-              Math.sqrt(total * 2.4)
-            )
-          )
-        );
-
-        for (
-          let n = initial;
-          n <= 24;
-          n++
-        ) {
-          for (
-            let attempt = 0;
-            attempt < 75;
-            attempt++
-          ) {
-            const matrix = Array.from(
-              { length: n },
-              () => Array(n).fill("")
-            );
-
-            const paths = new Map();
-
-            const sorted = [...words].sort(
-              (a, b) =>
-                b.clean.length -
-                a.clean.length
-            );
-
-            let success = true;
-
-            for (const word of sorted) {
-              const path = place(
-                matrix,
-                word.clean
-              );
-
-              if (!path) {
-                success = false;
-                break;
-              }
-
-              paths.set(
-                word.clean,
-                path
-              );
-            }
-
-            if (!success) {
-              continue;
-            }
-
-            for (
-              let r = 0;
-              r < n;
-              r++
-            ) {
-              for (
-                let c = 0;
-                c < n;
-                c++
-              ) {
-                if (!matrix[r][c]) {
-                  matrix[r][c] =
-                    LETTERS[
-                      random(LETTERS.length)
-                    ];
-                }
-              }
-            }
-
-            return {
-              matrix,
-              n,
-              paths
-            };
-          }
-        }
-
+  <div class="dialog-actions">
+    <button class="btn small" id="theme-cancel" hidden>
+      Cancelar e continuar
+    </button>
+  </div>
+</dialog>
+
+<!-- ========================================
+     LOGIN
+======================================== -->
+<dialog id="login-dialog">
+  <h2>Acesso à nuvem</h2>
+  <p>Entre com seu login e senha cadastrados no Firebase.</p>
+
+  <form id="login-form" class="login-form">
+    <div>
+      <label for="login-username">Login</label>
+      <input
+        id="login-username"
+        type="text"
+        placeholder="felipe.valente"
+        autocomplete="username"
+        required
+      >
+      <p class="suffix">
+        O domínio @painel.com.br será adicionado automaticamente.
+      </p>
+    </div>
+
+    <div>
+      <label for="login-password">Senha</label>
+      <input
+        id="login-password"
+        type="password"
+        autocomplete="current-password"
+        required
+      >
+    </div>
+
+    <p id="login-status" class="status"></p>
+
+    <div class="login-footer">
+      <button type="button" class="btn" id="cancel-login">
+        Cancelar
+      </button>
+      <button type="submit" class="btn primary" id="submit-login">
+        Entrar
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ========================================
+     DESISTÊNCIA
+======================================== -->
+<dialog id="giveup-dialog">
+  <h2>⚠ Deseja desistir?</h2>
+  <p>
+    As palavras não encontradas serão
+    reveladas em vermelho.
+  </p>
+  <div class="dialog-actions">
+    <button class="btn" id="keep-playing">
+      Continuar jogando
+    </button>
+    <button class="btn danger" id="confirm-giveup">
+      Sim, desistir
+    </button>
+  </div>
+</dialog>
+
+<!-- ========================================
+     VITÓRIA
+======================================== -->
+<div class="win-overlay" id="win-overlay" hidden>
+  <div class="win-card">
+    <span class="win-icon">🏆🎉</span>
+    <h2>Parabéns!</h2>
+    <p id="win-message">
+      Você encontrou todas as palavras!
+    </p>
+    <p id="win-time" class="win-time" hidden></p>
+
+    <button class="btn primary" id="play-again">
+      🎲 Escolher próximo tema
+    </button>
+    <button class="btn" id="close-win">
+      Ver meu tabuleiro
+    </button>
+  </div>
+</div>
+
+<div class="confetti-layer" id="confetti-layer"></div>
+
+<footer>
+  Caça-Palavras Interativo · 4 níveis de dificuldade
+</footer>
+
+<!-- ========================================
+     JAVASCRIPT DO JOGO
+======================================== -->
+<script>
+(() => {
+  "use strict";
+
+  /* ======================================
+     1. CATEGORIAS E PALAVRAS
+  ====================================== */
+
+  const THEMES = {
+    "Cultura Pop e Entretenimento": {
+      "Videogames Clássicos e RPGs": [
+        "Switch Axe","Dragon Slayer","Masmorra",
+        "Inventário","Manancial","Cavaleiro",
+        "Habilidade","Missão","Tesouro","Poção"
+      ],
+      "Universos de Fantasia e Sci-Fi": [
+        "Imperador","Galáxia","Tripulação",
+        "Fortaleza","Profecia","Tecnologia",
+        "Mutação","Dimensão","Apocalipse","Guardião"
+      ],
+      "Música e Bandas (Nu Metal e Rock Alternativo)": [
+        "Distorção","Bateria","Acorde",
+        "Melodia","Microfone","Amplificador",
+        "Harmonia","Grave","Frequência","Composição"
+      ],
+      "Animes e Mangás": [
+        "Protagonista","Espadachim","Poder",
+        "Vingança","Torneio","Dimensão",
+        "Lenda","Aliança","Segredo","Destino"
+      ]
+    },
+
+    "Ciências e Exatas": {
+      "Termos de Física e Matemática": [
+        "Termodinâmica","Aceleração","Gravidade",
+        "Velocidade","Dinâmica","Mecânica",
+        "Energia","Resistência","Trajetória","Potência"
+      ],
+      "Estatística e Análise de Dados": [
+        "Regressão","Variância","Correlação",
+        "Amostragem","Mediana","Probabilidade",
+        "Tendência","Hipótese","Distribuição","Frequência"
+      ],
+      "Astronomia e Espaço": [
+        "Constelação","Supernova","Gravidade",
+        "Atmosfera","Satélite","Eclipse",
+        "Nebulosa","Órbita","Meteorito","Infinito"
+      ]
+    },
+
+    "Cotidiano e Profissional": {
+      "Tecnologia e Programação": [
+        "Algoritmo","Variável","Função",
+        "Compilador","Interface","Estrutura",
+        "Repositório","Sistema","Servidor","Desenvolvedor"
+      ],
+      "Produtividade e Escritório": [
+        "Automação","Relatório","Processo",
+        "Planejamento","Demanda","Cronograma",
+        "Estratégia","Indicador","Eficiência","Desempenho"
+      ],
+      "Gastronomia e Cafés": [
+        "Espresso","Coador","Caramelo",
+        "Infusão","Aroma","Torrefação",
+        "Paladar","Extrato","Harmonização","Temperatura"
+      ]
+    },
+
+    "Temas Gerais e Universais": {
+      "Natureza e Geografia": [
+        "Ecossistema","Biodiversidade","Montanha",
+        "Nascente","Vegetação","Continente",
+        "Arquipélago","Atmosfera","Península","Preservação"
+      ],
+      "Viagens e Lugares": [
+        "Passaporte","Aeroporto","Hospedagem",
+        "Itinerário","Aventura","Destino",
+        "Excursão","Turismo","Bagagem","Horizonte"
+      ]
+    }
+  };
+
+  /* ======================================
+     2. NÍVEIS DE DIFICULDADE
+  ====================================== */
+
+  const LEVELS = {
+    facil: {
+      label:"Fácil",
+      count:5,
+      min:12,
+      max:15,
+      directions:[
+        [0,1],
+        [1,0]
+      ],
+      summary:"Horizontal e vertical, sem invertidas."
+    },
+
+    medio: {
+      label:"Médio",
+      count:7,
+      min:15,
+      max:18,
+      directions:[
+        [0,1],
+        [1,0],
+        [1,1],
+        [1,-1]
+      ],
+      summary:"Inclui diagonais, sem palavras invertidas."
+    },
+
+    dificil: {
+      label:"Difícil",
+      count:9,
+      min:18,
+      max:21,
+      directions:[
+        [0,1],
+        [1,0],
+        [1,1],
+        [1,-1],
+        [0,-1],
+        [-1,0]
+      ],
+      summary:"Inclui horizontais e verticais invertidas."
+    },
+
+    extremo: {
+      label:"Extremo",
+      count:10,
+      min:22,
+      max:24,
+      directions:[
+        [-1,-1],
+        [-1,0],
+        [-1,1],
+        [0,-1],
+        [0,1],
+        [1,-1],
+        [1,0],
+        [1,1]
+      ],
+      summary:"Todas as oito direções disponíveis."
+    }
+  };
+
+  /* ======================================
+     3. CONFIGURAÇÕES
+  ====================================== */
+
+  const $ = id => document.getElementById(id);
+
+  const board = $("board");
+  const picker = $("theme-dialog");
+
+  const WORDS_KEY = "caca-palavras-lista-v1";
+  const THEME_KEY = "caca-palavras-tema-v1";
+  const LEVEL_KEY = "caca-palavras-dificuldade-v1";
+
+  const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  const ALL_DIRS = LEVELS.extremo.directions;
+
+  let words = [];
+  let customWords = [];
+  let customName = "Minhas palavras";
+
+  let grid = [];
+  let size = 0;
+  let placements = new Map();
+  let found = new Set();
+
+  let drag = null;
+  let gameOver = false;
+  let hasStarted = false;
+
+  let themeName = "";
+  let currentLevel = LEVELS.medio;
+  let selectedTheme = "light";
+
+  let timerEnabled = false;
+  let elapsedMs = 0;
+  let clockStartedAt = 0;
+  let clockHandle = null;
+
+  /* ======================================
+     4. NORMALIZAR PALAVRAS
+  ====================================== */
+
+  function normalize(value) {
+    return String(value)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g,"")
+      .toUpperCase()
+      .replace(/[^A-Z]/g,"");
+  }
+
+  function parseWords(value) {
+    const entries = (
+      Array.isArray(value)
+        ? value
+        : String(value).split(/[,;\n]+/)
+    )
+      .map(v => String(v).trim())
+      .filter(Boolean);
+
+    if (!entries.length || entries.length > 25) {
+      throw new Error("Informe entre 1 e 25 palavras.");
+    }
+
+    const unique = new Map();
+
+    for (const label of entries) {
+      const clean = normalize(label);
+
+      if (clean.length < 2 || clean.length > 20) {
         throw new Error(
-          "Não foi possível encaixar as palavras. " +
-          "Experimente uma lista menor."
+          "Cada palavra precisa ter entre 2 e 20 letras: " +
+          label
         );
       }
 
-      /* ======================================
-         DESENHAR TABULEIRO
-      ====================================== */
+      if (!unique.has(clean)) {
+        unique.set(clean,{
+          clean,
+          label:label.toUpperCase()
+        });
+      }
+    }
 
-      const cellAt = (r, c) =>
-        board.children[r * size + c];
+    return [...unique.values()];
+  }
 
-      function renderBoard() {
-        board.style.setProperty(
-          "--size",
-          size
+  /* ======================================
+     5. ESCOLHA DAS CATEGORIAS
+  ====================================== */
+
+  function fillCategories() {
+    const select = $("category-select");
+    select.replaceChildren();
+
+    const categories = [
+      ["aleatorio","🎲 Surpreenda-me (tema aleatório)"],
+      ...Object.keys(THEMES).map(n => [n,n]),
+      ["personalizado","📝 Minhas palavras / modelo salvo"]
+    ];
+
+    for (const [value,label] of categories) {
+      select.add(new Option(label,value));
+    }
+
+    select.value = "aleatorio";
+    updateSubthemes();
+  }
+
+  function updateSubthemes() {
+    const category = $("category-select").value;
+    const select = $("subtheme-select");
+
+    select.replaceChildren();
+
+    const isTheme = !!THEMES[category];
+    $("subtheme-field").hidden = !isTheme;
+
+    if (isTheme) {
+      for (const title of Object.keys(THEMES[category])) {
+        select.add(new Option(title,title));
+      }
+    }
+
+    updateDifficultyInfo();
+  }
+
+  function selectedLevel() {
+    const selected = document.querySelector(
+      'input[name="difficulty"]:checked'
+    );
+
+    return LEVELS[selected?.value] || LEVELS.medio;
+  }
+
+  function updateDifficultyInfo() {
+    const level = selectedLevel();
+
+    const isCustom =
+      $("category-select").value === "personalizado";
+
+    const available = isCustom
+      ? customWords.length
+      : 10;
+
+    const count = Math.min(level.count,available);
+
+    $("difficulty-info").textContent =
+      `${count} palavra(s) · Grade ${level.min}–${level.max}. ` +
+      level.summary +
+      " A grade pode aumentar se houver palavras maiores.";
+  }
+
+  $("category-select").addEventListener(
+    "change",
+    updateSubthemes
+  );
+
+  document.querySelectorAll(
+    'input[name="difficulty"]'
+  ).forEach(input => {
+    input.addEventListener("change",() => {
+      try {
+        localStorage.setItem(
+          LEVEL_KEY,
+          input.value
         );
+      } catch (_) {}
 
-        const fragment =
-          document.createDocumentFragment();
+      updateDifficultyInfo();
+    });
+  });
 
-        grid.forEach((row, r) => {
-          row.forEach((letter, c) => {
-            const el =
-              document.createElement("div");
+  /* ======================================
+     6. ABRIR ESCOLHA DO DESAFIO
+  ====================================== */
 
-            el.className = "cell";
+  function openThemePicker(preferCustom = false) {
+    pauseClock();
+    hideWin();
 
-            el.textContent = letter;
+    if (preferCustom) {
+      $("category-select").value = "personalizado";
+    }
 
-            el.dataset.r = r;
+    $("theme-cancel").hidden = !hasStarted;
+    $("theme-error").hidden = true;
 
-            el.dataset.c = c;
+    updateSubthemes();
 
-            el.setAttribute(
-              "role",
-              "gridcell"
-            );
+    if (!picker.open) {
+      picker.showModal();
+    }
+  }
 
-            fragment.appendChild(el);
+  /* ======================================
+     7. ESCOLHER TEMA E PALAVRAS
+  ====================================== */
+
+  function challengeForSelection() {
+    let category = $("category-select").value;
+
+    if (category === "personalizado") {
+      return {
+        label:customName,
+        list:customWords.map(w => w.label)
+      };
+    }
+
+    if (category === "aleatorio") {
+      const all = [];
+
+      for (const [group,subthemes] of Object.entries(THEMES)) {
+        for (const [sub,items] of Object.entries(subthemes)) {
+          all.push({
+            label:group + " • " + sub,
+            list:items
           });
-        });
-
-        board.replaceChildren(fragment);
+        }
       }
 
-      /* ======================================
-         LISTA DE PALAVRAS
-      ====================================== */
+      return all[Math.floor(Math.random() * all.length)];
+    }
 
-      function renderWords() {
-        const fragment =
-          document.createDocumentFragment();
+    const sub = $("subtheme-select").value;
 
-        words.forEach(word => {
-          const yes =
-            found.has(word.clean);
+    return {
+      label:category + " • " + sub,
+      list:THEMES[category][sub]
+    };
+  }
 
-          const no =
-            gameOver && !yes;
+  function chooseWords(list,count) {
+    const mixed = [...parseWords(list)];
 
-          const li =
-            document.createElement("li");
+    for (let i = mixed.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [mixed[i],mixed[j]] = [mixed[j],mixed[i]];
+    }
 
-          li.className =
-            "word" +
-            (yes
-              ? " found"
-              : no
-                ? " missed"
-                : "");
+    return mixed.slice(
+      0,
+      Math.min(count,mixed.length)
+    );
+  }
 
-          const mark =
-            document.createElement("span");
+  function startChosenGame(enabled) {
+    const choice = challengeForSelection();
 
-          mark.className = "mark";
+    const previous = {
+      words,
+      themeName,
+      timerEnabled,
+      currentLevel
+    };
 
-          mark.textContent =
-            yes ? "✓" : no ? "×" : "";
+    try {
+      currentLevel = selectedLevel();
 
-          const label =
-            document.createElement("span");
+      words = chooseWords(
+        choice.list,
+        currentLevel.count
+      );
 
-          label.className = "word-label";
+      themeName = choice.label;
+      timerEnabled = enabled;
 
-          label.textContent =
-            word.label;
+      startGame();
 
-          li.append(mark, label);
+      $("words-input").value =
+        words.map(w => w.label).join("\n");
 
-          fragment.appendChild(li);
-        });
+      picker.close();
+    }
+    catch (error) {
+      words = previous.words;
+      themeName = previous.themeName;
+      timerEnabled = previous.timerEnabled;
+      currentLevel = previous.currentLevel;
 
-        $("word-list").replaceChildren(
-          fragment
+      $("theme-error").textContent = error.message;
+      $("theme-error").hidden = false;
+    }
+  }
+
+  $("timer-yes").addEventListener(
+    "click",
+    () => startChosenGame(true)
+  );
+
+  $("timer-no").addEventListener(
+    "click",
+    () => startChosenGame(false)
+  );
+
+  $("theme-cancel").addEventListener("click",() => {
+    picker.close();
+    resumeClock();
+  });
+
+  picker.addEventListener("cancel",event => {
+    if (!hasStarted) {
+      event.preventDefault();
+    } else {
+      resumeClock();
+    }
+  });
+
+  /* ======================================
+     8. CRONÔMETRO
+  ====================================== */
+
+  function formatTime(ms) {
+    const s = Math.floor(ms / 1000);
+    const hours = Math.floor(s / 3600);
+
+    const minutes = String(
+      Math.floor((s % 3600) / 60)
+    ).padStart(2,"0");
+
+    const seconds = String(
+      s % 60
+    ).padStart(2,"0");
+
+    return hours
+      ? `${hours}:${minutes}:${seconds}`
+      : `${minutes}:${seconds}`;
+  }
+
+  function getElapsed() {
+    return elapsedMs + (
+      clockHandle !== null
+        ? Date.now() - clockStartedAt
+        : 0
+    );
+  }
+
+  function updateClock() {
+    $("timer-value").textContent =
+      formatTime(getElapsed());
+  }
+
+  function pauseClock() {
+    if (clockHandle !== null) {
+      elapsedMs += Date.now() - clockStartedAt;
+      clearInterval(clockHandle);
+      clockHandle = null;
+    }
+
+    updateClock();
+  }
+
+  function resumeClock() {
+    if (
+      !hasStarted ||
+      !timerEnabled ||
+      gameOver ||
+      clockHandle !== null
+    ) return;
+
+    clockStartedAt = Date.now();
+    clockHandle = setInterval(updateClock,250);
+
+    updateClock();
+  }
+
+  /* ======================================
+     9. GERAR TABULEIRO
+  ====================================== */
+
+  const random = n =>
+    Math.floor(Math.random() * n);
+
+  function canPlace(matrix,word,r,c,dr,dc) {
+    for (let i = 0; i < word.length; i++) {
+      const y = r + i * dr;
+      const x = c + i * dc;
+
+      if (
+        y < 0 ||
+        x < 0 ||
+        y >= matrix.length ||
+        x >= matrix.length
+      ) return false;
+
+      if (
+        matrix[y][x] &&
+        matrix[y][x] !== word[i]
+      ) return false;
+    }
+
+    return true;
+  }
+
+  function place(matrix,word) {
+    const n = matrix.length;
+    const dirs = currentLevel.directions;
+
+    for (let tries = 0; tries < 900; tries++) {
+      const [dr,dc] = dirs[random(dirs.length)];
+
+      const minR = dr < 0 ? word.length - 1 : 0;
+      const maxR = dr > 0 ? n - word.length : n - 1;
+
+      const minC = dc < 0 ? word.length - 1 : 0;
+      const maxC = dc > 0 ? n - word.length : n - 1;
+
+      if (minR > maxR || minC > maxC) continue;
+
+      const r = minR + random(maxR - minR + 1);
+      const c = minC + random(maxC - minC + 1);
+
+      if (!canPlace(matrix,word,r,c,dr,dc)) {
+        continue;
+      }
+
+      const path = [];
+
+      for (let i = 0; i < word.length; i++) {
+        const y = r + dr * i;
+        const x = c + dc * i;
+
+        matrix[y][x] = word[i];
+        path.push([y,x]);
+      }
+
+      return path;
+    }
+
+    return null;
+  }
+
+  function generate() {
+    const longest = Math.max(
+      ...words.map(w => w.clean.length)
+    );
+
+    const smallest = Math.max(
+      currentLevel.min,
+      longest
+    );
+
+    const largest = Math.max(
+      smallest,
+      currentLevel.max
+    );
+
+    const initial =
+      smallest + random(largest - smallest + 1);
+
+    for (let n = initial; n <= 24; n++) {
+      for (let attempt = 0; attempt < 75; attempt++) {
+        const matrix = Array.from(
+          {length:n},
+          () => Array(n).fill("")
         );
 
-        $("score").textContent =
-          `${found.size} / ${words.length} encontradas`;
+        const paths = new Map();
 
-        $("badge").textContent = gameOver
-          ? "Encerrado"
-          : `${words.length - found.size} restantes`;
+        const sorted = [...words].sort(
+          (a,b) => b.clean.length - a.clean.length
+        );
 
-        $("progress-fill").style.width =
-          `${words.length
-            ? 100 * found.size / words.length
-            : 0}%`;
-      }
+        let success = true;
 
-      /* ======================================
-         INICIAR PARTIDA
-      ====================================== */
-
-      function hideWin() {
-        $("win-overlay").hidden = true;
-
-        $("confetti-layer").replaceChildren();
-      }
-
-      function startGame() {
-        const generated = generate();
-
-        pauseClock();
-
-        elapsedMs = 0;
-
-        updateClock();
-
-        $("timer-display").hidden =
-          !timerEnabled;
-
-        grid = generated.matrix;
-
-        size = generated.n;
-
-        placements = generated.paths;
-
-        found = new Set();
-
-        drag = null;
-
-        gameOver = false;
-
-        hasStarted = true;
-
-        renderBoard();
-
-        renderWords();
-
-        $("current-theme").textContent =
-          themeName;
-
-        $("current-theme").hidden = false;
-
-        $("next-theme").hidden = true;
-
-        board.classList.remove("locked");
-
-        $("legend").hidden = true;
-
-        $("giveup").disabled = false;
-
-        $("giveup").textContent =
-          "⚑ Desistir";
-
-        $("feedback").className =
-          "feedback";
-
-        $("feedback").textContent =
-          "Encontre a primeira palavra!";
-
-        if ($("giveup-dialog").open) {
-          $("giveup-dialog").close();
-        }
-
-        hideWin();
-
-        resumeClock();
-      }
-
-      /* ======================================
-         PERSONALIZAR PALAVRAS
-      ====================================== */
-
-      function setCustomWords(
-        list,
-        label = "Minhas palavras"
-      ) {
-        const parsed = parseWords(list);
-
-        customWords = parsed;
-
-        customName = label;
-
-        $("words-input").value =
-          parsed.map(w => w.label)
-            .join("\n");
-
-        try {
-          localStorage.setItem(
-            WORDS_KEY,
-            $("words-input").value
+        for (const word of sorted) {
+          const path = place(
+            matrix,
+            word.clean
           );
-        } catch (_) {}
 
-        openThemePicker(true);
-      }
-
-      /* ======================================
-         SELEÇÃO POR ARRASTE
-      ====================================== */
-
-      function coords(el) {
-        return [
-          Number(el.dataset.r),
-          Number(el.dataset.c)
-        ];
-      }
-
-      function hover(event) {
-        const el = document.elementFromPoint(
-          event.clientX,
-          event.clientY
-        )?.closest(".cell");
-
-        return el && board.contains(el)
-          ? el
-          : null;
-      }
-
-      function pathBetween(a, b) {
-        const dy = b[0] - a[0];
-
-        const dx = b[1] - a[1];
-
-        if (!dy && !dx) {
-          return [a];
-        }
-
-        let best = DIRS[0];
-
-        let score = -Infinity;
-
-        for (const dir of DIRS) {
-          const dot = (
-            dy * dir[0] +
-            dx * dir[1]
-          ) / Math.hypot(...dir);
-
-          if (dot > score) {
-            score = dot;
-            best = dir;
-          }
-        }
-
-        const [dr, dc] = best;
-
-        const steps = Math.max(
-          0,
-          Math.round(
-            (dy * dr + dx * dc) /
-            (dr * dr + dc * dc)
-          )
-        );
-
-        const path = [];
-
-        for (
-          let i = 0;
-          i <= steps;
-          i++
-        ) {
-          const r = a[0] + i * dr;
-
-          const c = a[1] + i * dc;
-
-          if (
-            r < 0 ||
-            c < 0 ||
-            r >= size ||
-            c >= size
-          ) {
+          if (!path) {
+            success = false;
             break;
           }
 
-          path.push([r, c]);
+          paths.set(word.clean,path);
         }
 
-        return path;
-      }
-
-      function highlight() {
-        board.querySelectorAll(
-          ".selected"
-        ).forEach(el => {
-          el.classList.remove(
-            "selected"
-          );
-        });
-
-        if (drag && !gameOver) {
-          drag.path.forEach(([r, c]) => {
-            cellAt(r, c).classList.add(
-              "selected"
-            );
-          });
-        }
-      }
-
-      function samePath(
-        selected,
-        actual
-      ) {
-        if (
-          !actual ||
-          selected.length !== actual.length
-        ) {
-          return false;
-        }
-
-        const forward =
-          selected.every(
-            ([r, c], i) =>
-              r === actual[i][0] &&
-              c === actual[i][1]
-          );
-
-        const reverse =
-          selected.every(
-            ([r, c], i) => {
-              const p =
-                actual[actual.length - i - 1];
-
-              return (
-                r === p[0] &&
-                c === p[1]
-              );
-            }
-          );
-
-        return forward || reverse;
-      }
-
-      /* ======================================
-         INICIAR ARRASTE
-      ====================================== */
-
-      board.addEventListener(
-        "pointerdown",
-        event => {
-          if (
-            !hasStarted ||
-            gameOver ||
-            drag ||
-            (
-              event.pointerType === "mouse" &&
-              event.button !== 0
-            )
-          ) {
-            return;
-          }
-
-          const cell =
-            event.target.closest(".cell");
-
-          if (!cell) {
-            return;
-          }
-
-          event.preventDefault();
-
-          const start = coords(cell);
-
-          drag = {
-            pointerId: event.pointerId,
-            start,
-            path: [start]
-          };
-
-          board.setPointerCapture(
-            event.pointerId
-          );
-
-          highlight();
-        }
-      );
-
-      /* ======================================
-         MOVIMENTAR ARRASTE
-      ====================================== */
-
-      board.addEventListener(
-        "pointermove",
-        event => {
-          if (
-            !drag ||
-            event.pointerId !== drag.pointerId
-          ) {
-            return;
-          }
-
-          const cell = hover(event);
-
-          if (cell) {
-            drag.path = pathBetween(
-              drag.start,
-              coords(cell)
-            );
-
-            highlight();
-          }
-        }
-      );
-
-      board.addEventListener(
-        "pointercancel",
-        event => {
-          if (
-            drag &&
-            event.pointerId === drag.pointerId
-          ) {
-            drag = null;
-
-            highlight();
-          }
-        }
-      );
-
-      /* ======================================
-         VALIDAR PALAVRA
-      ====================================== */
-
-      board.addEventListener(
-        "pointerup",
-        event => {
-          if (
-            !drag ||
-            event.pointerId !== drag.pointerId
-          ) {
-            return;
-          }
-
-          const cell = hover(event);
-
-          if (cell) {
-            drag.path = pathBetween(
-              drag.start,
-              coords(cell)
-            );
-          }
-
-          const path = drag.path;
-
-          drag = null;
-
-          highlight();
-
-          if (
-            gameOver ||
-            path.length < 2
-          ) {
-            return;
-          }
-
-          const match = words.find(
-            w =>
-              !found.has(w.clean) &&
-              samePath(
-                path,
-                placements.get(w.clean)
-              )
-          );
-
-          if (!match) {
-            $("feedback").className =
-              "feedback";
-
-            $("feedback").textContent =
-              "Sequência incorreta. Tente novamente!";
-
-            return;
-          }
-
-          found.add(match.clean);
-
-          placements.get(
-            match.clean
-          ).forEach(([r, c]) => {
-            cellAt(r, c).classList.add(
-              "found"
-            );
-          });
-
-          /* VITÓRIA */
-
-          if (
-            found.size === words.length
-          ) {
-            pauseClock();
-
-            gameOver = true;
-
-            board.classList.add(
-              "locked"
-            );
-
-            $("giveup").disabled = true;
-
-            $("next-theme").hidden = false;
-
-            $("feedback").textContent =
-              "🎉 Você encontrou todas as palavras!";
-
-            $("feedback").className =
-              "feedback success";
-
-            renderWords();
-
-            congratulate();
-
-            return;
-          }
-
-          renderWords();
-
-          $("feedback").className =
-            "feedback success";
-
-          $("feedback").textContent =
-            `✓ Palavra encontrada: ${match.label}`;
-        }
-      );
-
-      /* ======================================
-         CONFETES
-      ====================================== */
-
-      function confetti() {
-        if (
-          matchMedia(
-            "(prefers-reduced-motion: reduce)"
-          ).matches
-        ) {
-          return;
-        }
-
-        const layer =
-          $("confetti-layer");
-
-        layer.replaceChildren();
-
-        const colors = [
-          "#f472b6",
-          "#34d399",
-          "#60a5fa",
-          "#facc15",
-          "#a78bfa",
-          "#fb923c"
-        ];
-
-        const fragment =
-          document.createDocumentFragment();
-
-        for (
-          let i = 0;
-          i < 110;
-          i++
-        ) {
-          const el =
-            document.createElement("span");
-
-          el.className = "confetti";
-
-          el.style.setProperty(
-            "--x",
-            `${Math.random() * 100}%`
-          );
-
-          el.style.setProperty(
-            "--color",
-            colors[i % colors.length]
-          );
-
-          el.style.setProperty(
-            "--duration",
-            `${2.8 + Math.random() * 2.2}s`
-          );
-
-          el.style.setProperty(
-            "--delay",
-            `${Math.random() * .8}s`
-          );
-
-          el.style.setProperty(
-            "--drift",
-            `${(Math.random() - .5) * 240}px`
-          );
-
-          fragment.appendChild(el);
-        }
-
-        layer.appendChild(fragment);
-
-        setTimeout(() => {
-          layer.replaceChildren();
-        }, 6500);
-      }
-
-      /* ======================================
-         MENSAGEM DE VITÓRIA
-      ====================================== */
-
-      function congratulate() {
-        $("win-message").textContent =
-          `Você encontrou as ${words.length} ` +
-          `palavras de ${themeName}! ` +
-          "Excelente trabalho!";
-
-        $("win-time").hidden =
-          !timerEnabled;
-
-        $("win-time").textContent =
-          timerEnabled
-            ? `Seu tempo: ${formatTime(getElapsed())}`
-            : "";
-
-        $("win-overlay").hidden = false;
-
-        confetti();
-
-        $("play-again").focus();
-      }
-
-      $("play-again").addEventListener(
-        "click",
-        () => openThemePicker()
-      );
-
-      $("close-win").addEventListener(
-        "click",
-        hideWin
-      );
-
-      $("next-theme").addEventListener(
-        "click",
-        () => openThemePicker()
-      );
-
-      $("shuffle").addEventListener(
-        "click",
-        () => openThemePicker()
-      );
-
-      /* ======================================
-         DESISTÊNCIA
-      ====================================== */
-
-      $("giveup").disabled = true;
-
-      $("giveup").addEventListener(
-        "click",
-        () => {
-          if (
-            !gameOver &&
-            hasStarted
-          ) {
-            pauseClock();
-
-            $("giveup-dialog").showModal();
-          }
-        }
-      );
-
-      $("keep-playing").addEventListener(
-        "click",
-        () => {
-          $("giveup-dialog").close();
-
-          resumeClock();
-        }
-      );
-
-      $("giveup-dialog").addEventListener(
-        "cancel",
-        () => resumeClock()
-      );
-
-      $("confirm-giveup").addEventListener(
-        "click",
-        () => {
-          $("giveup-dialog").close();
-
-          if (gameOver) {
-            return;
-          }
-
-          pauseClock();
-
-          gameOver = true;
-
-          drag = null;
-
-          highlight();
-
-          board.classList.add(
-            "locked"
-          );
-
-          $("giveup").disabled = true;
-
-          $("giveup").textContent =
-            "⚑ Desistiu";
-
-          $("legend").hidden = false;
-
-          $("next-theme").hidden = false;
-
-          for (const word of words) {
-            if (!found.has(word.clean)) {
-              placements.get(
-                word.clean
-              ).forEach(([r, c]) => {
-                cellAt(r, c).classList.add(
-                  "missed"
-                );
-              });
+        if (!success) continue;
+
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if (!matrix[r][c]) {
+              matrix[r][c] =
+                LETTERS[random(LETTERS.length)];
             }
           }
-
-          renderWords();
-
-          $("feedback").className =
-            "feedback alert";
-
-          $("feedback").textContent =
-            `Partida encerrada: ` +
-            `${words.length - found.size} ` +
-            "palavra(s) revelada(s) em vermelho.";
         }
-      );
 
-      /* ======================================
-         CRIAR LISTA PERSONALIZADA
-      ====================================== */
-
-      $("apply").addEventListener(
-        "click",
-        () => {
-          try {
-            setCustomWords(
-              $("words-input").value
-            );
-
-            const u = new URL(
-              location.href
-            );
-
-            u.searchParams.delete(
-              "modelo"
-            );
-
-            history.replaceState(
-              null,
-              "",
-              u
-            );
-
-            $("local-status").textContent =
-              "Lista preparada! Escolha o cronômetro para jogar.";
-
-            $("local-status").className =
-              "status ok";
-
-          } catch (error) {
-            $("local-status").textContent =
-              error.message;
-
-            $("local-status").className =
-              "status error";
-          }
-        }
-      );
-
-      /* ======================================
-         TEMA CLARO / ESCURO
-      ====================================== */
-
-      function applyTheme(theme) {
-        selectedTheme = theme;
-
-        const dark =
-          theme === "dark";
-
-        document.documentElement.dataset.theme =
-          theme;
-
-        $("theme-toggle").firstChild.textContent =
-          dark ? "☀ " : "☾ ";
-
-        $("theme-label").textContent =
-          dark ? "Claro" : "Escuro";
-
-        $("theme-toggle").setAttribute(
-          "aria-label",
-          dark
-            ? "Ativar modo claro"
-            : "Ativar modo escuro"
-        );
-
-        document.querySelector(
-          'meta[name="theme-color"]'
-        ).content =
-          dark ? "#0c1322" : "#f4f7fd";
+        return {
+          matrix,
+          n,
+          paths
+        };
       }
-
-      $("theme-toggle").addEventListener(
-        "click",
-        () => {
-          applyTheme(
-            selectedTheme === "light"
-              ? "dark"
-              : "light"
-          );
-
-          try {
-            localStorage.setItem(
-              THEME_KEY,
-              selectedTheme
-            );
-          } catch (_) {}
-        }
-      );
-
-      /* ======================================
-         INICIALIZAÇÃO
-      ====================================== */
-
-      let initialTheme;
-
-      try {
-        initialTheme =
-          localStorage.getItem(
-            THEME_KEY
-          );
-      } catch (_) {}
-
-      applyTheme(
-        ["light", "dark"].includes(
-          initialTheme
-        )
-          ? initialTheme
-          : (
-              matchMedia(
-                "(prefers-color-scheme: dark)"
-              ).matches
-                ? "dark"
-                : "light"
-            )
-      );
-
-      let saved;
-
-      try {
-        saved =
-          localStorage.getItem(
-            WORDS_KEY
-          );
-      } catch (_) {}
-
-      try {
-        customWords = parseWords(
-          saved || DEFAULT_WORDS
-        );
-      } catch (_) {
-        customWords = parseWords(
-          DEFAULT_WORDS
-        );
-      }
-
-      words = customWords;
-
-      $("words-input").value =
-        customWords.map(
-          w => w.label
-        ).join("\n");
-
-      fillCategories();
-
-      // Ao abrir ou atualizar:
-      // solicitar tema e cronômetro.
-
-      openThemePicker();
-
-      /* ======================================
-         COMUNICAÇÃO COM FIREBASE
-      ====================================== */
-
-      window.WordGame = {
-        getWords: () =>
-          words.map(w => w.label),
-
-        loadWords: (
-          list,
-          name = "Modelo compartilhado"
-        ) => setCustomWords(list, name),
-
-        showLocalError: text => {
-          $("local-status").textContent =
-            text;
-
-          $("local-status").className =
-            "status error";
-        }
-      };
-
-    })();
-  </script>
-
-  <!-- ==========================================
-       29. FIREBASE
-  ========================================== -->
-
-  <script type="module">
-
-    import {
-      initializeApp
-    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-
-    import {
-      getFirestore,
-      collection,
-      doc,
-      getDoc,
-      getDocs,
-      query,
-      where,
-      limit,
-      deleteDoc,
-      runTransaction,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
-    /* ======================================
-       CONFIGURAÇÃO DO SEU FIREBASE
-    ====================================== */
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBt5PxI4qIfc23Vr2ytTd9VYFIGvSwv2fE",
-      authDomain: "cacapalavrasinterativo.firebaseapp.com",
-      projectId: "cacapalavrasinterativo",
-      storageBucket: "cacapalavrasinterativo.firebasestorage.app",
-      messagingSenderId: "167586064732",
-      appId: "1:167586064732:web:4b7450d7cbbbcf09717999"
-    };
-
-    const app =
-      initializeApp(firebaseConfig);
-
-    const auth =
-      getAuth(app);
-
-    const db =
-      getFirestore(app);
-
-    const $ = id =>
-      document.getElementById(id);
-
-    const CODE_REGEX =
-      /^CP-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
-
-    const CHARS =
-      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-    const LOGIN_DOMAIN =
-      "@painel.com.br";
-
-    let currentUser = null;
-
-    /* ======================================
-       MENSAGENS DO FIREBASE
-    ====================================== */
-
-    function status(
-      id,
-      text,
-      type = ""
-    ) {
-      $(id).textContent = text;
-
-      $(id).className =
-        "status" +
-        (type ? " " + type : "");
     }
 
-    function friendlyError(error) {
-      if (
-        error.code === "permission-denied"
-      ) {
-        return (
-          "Permissão negada. Confira " +
-          "as regras do Firestore."
-        );
-      }
-
-      if (
-        error.code === "auth/unauthorized-domain"
-      ) {
-        return (
-          "Adicione o domínio do GitHub Pages " +
-          "aos domínios autorizados do Firebase."
-        );
-      }
-
-      if ([
-        "auth/invalid-credential",
-        "auth/wrong-password",
-        "auth/user-not-found",
-        "auth/invalid-email"
-      ].includes(error.code)) {
-        return (
-          "Login ou senha incorretos, " +
-          "ou conta inexistente."
-        );
-      }
-
-      if (
-        error.code === "unavailable"
-      ) {
-        return (
-          "Firebase indisponível. " +
-          "Verifique a conexão."
-        );
-      }
-
-      return error.message ||
-        "Ocorreu um erro ao acessar o Firebase.";
-    }
-
-    /* ======================================
-       CÓDIGO DE COMPARTILHAMENTO
-    ====================================== */
-
-    function canonicalCode(value) {
-      return String(value)
-        .trim()
-        .toUpperCase();
-    }
-
-    function newCode() {
-      const bytes =
-        crypto.getRandomValues(
-          new Uint8Array(12)
-        );
-
-      const raw = [...bytes]
-        .map(
-          b => CHARS[b % CHARS.length]
-        )
-        .join("");
-
-      return (
-        `CP-${raw.slice(0, 4)}` +
-        `-${raw.slice(4, 8)}` +
-        `-${raw.slice(8, 12)}`
-      );
-    }
-
-    function linkFor(code) {
-      const u =
-        new URL(location.href);
-
-      u.searchParams.set(
-        "modelo",
-        code
-      );
-
-      return u.href;
-    }
-
-    async function copyText(text) {
-      await navigator.clipboard.writeText(
-        text
-      );
-    }
-
-    /* ======================================
-       LOGIN
-    ====================================== */
-
-    $("login").addEventListener(
-      "click",
-      () => {
-        status(
-          "login-status",
-          ""
-        );
-
-        $("login-dialog").showModal();
-
-        $("login-username").focus();
-      }
+    throw new Error(
+      "Não foi possível gerar o tabuleiro."
     );
+  }
 
-    $("cancel-login").addEventListener(
-      "click",
-      () => {
-        $("login-dialog").close();
+  /* ======================================
+     10. EXIBIR TABULEIRO
+  ====================================== */
 
-        $("login-password").value = "";
-      }
-    );
+  const cellAt = (r,c) =>
+    board.children[r * size + c];
 
-    /* ======================================
-       AUTENTICAÇÃO E-MAIL / SENHA
-    ====================================== */
+  function renderBoard() {
+    board.style.setProperty("--size",size);
 
-    $("login-form").addEventListener(
-      "submit",
-      async event => {
-        event.preventDefault();
+    const fragment =
+      document.createDocumentFragment();
 
-        const username =
-          $("login-username")
-            .value
-            .trim()
-            .toLowerCase();
+    grid.forEach((row,r) => {
+      row.forEach((letter,c) => {
+        const el = document.createElement("div");
 
-        const password =
-          $("login-password").value;
+        el.className = "cell";
+        el.textContent = letter;
+        el.dataset.r = r;
+        el.dataset.c = c;
 
-        if (
-          !/^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$/.test(
-            username
-          )
-        ) {
-          status(
-            "login-status",
-            "Digite somente seu login, " +
-            "por exemplo: felipe.valente",
-            "error"
-          );
+        fragment.appendChild(el);
+      });
+    });
 
-          return;
-        }
+    board.replaceChildren(fragment);
+  }
 
-        $("submit-login").disabled = true;
+  function renderWords() {
+    const fragment =
+      document.createDocumentFragment();
 
-        status(
-          "login-status",
-          "Verificando suas credenciais..."
-        );
+    for (const word of words) {
+      const yes = found.has(word.clean);
+      const no = gameOver && !yes;
 
-        try {
-          await signInWithEmailAndPassword(
-            auth,
-            username + LOGIN_DOMAIN,
-            password
-          );
+      const li = document.createElement("li");
+      li.className =
+        "word" + (yes ? " found" : no ? " missed" : "");
 
-          $("login-password").value = "";
+      const mark = document.createElement("span");
+      mark.className = "mark";
+      mark.textContent = yes ? "✓" : no ? "×" : "";
 
-          $("login-dialog").close();
+      const label = document.createElement("span");
+      label.className = "word-label";
+      label.textContent = word.label;
 
-          status(
-            "save-status",
-            "Acesso à nuvem liberado.",
-            "ok"
-          );
+      li.append(mark,label);
+      fragment.appendChild(li);
+    }
 
-        } catch (error) {
-          status(
-            "login-status",
-            friendlyError(error),
-            "error"
-          );
+    $("word-list").replaceChildren(fragment);
 
-        } finally {
-          $("submit-login").disabled =
-            false;
-        }
-      }
-    );
+    $("score").textContent =
+      `${found.size} / ${words.length} encontradas`;
 
-    /* ======================================
-       SAIR
-    ====================================== */
+    $("badge").textContent = gameOver
+      ? "Encerrado"
+      : `${words.length-found.size} restantes`;
 
-    $("logout").addEventListener(
-      "click",
-      async () => {
-        try {
-          await signOut(auth);
+    $("progress-fill").style.width =
+      `${100 * found.size / words.length}%`;
+  }
 
-          status(
-            "save-status",
-            "Você saiu da sua conta."
-          );
+  function hideWin() {
+    $("win-overlay").hidden = true;
+    $("confetti-layer").replaceChildren();
+  }
 
-        } catch (error) {
-          status(
-            "save-status",
-            friendlyError(error),
-            "error"
-          );
-        }
-      }
-    );
+  /* ======================================
+     11. INICIAR PARTIDA
+  ====================================== */
 
-    /* ======================================
-       AUTENTICAÇÃO E VISIBILIDADE
-    ====================================== */
+  function startGame() {
+    const generated = generate();
 
-    onAuthStateChanged(
-      auth,
-      user => {
-        currentUser = user;
+    pauseClock();
+    elapsedMs = 0;
+    updateClock();
 
-        // MOSTRA SALVAR SOMENTE COM LOGIN
+    grid = generated.matrix;
+    size = generated.n;
+    placements = generated.paths;
 
-        $("cloud-save-section").hidden =
-          !user;
+    found = new Set();
+    drag = null;
+    gameOver = false;
+    hasStarted = true;
 
-        // MOSTRA MEUS MODELOS SOMENTE COM LOGIN
+    renderBoard();
+    renderWords();
 
-        $("my-models-section").hidden =
-          !user;
+    $("current-theme").textContent =
+      `${themeName} • ${currentLevel.label} • ${size}×${size}`;
 
-        // BOTÕES ENTRAR E SAIR
+    $("current-theme").hidden = false;
+    $("timer-display").hidden = !timerEnabled;
+    $("next-theme").hidden = true;
+    $("legend").hidden = true;
 
-        $("login").hidden =
-          !!user;
+    board.classList.remove("locked");
 
-        $("logout").hidden =
-          !user;
+    $("giveup").disabled = false;
+    $("giveup").textContent = "⚑ Desistir";
 
-        // NOME DO USUÁRIO
+    $("feedback").className = "feedback";
+    $("feedback").textContent =
+      "Encontre a primeira palavra!";
 
-        $("user-details").textContent =
-          user
-            ? (
-                user.email?.split("@")[0] ||
-                "Conectado"
-              )
-            : "Modo visitante";
+    hideWin();
+    resumeClock();
+  }
 
-        // HABILITA SALVAMENTO
+  function setCustomWords(
+    list,
+    label = "Minhas palavras"
+  ) {
+    customWords = parseWords(list);
+    customName = label;
 
-        $("save-preset").disabled =
-          !user;
+    $("words-input").value =
+      customWords.map(w => w.label).join("\n");
 
-        $("save-hint").textContent =
-          user
-            ? "Salve as palavras da partida atual."
-            : "Entre com login e senha para salvar.";
-
-        if (user) {
-          refreshModels();
-
-        } else {
-          $("my-models").replaceChildren();
-
-          $("saved-share").hidden = true;
-
-          status(
-            "models-status",
-            ""
-          );
-        }
-      }
-    );
-
-    /* ======================================
-       CARREGAR MODELO
-    ====================================== */
-
-    async function loadPreset(code) {
-      code = canonicalCode(code);
-
-      if (
-        !CODE_REGEX.test(code)
-      ) {
-        status(
-          "preset-status",
-          "Código inválido. " +
-          "Use CP-XXXX-XXXX-XXXX.",
-          "error"
-        );
-
-        return;
-      }
-
-      $("load-preset").disabled = true;
-
-      status(
-        "preset-status",
-        "Consultando o Firebase..."
+    try {
+      localStorage.setItem(
+        WORDS_KEY,
+        $("words-input").value
       );
+    } catch (_) {}
 
-      try {
-        const snapshot =
-          await getDoc(
-            doc(
-              db,
-              "modelos",
-              code
-            )
-          );
+    openThemePicker(true);
+  }
 
-        if (!snapshot.exists()) {
-          status(
-            "preset-status",
-            "Modelo não encontrado. " +
-            "Verifique o código.",
-            "error"
-          );
+  /* ======================================
+     12. ARRASTE DAS LETRAS
+  ====================================== */
 
-          return;
-        }
+  function coords(el) {
+    return [
+      Number(el.dataset.r),
+      Number(el.dataset.c)
+    ];
+  }
 
-        const data =
-          snapshot.data();
+  function hover(event) {
+    const el = document.elementFromPoint(
+      event.clientX,
+      event.clientY
+    )?.closest(".cell");
 
-        if (
-          !Array.isArray(data.palavras)
-        ) {
-          throw new Error(
-            "O modelo armazenado não possui " +
-            "uma lista válida."
-          );
-        }
+    return el && board.contains(el) ? el : null;
+  }
 
-        window.WordGame.loadWords(
-          data.palavras,
-          data.nome || code
-        );
+  function pathBetween(a,b) {
+    const dy = b[0] - a[0];
+    const dx = b[1] - a[1];
 
-        $("preset-code").value =
-          code;
+    if (!dy && !dx) return [a];
 
-        $("model-name").value =
-          typeof data.nome === "string"
-            ? data.nome
-            : "";
+    let best = ALL_DIRS[0];
+    let score = -Infinity;
 
-        const u =
-          new URL(location.href);
+    for (const dir of ALL_DIRS) {
+      const dot =
+        (dy * dir[0] + dx * dir[1]) /
+        Math.hypot(...dir);
 
-        u.searchParams.set(
-          "modelo",
-          code
-        );
-
-        history.replaceState(
-          null,
-          "",
-          u
-        );
-
-        status(
-          "preset-status",
-          `Modelo "${data.nome || code}" carregado! ` +
-          "Escolha a modalidade para começar.",
-          "ok"
-        );
-
-      } catch (error) {
-        status(
-          "preset-status",
-          friendlyError(error),
-          "error"
-        );
-
-      } finally {
-        $("load-preset").disabled = false;
+      if (dot > score) {
+        score = dot;
+        best = dir;
       }
     }
 
-    $("load-preset").addEventListener(
-      "click",
-      () => loadPreset(
-        $("preset-code").value
+    const [dr,dc] = best;
+
+    const steps = Math.max(
+      0,
+      Math.round(
+        (dy * dr + dx * dc) /
+        (dr * dr + dc * dc)
       )
     );
 
-    $("preset-code").addEventListener(
-      "keydown",
-      event => {
-        if (
-          event.key === "Enter"
-        ) {
-          loadPreset(
-            $("preset-code").value
-          );
-        }
+    const path = [];
+
+    for (let i = 0; i <= steps; i++) {
+      const r = a[0] + i * dr;
+      const c = a[1] + i * dc;
+
+      if (
+        r < 0 ||
+        c < 0 ||
+        r >= size ||
+        c >= size
+      ) break;
+
+      path.push([r,c]);
+    }
+
+    return path;
+  }
+
+  function highlight() {
+    board.querySelectorAll(".selected")
+      .forEach(el => el.classList.remove("selected"));
+
+    if (drag && !gameOver) {
+      drag.path.forEach(([r,c]) => {
+        cellAt(r,c).classList.add("selected");
+      });
+    }
+  }
+
+  function samePath(selected,actual) {
+    if (!actual || selected.length !== actual.length) {
+      return false;
+    }
+
+    const forward = selected.every(
+      ([r,c],i) =>
+        r === actual[i][0] &&
+        c === actual[i][1]
+    );
+
+    const reverse = selected.every(
+      ([r,c],i) => {
+        const p = actual[actual.length-i-1];
+        return r === p[0] && c === p[1];
       }
     );
 
-    /* ======================================
-       SALVAR NO FIRESTORE
-    ====================================== */
+    return forward || reverse;
+  }
 
-    $("save-preset").addEventListener(
-      "click",
-      async () => {
-        if (!currentUser) {
-          status(
-            "save-status",
-            "Faça login para salvar.",
-            "error"
-          );
+  board.addEventListener("pointerdown",event => {
+    if (
+      !hasStarted ||
+      gameOver ||
+      drag ||
+      (
+        event.pointerType === "mouse" &&
+        event.button !== 0
+      )
+    ) return;
 
-          return;
+    const cell = event.target.closest(".cell");
+
+    if (!cell) return;
+
+    event.preventDefault();
+
+    const start = coords(cell);
+
+    drag = {
+      pointerId:event.pointerId,
+      start,
+      path:[start]
+    };
+
+    board.setPointerCapture(event.pointerId);
+    highlight();
+  });
+
+  board.addEventListener("pointermove",event => {
+    if (!drag || event.pointerId !== drag.pointerId) {
+      return;
+    }
+
+    const cell = hover(event);
+
+    if (cell) {
+      drag.path = pathBetween(
+        drag.start,
+        coords(cell)
+      );
+
+      highlight();
+    }
+  });
+
+  board.addEventListener("pointercancel",event => {
+    if (drag && drag.pointerId === event.pointerId) {
+      drag = null;
+      highlight();
+    }
+  });
+
+  /* ======================================
+     13. VERIFICAR PALAVRA
+  ====================================== */
+
+  board.addEventListener("pointerup",event => {
+    if (!drag || event.pointerId !== drag.pointerId) {
+      return;
+    }
+
+    const cell = hover(event);
+
+    if (cell) {
+      drag.path = pathBetween(
+        drag.start,
+        coords(cell)
+      );
+    }
+
+    const path = drag.path;
+    drag = null;
+
+    highlight();
+
+    if (gameOver || path.length < 2) return;
+
+    const match = words.find(
+      w =>
+        !found.has(w.clean) &&
+        samePath(
+          path,
+          placements.get(w.clean)
+        )
+    );
+
+    if (!match) {
+      $("feedback").className = "feedback";
+      $("feedback").textContent =
+        "Sequência incorreta. Tente novamente!";
+      return;
+    }
+
+    found.add(match.clean);
+
+    placements.get(match.clean).forEach(([r,c]) => {
+      cellAt(r,c).classList.add("found");
+    });
+
+    renderWords();
+
+    if (found.size === words.length) {
+      pauseClock();
+
+      gameOver = true;
+      board.classList.add("locked");
+
+      $("giveup").disabled = true;
+      $("next-theme").hidden = false;
+
+      $("feedback").className = "feedback success";
+      $("feedback").textContent =
+        "🎉 Você encontrou todas as palavras!";
+
+      congratulate();
+      return;
+    }
+
+    $("feedback").className = "feedback success";
+    $("feedback").textContent =
+      `✓ Palavra encontrada: ${match.label}`;
+  });
+
+  /* ======================================
+     14. CONFETES E VITÓRIA
+  ====================================== */
+
+  function confetti() {
+    if (
+      matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+    ) return;
+
+    const layer = $("confetti-layer");
+    layer.replaceChildren();
+
+    const colors = [
+      "#f472b6","#34d399","#60a5fa",
+      "#facc15","#a78bfa","#fb923c"
+    ];
+
+    const fragment =
+      document.createDocumentFragment();
+
+    for (let i = 0; i < 110; i++) {
+      const el = document.createElement("span");
+      el.className = "confetti";
+
+      el.style.setProperty(
+        "--x",
+        `${Math.random()*100}%`
+      );
+      el.style.setProperty(
+        "--color",
+        colors[i%colors.length]
+      );
+      el.style.setProperty(
+        "--duration",
+        `${2.8+Math.random()*2.2}s`
+      );
+      el.style.setProperty(
+        "--delay",
+        `${Math.random()*.8}s`
+      );
+      el.style.setProperty(
+        "--drift",
+        `${(Math.random()-.5)*240}px`
+      );
+
+      fragment.appendChild(el);
+    }
+
+    layer.appendChild(fragment);
+
+    setTimeout(() => {
+      layer.replaceChildren();
+    },6500);
+  }
+
+  function congratulate() {
+    $("win-message").textContent =
+      `Você encontrou as ${words.length} palavras! ` +
+      `Nível ${currentLevel.label}. Excelente trabalho!`;
+
+    $("win-time").hidden = !timerEnabled;
+
+    $("win-time").textContent = timerEnabled
+      ? `Seu tempo: ${formatTime(getElapsed())}`
+      : "";
+
+    $("win-overlay").hidden = false;
+
+    confetti();
+  }
+
+  $("play-again").addEventListener(
+    "click",
+    () => openThemePicker()
+  );
+
+  $("close-win").addEventListener(
+    "click",
+    hideWin
+  );
+
+  $("next-theme").addEventListener(
+    "click",
+    () => openThemePicker()
+  );
+
+  $("shuffle").addEventListener(
+    "click",
+    () => openThemePicker()
+  );
+
+  /* ======================================
+     15. DESISTÊNCIA
+  ====================================== */
+
+  $("giveup").disabled = true;
+
+  $("giveup").addEventListener("click",() => {
+    if (!gameOver && hasStarted) {
+      pauseClock();
+      $("giveup-dialog").showModal();
+    }
+  });
+
+  $("keep-playing").addEventListener("click",() => {
+    $("giveup-dialog").close();
+    resumeClock();
+  });
+
+  $("giveup-dialog").addEventListener(
+    "cancel",
+    () => resumeClock()
+  );
+
+  $("confirm-giveup").addEventListener("click",() => {
+    $("giveup-dialog").close();
+
+    if (gameOver) return;
+
+    pauseClock();
+    gameOver = true;
+    drag = null;
+
+    highlight();
+
+    board.classList.add("locked");
+
+    $("giveup").disabled = true;
+    $("giveup").textContent = "⚑ Desistiu";
+
+    $("legend").hidden = false;
+    $("next-theme").hidden = false;
+
+    for (const word of words) {
+      if (!found.has(word.clean)) {
+        placements.get(word.clean).forEach(([r,c]) => {
+          cellAt(r,c).classList.add("missed");
+        });
+      }
+    }
+
+    renderWords();
+
+    $("feedback").className = "feedback alert";
+    $("feedback").textContent =
+      "Partida encerrada. As palavras restantes " +
+      "foram reveladas em vermelho.";
+  });
+
+  /* ======================================
+     16. PERSONALIZAR DESAFIO
+  ====================================== */
+
+  $("apply").addEventListener("click",() => {
+    try {
+      setCustomWords($("words-input").value);
+
+      const u = new URL(location.href);
+      u.searchParams.delete("modelo");
+
+      history.replaceState(null,"",u);
+
+      $("local-status").className = "status ok";
+      $("local-status").textContent =
+        "Lista preparada! Escolha a dificuldade " +
+        "e o cronômetro.";
+    }
+    catch (error) {
+      $("local-status").className = "status error";
+      $("local-status").textContent = error.message;
+    }
+  });
+
+  /* ======================================
+     17. MODO CLARO / ESCURO
+  ====================================== */
+
+  function applyTheme(theme) {
+    selectedTheme = theme;
+
+    const dark = theme === "dark";
+    document.documentElement.dataset.theme = theme;
+
+    $("theme-toggle").firstChild.textContent =
+      dark ? "☀ " : "☾ ";
+
+    $("theme-label").textContent =
+      dark ? "Claro" : "Escuro";
+
+    document.querySelector(
+      'meta[name="theme-color"]'
+    ).content = dark ? "#0c1322" : "#f4f7fd";
+  }
+
+  $("theme-toggle").addEventListener("click",() => {
+    applyTheme(
+      selectedTheme === "light" ? "dark" : "light"
+    );
+
+    try {
+      localStorage.setItem(
+        THEME_KEY,
+        selectedTheme
+      );
+    } catch (_) {}
+  });
+
+  /* ======================================
+     18. INICIALIZAÇÃO
+  ====================================== */
+
+  let savedTheme;
+
+  try {
+    savedTheme = localStorage.getItem(THEME_KEY);
+  } catch (_) {}
+
+  applyTheme(
+    ["light","dark"].includes(savedTheme)
+      ? savedTheme
+      : (
+          matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches
+            ? "dark"
+            : "light"
+        )
+  );
+
+  const DEFAULT_WORDS =
+    THEMES["Cultura Pop e Entretenimento"]
+          ["Videogames Clássicos e RPGs"];
+
+  let savedWords;
+
+  try {
+    savedWords = localStorage.getItem(WORDS_KEY);
+  } catch (_) {}
+
+  try {
+    customWords = parseWords(
+      savedWords || DEFAULT_WORDS
+    );
+  }
+  catch (_) {
+    customWords = parseWords(DEFAULT_WORDS);
+  }
+
+  words = customWords;
+
+  $("words-input").value =
+    customWords.map(w => w.label).join("\n");
+
+  fillCategories();
+
+  try {
+    const lastLevel = localStorage.getItem(LEVEL_KEY);
+
+    const input = document.querySelector(
+      `input[name="difficulty"][value="${lastLevel}"]`
+    );
+
+    if (input) input.checked = true;
+  } catch (_) {}
+
+  updateDifficultyInfo();
+  openThemePicker();
+
+  /* ======================================
+     19. INTEGRAÇÃO COM FIREBASE
+  ====================================== */
+
+  window.WordGame = {
+    getWords:() => words.map(w => w.label),
+
+    loadWords:(
+      list,
+      name = "Modelo compartilhado"
+    ) => setCustomWords(list,name),
+
+    showLocalError:text => {
+      $("local-status").className = "status error";
+      $("local-status").textContent = text;
+    }
+  };
+})();
+</script>
+
+<!-- ========================================
+     FIREBASE AUTHENTICATION + FIRESTORE
+======================================== -->
+<script type="module">
+
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  limit,
+  deleteDoc,
+  runTransaction,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+/* ======================================
+   CONFIGURAÇÃO FIREBASE
+====================================== */
+
+const firebaseConfig = {
+  apiKey:"AIzaSyBt5PxI4qIfc23Vr2ytTd9VYFIGvSwv2fE",
+  authDomain:"cacapalavrasinterativo.firebaseapp.com",
+  projectId:"cacapalavrasinterativo",
+  storageBucket:"cacapalavrasinterativo.firebasestorage.app",
+  messagingSenderId:"167586064732",
+  appId:"1:167586064732:web:4b7450d7cbbbcf09717999"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+
+const LOGIN_DOMAIN = "@painel.com.br";
+
+const CODE_REGEX =
+  /^CP-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
+
+const CHARS =
+  "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+let currentUser = null;
+
+/* ======================================
+   MENSAGENS
+====================================== */
+
+function status(id,text,type="") {
+  $(id).textContent = text;
+  $(id).className =
+    "status" + (type ? " " + type : "");
+}
+
+function friendlyError(error) {
+  if (error.code === "permission-denied") {
+    return "Permissão negada. Confira as regras do Firestore.";
+  }
+
+  if (error.code === "auth/unauthorized-domain") {
+    return "Domínio não autorizado no Firebase Authentication.";
+  }
+
+  if ([
+    "auth/invalid-credential",
+    "auth/wrong-password",
+    "auth/user-not-found",
+    "auth/invalid-email"
+  ].includes(error.code)) {
+    return "Login ou senha incorretos.";
+  }
+
+  return error.message || "Erro ao acessar o Firebase.";
+}
+
+/* ======================================
+   GERAR CÓDIGO
+====================================== */
+
+function newCode() {
+  const bytes = crypto.getRandomValues(
+    new Uint8Array(12)
+  );
+
+  const raw = [...bytes].map(
+    b => CHARS[b % CHARS.length]
+  ).join("");
+
+  return (
+    `CP-${raw.slice(0,4)}` +
+    `-${raw.slice(4,8)}` +
+    `-${raw.slice(8,12)}`
+  );
+}
+
+function linkFor(code) {
+  const u = new URL(location.href);
+  u.searchParams.set("modelo",code);
+  return u.href;
+}
+
+async function copyText(text) {
+  await navigator.clipboard.writeText(text);
+}
+
+/* ======================================
+   LOGIN
+====================================== */
+
+$("login").addEventListener("click",() => {
+  status("login-status","");
+  $("login-dialog").showModal();
+});
+
+$("cancel-login").addEventListener("click",() => {
+  $("login-dialog").close();
+  $("login-password").value = "";
+});
+
+$("login-form").addEventListener("submit",async event => {
+  event.preventDefault();
+
+  const username = $("login-username")
+    .value.trim().toLowerCase();
+
+  const password = $("login-password").value;
+
+  if (
+    !/^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$/.test(
+      username
+    )
+  ) {
+    status(
+      "login-status",
+      "Digite apenas seu nome de usuário.",
+      "error"
+    );
+    return;
+  }
+
+  $("submit-login").disabled = true;
+
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      username + LOGIN_DOMAIN,
+      password
+    );
+
+    $("login-password").value = "";
+    $("login-dialog").close();
+
+    status(
+      "save-status",
+      "Acesso à nuvem liberado.",
+      "ok"
+    );
+  }
+  catch (error) {
+    status(
+      "login-status",
+      friendlyError(error),
+      "error"
+    );
+  }
+  finally {
+    $("submit-login").disabled = false;
+  }
+});
+
+/* ======================================
+   SAIR
+====================================== */
+
+$("logout").addEventListener("click",async () => {
+  try {
+    await signOut(auth);
+  }
+  catch (error) {
+    alert(friendlyError(error));
+  }
+});
+
+/* ======================================
+   ESTADO DA AUTENTICAÇÃO
+====================================== */
+
+onAuthStateChanged(auth,user => {
+  currentUser = user;
+
+  $("login").hidden = !!user;
+  $("logout").hidden = !user;
+
+  $("user-details").textContent = user
+    ? (user.email?.split("@")[0] || "Conectado")
+    : "Modo visitante";
+
+  // Salvar na nuvem apenas com login.
+  $("cloud-save-section").hidden = !user;
+
+  // Meus modelos apenas com login.
+  $("my-models-section").hidden = !user;
+
+  $("save-preset").disabled = !user;
+
+  if (!user) {
+    $("saved-share").hidden = true;
+    $("my-models").replaceChildren();
+    status("models-status","");
+  } else {
+    refreshModels();
+  }
+});
+
+/* ======================================
+   CARREGAR MODELO
+====================================== */
+
+async function loadPreset(code) {
+  code = String(code).trim().toUpperCase();
+
+  if (!CODE_REGEX.test(code)) {
+    status(
+      "preset-status",
+      "Código inválido. Use CP-XXXX-XXXX-XXXX.",
+      "error"
+    );
+    return;
+  }
+
+  $("load-preset").disabled = true;
+  status("preset-status","Consultando o Firebase...");
+
+  try {
+    const snapshot = await getDoc(
+      doc(db,"modelos",code)
+    );
+
+    if (!snapshot.exists()) {
+      throw new Error("Modelo não encontrado.");
+    }
+
+    const data = snapshot.data();
+
+    if (!Array.isArray(data.palavras)) {
+      throw new Error("Lista de palavras inválida.");
+    }
+
+    window.WordGame.loadWords(
+      data.palavras,
+      data.nome || code
+    );
+
+    $("preset-code").value = code;
+    $("model-name").value = data.nome || "";
+
+    const url = new URL(location.href);
+    url.searchParams.set("modelo",code);
+    history.replaceState(null,"",url);
+
+    status(
+      "preset-status",
+      "Modelo carregado! Escolha a dificuldade.",
+      "ok"
+    );
+  }
+  catch (error) {
+    status(
+      "preset-status",
+      friendlyError(error),
+      "error"
+    );
+  }
+  finally {
+    $("load-preset").disabled = false;
+  }
+}
+
+$("load-preset").addEventListener(
+  "click",
+  () => loadPreset($("preset-code").value)
+);
+
+/* ======================================
+   SALVAR MODELO
+====================================== */
+
+$("save-preset").addEventListener("click",async () => {
+  if (!currentUser) return;
+
+  const name = $("model-name").value.trim();
+
+  if (!name || name.length > 80) {
+    status(
+      "save-status",
+      "Informe um nome de até 80 caracteres.",
+      "error"
+    );
+    return;
+  }
+
+  const creator = currentUser;
+
+  const model = {
+    ownerUid:creator.uid,
+    nome:name,
+    palavras:window.WordGame.getWords(),
+    criadoEm:serverTimestamp()
+  };
+
+  $("save-preset").disabled = true;
+
+  try {
+    let code = null;
+
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const candidate = newCode();
+      const ref = doc(db,"modelos",candidate);
+
+      try {
+        await runTransaction(db,async transaction => {
+          const snapshot = await transaction.get(ref);
+
+          if (snapshot.exists()) {
+            throw new Error("COLISAO");
+          }
+
+          transaction.set(ref,model);
+        });
+
+        code = candidate;
+        break;
+      }
+      catch (error) {
+        if (error.message === "COLISAO") {
+          continue;
         }
 
-        const name =
-          $("model-name").value.trim();
+        throw error;
+      }
+    }
 
-        if (
-          !name ||
-          name.length > 80
-        ) {
-          status(
-            "save-status",
-            "Informe um nome de até 80 caracteres.",
-            "error"
-          );
+    if (!code) {
+      throw new Error(
+        "Não foi possível gerar um código exclusivo."
+      );
+    }
 
-          return;
+    $("saved-share").hidden = false;
+    $("saved-code").value = code;
+
+    status(
+      "save-status",
+      "Modelo salvo com sucesso!",
+      "ok"
+    );
+
+    await refreshModels();
+  }
+  catch (error) {
+    status(
+      "save-status",
+      friendlyError(error),
+      "error"
+    );
+  }
+  finally {
+    $("save-preset").disabled = !auth.currentUser;
+  }
+});
+
+/* ======================================
+   COPIAR CÓDIGO E LINK
+====================================== */
+
+$("copy-code").addEventListener("click",async () => {
+  try {
+    await copyText($("saved-code").value);
+    status("save-status","Código copiado!","ok");
+  }
+  catch (_) {
+    status("save-status","Não foi possível copiar.","error");
+  }
+});
+
+$("copy-link").addEventListener("click",async () => {
+  try {
+    await copyText(linkFor($("saved-code").value));
+    status("save-status","Link copiado!","ok");
+  }
+  catch (_) {
+    status("save-status","Não foi possível copiar.","error");
+  }
+});
+
+/* ======================================
+   MEUS MODELOS
+====================================== */
+
+async function refreshModels() {
+  const user = currentUser;
+
+  if (!user) return;
+
+  status("models-status","Carregando modelos...");
+
+  try {
+    const q = query(
+      collection(db,"modelos"),
+      where("ownerUid","==",user.uid),
+      limit(50)
+    );
+
+    const snapshots = await getDocs(q);
+
+    if (currentUser?.uid !== user.uid) return;
+
+    const fragment =
+      document.createDocumentFragment();
+
+    const entries = snapshots.docs.sort(
+      (a,b) => {
+        const left =
+          a.data().criadoEm?.toMillis?.() || 0;
+
+        const right =
+          b.data().criadoEm?.toMillis?.() || 0;
+
+        return right - left;
+      }
+    );
+
+    for (const snapshot of entries) {
+      const data = snapshot.data();
+      const code = snapshot.id;
+
+      const li = document.createElement("li");
+      li.className = "model-item";
+
+      const title = document.createElement("div");
+      title.className = "model-name";
+      title.textContent = data.nome || "Sem nome";
+
+      const codeLabel = document.createElement("div");
+      codeLabel.className = "model-code";
+      codeLabel.textContent = code;
+
+      const actions = document.createElement("div");
+      actions.className = "model-buttons";
+
+      const open = document.createElement("button");
+      open.className = "btn small";
+      open.textContent = "Carregar";
+      open.onclick = () => loadPreset(code);
+
+      const copy = document.createElement("button");
+      copy.className = "btn small";
+      copy.textContent = "Copiar link";
+
+      copy.onclick = async () => {
+        try {
+          await copyText(linkFor(code));
+          status("models-status","Link copiado!","ok");
         }
+        catch (_) {
+          status("models-status","Erro ao copiar.","error");
+        }
+      };
 
-        const creator =
-          currentUser;
+      const remove = document.createElement("button");
+      remove.className = "btn small danger-outline";
+      remove.textContent = "Excluir";
 
-        const model = {
-          ownerUid: creator.uid,
-
-          nome: name,
-
-          palavras:
-            window.WordGame.getWords(),
-
-          criadoEm:
-            serverTimestamp()
-        };
-
-        $("save-preset").disabled = true;
-
-        status(
-          "save-status",
-          "Salvando modelo na nuvem..."
-        );
+      remove.onclick = async () => {
+        if (!confirm(
+          `Excluir permanentemente "${data.nome}"?`
+        )) return;
 
         try {
-          let code = null;
-
-          for (
-            let tries = 0;
-            tries < 4;
-            tries++
-          ) {
-            const candidate =
-              newCode();
-
-            const ref = doc(
-              db,
-              "modelos",
-              candidate
-            );
-
-            try {
-              await runTransaction(
-                db,
-                async transaction => {
-                  const snapshot =
-                    await transaction.get(ref);
-
-                  if (
-                    snapshot.exists()
-                  ) {
-                    throw new Error(
-                      "COLISAO"
-                    );
-                  }
-
-                  transaction.set(
-                    ref,
-                    model
-                  );
-                }
-              );
-
-              code = candidate;
-
-              break;
-
-            } catch (error) {
-              if (
-                error.message === "COLISAO"
-              ) {
-                continue;
-              }
-
-              throw error;
-            }
-          }
-
-          if (!code) {
-            throw new Error(
-              "Não foi possível gerar um código exclusivo."
-            );
-          }
-
-          $("saved-share").hidden = false;
-
-          $("saved-code").value = code;
-
+          await deleteDoc(doc(db,"modelos",code));
+          await refreshModels();
+        }
+        catch (error) {
           status(
-            "save-status",
-            "Modelo salvo! Compartilhe " +
-            "o código ou o link.",
-            "ok"
-          );
-
-          if (
-            auth.currentUser?.uid ===
-            creator.uid
-          ) {
-            await refreshModels();
-          }
-
-        } catch (error) {
-          status(
-            "save-status",
+            "models-status",
             friendlyError(error),
             "error"
           );
-
-        } finally {
-          $("save-preset").disabled =
-            !auth.currentUser;
         }
-      }
-    );
-
-    /* ======================================
-       COPIAR CÓDIGO
-    ====================================== */
-
-    $("copy-code").addEventListener(
-      "click",
-      async () => {
-        try {
-          await copyText(
-            $("saved-code").value
-          );
-
-          status(
-            "save-status",
-            "Código copiado!",
-            "ok"
-          );
-
-        } catch (_) {
-          status(
-            "save-status",
-            "Não foi possível copiar automaticamente.",
-            "error"
-          );
-        }
-      }
-    );
-
-    /* ======================================
-       COPIAR LINK
-    ====================================== */
-
-    $("copy-link").addEventListener(
-      "click",
-      async () => {
-        try {
-          await copyText(
-            linkFor(
-              $("saved-code").value
-            )
-          );
-
-          status(
-            "save-status",
-            "Link copiado!",
-            "ok"
-          );
-
-        } catch (_) {
-          status(
-            "save-status",
-            "Não foi possível copiar o link.",
-            "error"
-          );
-        }
-      }
-    );
-
-    /* ======================================
-       MEUS MODELOS
-    ====================================== */
-
-    async function refreshModels() {
-      const user =
-        currentUser;
-
-      if (!user) {
-        return;
-      }
-
-      status(
-        "models-status",
-        "Carregando seus modelos..."
-      );
-
-      try {
-        const q = query(
-          collection(
-            db,
-            "modelos"
-          ),
-
-          where(
-            "ownerUid",
-            "==",
-            user.uid
-          ),
-
-          limit(50)
-        );
-
-        const snapshots =
-          await getDocs(q);
-
-        if (
-          currentUser?.uid !==
-          user.uid
-        ) {
-          return;
-        }
-
-        const fragment =
-          document.createDocumentFragment();
-
-        const entries =
-          snapshots.docs.sort(
-            (a, b) => {
-              const left =
-                a.data().criadoEm
-                  ?.toMillis?.() || 0;
-
-              const right =
-                b.data().criadoEm
-                  ?.toMillis?.() || 0;
-
-              return right - left;
-            }
-          );
-
-        for (const snapshot of entries) {
-          const data =
-            snapshot.data();
-
-          const code =
-            snapshot.id;
-
-          const li =
-            document.createElement("li");
-
-          li.className =
-            "model-item";
-
-          const name =
-            document.createElement("div");
-
-          name.className =
-            "model-name";
-
-          name.textContent =
-            data.nome || "Sem nome";
-
-          const codeText =
-            document.createElement("div");
-
-          codeText.className =
-            "model-code";
-
-          codeText.textContent =
-            code;
-
-          const actions =
-            document.createElement("div");
-
-          actions.className =
-            "model-buttons";
-
-          /* CARREGAR */
-
-          const open =
-            document.createElement("button");
-
-          open.type =
-            "button";
-
-          open.className =
-            "btn small";
-
-          open.textContent =
-            "Carregar";
-
-          open.addEventListener(
-            "click",
-            () => loadPreset(code)
-          );
-
-          /* COMPARTILHAR */
-
-          const copy =
-            document.createElement("button");
-
-          copy.type =
-            "button";
-
-          copy.className =
-            "btn small";
-
-          copy.textContent =
-            "Copiar link";
-
-          copy.addEventListener(
-            "click",
-            async () => {
-              try {
-                await copyText(
-                  linkFor(code)
-                );
-
-                status(
-                  "models-status",
-                  "Link copiado!",
-                  "ok"
-                );
-
-              } catch (_) {
-                status(
-                  "models-status",
-                  "Não foi possível copiar o link.",
-                  "error"
-                );
-              }
-            }
-          );
-
-          /* EXCLUIR */
-
-          const remove =
-            document.createElement("button");
-
-          remove.type =
-            "button";
-
-          remove.className =
-            "btn small danger-outline";
-
-          remove.textContent =
-            "Excluir";
-
-          remove.addEventListener(
-            "click",
-            async () => {
-              const confirmed = confirm(
-                `Excluir permanentemente ` +
-                `o modelo "${data.nome}" (${code})?`
-              );
-
-              if (!confirmed) {
-                return;
-              }
-
-              try {
-                await deleteDoc(
-                  doc(
-                    db,
-                    "modelos",
-                    code
-                  )
-                );
-
-                status(
-                  "models-status",
-                  "Modelo excluído.",
-                  "ok"
-                );
-
-                await refreshModels();
-
-              } catch (error) {
-                status(
-                  "models-status",
-                  friendlyError(error),
-                  "error"
-                );
-              }
-            }
-          );
-
-          actions.append(
-            open,
-            copy,
-            remove
-          );
-
-          li.append(
-            name,
-            codeText,
-            actions
-          );
-
-          fragment.appendChild(li);
-        }
-
-        $("my-models").replaceChildren(
-          fragment
-        );
-
-        status(
-          "models-status",
-          entries.length
-            ? `${entries.length} modelo(s) exibido(s).`
-            : "Você ainda não salvou nenhum modelo."
-        );
-
-      } catch (error) {
-        status(
-          "models-status",
-          friendlyError(error),
-          "error"
-        );
-      }
+      };
+
+      actions.append(open,copy,remove);
+      li.append(title,codeLabel,actions);
+      fragment.appendChild(li);
     }
 
-    $("refresh-models").addEventListener(
-      "click",
-      refreshModels
+    $("my-models").replaceChildren(fragment);
+
+    status(
+      "models-status",
+      `${entries.length} modelo(s) exibido(s).`
     );
+  }
+  catch (error) {
+    status(
+      "models-status",
+      friendlyError(error),
+      "error"
+    );
+  }
+}
 
-    /* ======================================
-       HABILITAR LOGIN E CARREGAMENTO
-    ====================================== */
+$("refresh-models").addEventListener(
+  "click",
+  refreshModels
+);
 
-    $("login").disabled = false;
+/* ======================================
+   ATIVAR LOGIN E CARREGAMENTO
+====================================== */
 
-    $("load-preset").disabled = false;
+$("login").disabled = false;
+$("load-preset").disabled = false;
 
-    /* ======================================
-       CARREGAR MODELO PELO LINK
-    ====================================== */
+/* ======================================
+   CARREGAMENTO PELO LINK
+====================================== */
 
-    const initialCode =
-      new URLSearchParams(
-        location.search
-      ).get("modelo");
+const initialCode = new URLSearchParams(
+  location.search
+).get("modelo");
 
-    if (initialCode) {
-      $("preset-code").value =
-        initialCode;
+if (initialCode) {
+  $("preset-code").value = initialCode;
+  loadPreset(initialCode);
+}
 
-      loadPreset(initialCode);
-    }
-
-  </script>
-
+</script>
 </body>
 </html>
